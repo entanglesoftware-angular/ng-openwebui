@@ -3,6 +3,11 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "paths": {
+      "commerceai": [
+        "./dist/commerceai"
+      ]
+    },
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -22,5 +27,13 @@
     "typeCheckHostBindings": true,
     "strictTemplates": true
   },
-  "files": []
+  "files": [],
+  "references": [
+    {
+      "path": "./projects/commerceai/tsconfig.lib.json"
+    },
+    {
+      "path": "./projects/commerceai/tsconfig.spec.json"
+    }
+  ]
 }
