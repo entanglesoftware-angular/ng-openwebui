@@ -5,22 +5,21 @@ import {
   ElementRef,
   AfterViewChecked
 } from '@angular/core';
-import {MatFormField} from '@angular/material/form-field';
-import {MatIcon} from '@angular/material/icon';
+import { MaterialModule } from './modules/material.module';
 import {FormsModule} from '@angular/forms';
-import {MatInput} from '@angular/material/input';
-import {MatIconButton} from '@angular/material/button';
 import {Router} from '@angular/router';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {HttpClientModule} from '@angular/common/http';
 import {HttpClient} from '@angular/common/http';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {MarkdownModule} from 'ngx-markdown';
-import {MatCard} from '@angular/material/card';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Sidebar } from './sidebar/sidebar';
+import {ChatPersistenceService } from './services/chat-persistence.service'
+
 
 interface ChatMessage {
   role: 'user' | 'assistant';
-  content: string;
+  content: string | null;
 }
 
 interface LoginResponse {
@@ -38,64 +37,77 @@ interface LoginResponse {
 @Component({
   selector: 'lib-commerceai',
   imports: [
-    MatFormField,
+    MaterialModule,
     FormsModule,
-    MatInput,
-    MatIconButton,
-    MatIcon,
     HttpClientModule,
     NgClass,
     NgForOf,
     MarkdownModule,
     NgIf,
-    MatCard
+    Sidebar
   ],
   template: `
-    <div class="chat-box-container">
-      <mat-card class="ai-name">{{ aiName }}</mat-card>
+    <div class="main-container">
+      <lib-sidebar></lib-sidebar>
+      <div class="chat-box-container">
+        <div class="chat-box-container">
+          <mat-card class="ai-name">{{ aiName }}</mat-card>
 
-      <div class="chat-messages" #chatContainer>
-        <mat-card
-          *ngFor="let msg of chatMessages"
-          class="message"
-          [ngClass]="{ 'user': msg.role === 'user', 'assistant': msg.role === 'assistant' }"
-        >
-          <!--            {{msg.content}}-->
-          <div *ngIf="msg.role === 'user'">{{ msg.content }}</div>
-          <markdown *ngIf="msg.role === 'assistant'" [data]="msg.content"></markdown>
-        </mat-card>
+          <div class="chat-messages" #chatContainer>
+            <mat-card
+              *ngFor="let msg of chatMessages"
+              class="message"
+              [ngClass]="{ 'user': msg.role === 'user', 'assistant': msg.role === 'assistant' }"
+            >
+              <!--            {{msg.content}}-->
+              <div *ngIf="msg.role === 'user'">{{ msg.content }}</div>
+              <markdown *ngIf="msg.role === 'assistant'" [data]="msg.content"></markdown>
+            </mat-card>
+          </div>
+
+          <mat-card
+            class="chat-input-container"
+          >
+            <mat-form-field class="chat-input" appearance="outline">
+              <input
+                matInput
+                placeholder="Type a message..."
+                [(ngModel)]="message"
+                (keyup.enter)="onSend()"
+              />
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              color="primary"
+              class="send-button"
+              (click)="onSend()"
+              [disabled]="!message.trim()"
+            >
+              <mat-icon>send</mat-icon>
+            </button>
+          </mat-card>
+        </div>
       </div>
-
-      <mat-card
-        class="chat-input-container"
-      >
-        <mat-form-field class="chat-input" appearance="outline">
-          <input
-            matInput
-            placeholder="Type a message..."
-            [(ngModel)]="message"
-            (keyup.enter)="onSend()"
-          />
-        </mat-form-field>
-
-        <button
-          mat-icon-button
-          color="primary"
-          class="send-button"
-          (click)="onSend()"
-          [disabled]="!message.trim()"
-        >
-          <mat-icon>send</mat-icon>
-        </button>
-      </mat-card>
     </div>
   `,
-  styles: `.chat-box-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background-color: gainsboro;
-  }
+  styles: `
+     lib-sidebar {
+      flex: 0 0 250px; // Fixed width
+    }
+    .main-container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .chat-box-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: gainsboro;
+      overflow: hidden;
+    }
 
   .ai-name {
 
@@ -212,6 +224,7 @@ export class Commerceai {
     private router: Router,
     private snackBar: MatSnackBar,
     private http: HttpClient,
+    private chatPersistence: ChatPersistenceService
   ) { }
 
 
@@ -230,11 +243,19 @@ export class Commerceai {
     });
 
   }
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
 
     if (sessionStorage.getItem('jwt') == null || sessionStorage.getItem('jwt') == undefined || sessionStorage.getItem('jwt') == '') {
       this.getToken();
     }
+
+    try {
+      const loadedMessages = await this.chatPersistence.loadMessages();
+      this.chatMessages = loadedMessages || [];
+    } catch (err) {
+      console.error('Failed to load chat history:', err);
+    }
+
 
     this.http.get<any>(`${this.domain}/v1/models`).subscribe({
       next: (res) => {
@@ -256,12 +277,18 @@ export class Commerceai {
     } catch (err) {}
   }
 
+  clearChat(): void {
+    this.chatPersistence.clearMessages();
+    this.chatMessages = [];
+  }
+
   onSend() {
     const trimmed = this.message.trim();
     if (!trimmed) return;
 
     const userMessage: ChatMessage = { role: 'user', content: trimmed };
     this.chatMessages.push(userMessage);
+    this.chatPersistence.saveMessage(userMessage);
 
     this.message = '';
 
@@ -306,6 +333,7 @@ export class Commerceai {
             if (delta?.content) {
               assistantContent += delta.content;
               assistantMessage.content = assistantContent;
+              this.chatPersistence.saveMessage(assistantMessage);
             }
           } catch (e) {
             console.error('Error parsing stream chunk', e);
@@ -316,3 +344,6 @@ export class Commerceai {
   }
 
 }
+
+export * from './services/chat-persistence.service';
+export * from './models/chat-message.model';
