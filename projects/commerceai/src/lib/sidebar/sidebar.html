@@ -1,0 +1,8 @@
+<mat-toolbar color="primary">
+  <span class="toolbar-title">Chats</span>
+</mat-toolbar>
+<mat-nav-list>
+  <mat-list-item *ngFor="let chat of chatNames">
+    <div matLine>{{ chat }}</div>
+  </mat-list-item>
+</mat-nav-list>

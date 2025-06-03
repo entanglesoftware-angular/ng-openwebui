@@ -1,0 +1,43 @@
+<div class="main-container">
+  <lib-sidebar></lib-sidebar>
+  <div class="chat-box-container">
+    <div class="chat-box-container">
+      <mat-card class="ai-name">{{ aiName }}</mat-card>
+
+      <div class="chat-messages" #chatContainer>
+        <mat-card
+          *ngFor="let msg of chatMessages"
+          class="message"
+          [ngClass]="{ 'user': msg.role === 'user', 'assistant': msg.role === 'assistant' }"
+        >
+          <!--            {{msg.content}}-->
+          <div *ngIf="msg.role === 'user'">{{ msg.content }}</div>
+          <markdown *ngIf="msg.role === 'assistant'" [data]="msg.content"></markdown>
+        </mat-card>
+      </div>
+
+      <mat-card
+        class="chat-input-container"
+      >
+        <mat-form-field class="chat-input" appearance="outline">
+          <input
+            matInput
+            placeholder="Type a message..."
+            [(ngModel)]="message"
+            (keyup.enter)="onSend()"
+          />
+        </mat-form-field>
+
+        <button
+          mat-icon-button
+          color="primary"
+          class="send-button"
+          (click)="onSend()"
+          [disabled]="!message.trim()"
+        >
+          <mat-icon>send</mat-icon>
+        </button>
+      </mat-card>
+    </div>
+  </div>
+</div>
