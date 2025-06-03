@@ -19,6 +19,10 @@ import { MaterialModule } from '../modules/material.module';
   template: `
     <mat-toolbar color="primary">
       <span class="toolbar-title">Chats</span>
+      <span class="spacer"></span>
+      <button mat-icon-button (click)="addNewChat()" aria-label="New Chat">
+        <mat-icon>add</mat-icon>
+      </button>
     </mat-toolbar>
     <mat-nav-list>
       <mat-list-item *ngFor="let chat of chatNames">
@@ -56,8 +60,16 @@ import { MaterialModule } from '../modules/material.module';
     mat-list-item:hover {
       background: #eee;
     }
+
+    .spacer {
+      flex: 1 1 auto;
+    }
   `
 })
 export class Sidebar {
-  chatNames = ['Session 1', 'Session 2', 'Session 3'];
+  chatCounter = 1;
+  chatNames: string[] = [];
+  addNewChat() {
+    this.chatNames.unshift(`Session ${this.chatCounter++}`);
+  }
 }
