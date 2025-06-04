@@ -1,5 +1,9 @@
 <mat-toolbar color="primary">
   <span class="toolbar-title">Chats</span>
+  <span class="spacer"></span>
+  <button mat-icon-button (click)="addNewChat()" aria-label="New Chat">
+    <mat-icon>add</mat-icon>
+  </button>
 </mat-toolbar>
 <mat-nav-list>
   <mat-list-item *ngFor="let chat of chatNames">

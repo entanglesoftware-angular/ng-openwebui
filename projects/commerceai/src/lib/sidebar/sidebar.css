@@ -27,3 +27,7 @@ mat-list-item {
 mat-list-item:hover {
   background: #eee;
 }
+
+.spacer {
+  flex: 1 1 auto;
+}
