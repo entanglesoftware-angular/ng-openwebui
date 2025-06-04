@@ -1,0 +1,29 @@
+mat-toolbar {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-title {
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+:host {
+  width: 260px;
+  height: 100vh;
+  display: block;
+  border-right: 1px solid #ccc;
+  background: #fafafa;
+}
+
+mat-nav-list {
+  padding: 0;
+}
+
+mat-list-item {
+  cursor: pointer;
+}
+
+mat-list-item:hover {
+  background: #eee;
+}
