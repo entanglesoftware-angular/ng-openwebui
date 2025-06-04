@@ -4,8 +4,8 @@ mat-toolbar {
 }
 
 .toolbar-title {
-  margin-left: 8px;
-  font-weight: 600;
+  /* margin-left: 8px; */
+  font-weight: 400;
 }
 
 :host {

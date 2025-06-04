@@ -2,8 +2,28 @@
   <lib-sidebar></lib-sidebar>
   <div class="chat-box-container">
     <div class="chat-box-container">
-      <mat-card class="ai-name">{{ aiName }}</mat-card>
+       <mat-card style="height:55px;border-radius:0;">
+      <div
+        class="model-selector"
+        (click)="toggleDropdown()"
+        [class.open]="dropdownOpen"
+      >
+        <button class="model-button">
+          {{ selectedModel || 'Select Model' }}
+          <mat-icon style="color:grey">expand_more</mat-icon>
+        </button>
 
+        <div *ngIf="dropdownOpen" class="dropdown-card">
+          <div
+            class="dropdown-item"
+            *ngFor="let model of models"
+            (click)="selectModel(model); $event.stopPropagation()"
+          >
+            {{ model }}
+          </div>
+        </div>
+      </div>
+      </mat-card>
       <div class="chat-messages" #chatContainer>
         <mat-card
           *ngFor="let msg of chatMessages"
@@ -12,13 +32,14 @@
         >
           <!--            {{msg.content}}-->
           <div *ngIf="msg.role === 'user'">{{ msg.content }}</div>
-          <markdown *ngIf="msg.role === 'assistant'" [data]="msg.content"></markdown>
+          <markdown
+            *ngIf="msg.role === 'assistant'"
+            [data]="msg.content"
+          ></markdown>
         </mat-card>
       </div>
 
-      <mat-card
-        class="chat-input-container"
-      >
+      <mat-card class="chat-input-container">
         <mat-form-field class="chat-input" appearance="outline">
           <input
             matInput

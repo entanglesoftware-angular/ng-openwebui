@@ -3,19 +3,22 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
-  AfterViewChecked
+  AfterViewChecked,
 } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
-import {FormsModule} from '@angular/forms';
-import {Router} from '@angular/router';
-import {HttpClientModule} from '@angular/common/http';
-import {HttpClient} from '@angular/common/http';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
-import {MarkdownModule} from 'ngx-markdown';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { MarkdownModule } from 'ngx-markdown';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
-import {ChatPersistenceService } from './services/chat-persistence.service'
-
+import { ChatPersistenceService } from './services/chat-persistence.service';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { HostListener } from '@angular/core';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -44,17 +47,21 @@ interface LoginResponse {
     NgForOf,
     MarkdownModule,
     NgIf,
-    Sidebar
+    Sidebar,
+    MatInputModule,
+    MatSelectModule,
+    MatFormFieldModule,
   ],
   templateUrl: './commerceai.html',
   styleUrl: './commerceai.css',
 })
-
-
 export class Commerceai {
   message: string = '';
   aiName: string = 'CommerceAI';
   domain: string = 'http://localhost:8000';
+  models: string[] = ['gpt-3.5-turbo', 'gpt-4', 'gemini-pro', 'llama-3'];
+  selectedModel: string = '';
+  dropdownOpen: boolean = false;
   chatMessages: ChatMessage[] = [];
   @ViewChild('chatContainer') chatContainer!: ElementRef;
 
@@ -63,27 +70,33 @@ export class Commerceai {
     private snackBar: MatSnackBar,
     private http: HttpClient,
     private chatPersistence: ChatPersistenceService
-  ) { }
+  ) {}
 
-
-  getToken(){
+  getToken() {
     const loginData = {
       email: 'alice.smith123@example.com',
-      password: 'newsecurepass123'
-    }
-    this.http.post<LoginResponse>(`https://micro-scale.software/api/login`, loginData).subscribe({
-      next: (response) => {
-        sessionStorage.setItem('jwt', response.JWT_Token);
-      },
-      error: (err) => {
-        console.error('Login error:', err);
-      }
-    });
-
+      password: 'newsecurepass123',
+    };
+    this.http
+      .post<LoginResponse>(`https://micro-scale.software/api/login`, loginData)
+      .subscribe({
+        next: (response) => {
+          sessionStorage.setItem('jwt', response.JWT_Token);
+        },
+        error: (err) => {
+          console.error('Login error:', err);
+        },
+      });
   }
   async ngOnInit(): Promise<void> {
-
-    if (sessionStorage.getItem('jwt') == null || sessionStorage.getItem('jwt') == undefined || sessionStorage.getItem('jwt') == '') {
+    this.models = ['gpt-3.5-turbo', 'gpt-4', 'custom-model'];
+    this.selectedModel = this.models[0];
+     document.addEventListener('click', this.closeDropdownOnOutsideClick.bind(this));
+    if (
+      sessionStorage.getItem('jwt') == null ||
+      sessionStorage.getItem('jwt') == undefined ||
+      sessionStorage.getItem('jwt') == ''
+    ) {
       this.getToken();
     }
 
@@ -94,24 +107,48 @@ export class Commerceai {
       console.error('Failed to load chat history:', err);
     }
 
-
     this.http.get<any>(`${this.domain}/v1/models`).subscribe({
       next: (res) => {
-        this.aiName = res?.data?.[0]?.id ?? 'Unknown AI';
-        console.log(res);
+        this.models = res?.data?.map((m: any) => m.id) || [];
+        this.selectedModel = this.models[0] || '';
+
+        // this.selectedModel = this.models[0] || '';
+        // this.aiName = this.selectedModel || 'Unknown AI';
+
+        console.log('Loaded models:', this.models);
+
+        // this.aiName = res?.data?.[0]?.id ?? 'Unknown AI';
+        // console.log(res);
       },
-      error: () => {
+      error: (err) => {
+        // this.aiName = 'Select Model';
+        console.error('Error loading models:', err);
         this.aiName = 'Select Model';
-      }
+      },
     });
   }
 
+  toggleDropdown() {
+    this.dropdownOpen = !this.dropdownOpen;
+  }
+  selectModel(model: string) {
+    this.selectedModel = model;
+    this.dropdownOpen = false;
+  }
+  @HostListener('document:click', ['$event'])
+closeDropdownOnOutsideClick(event: Event) {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.model-selector')) {
+    this.dropdownOpen = false;
+  }
+}
   ngAfterViewChecked(): void {
     this.scrollToBottom();
   }
   scrollToBottom() {
     try {
-      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
+      this.chatContainer.nativeElement.scrollTop =
+        this.chatContainer.nativeElement.scrollHeight;
     } catch (err) {}
   }
 
@@ -133,16 +170,16 @@ export class Commerceai {
     const body = {
       model: this.aiName,
       messages: [{ role: 'user', content: trimmed }],
-      stream: true
+      stream: true,
     };
 
     fetch(`${this.domain}/v1/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'authorization': sessionStorage.getItem('jwt') || ""
+        authorization: sessionStorage.getItem('jwt') || '',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     }).then(async (response) => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder('utf-8');
@@ -180,7 +217,6 @@ export class Commerceai {
       }
     });
   }
-
 }
 
 export * from './services/chat-persistence.service';
