@@ -6,21 +6,16 @@ import {
   AfterViewChecked
 } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
-import {FormsModule} from '@angular/forms';
-import {Router} from '@angular/router';
-import {HttpClientModule} from '@angular/common/http';
-import {HttpClient} from '@angular/common/http';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
-import {MarkdownModule} from 'ngx-markdown';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { MarkdownModule } from 'ngx-markdown';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
-import {ChatPersistenceService } from './services/chat-persistence.service'
-
-
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string | null;
-}
+import { ChatPersistenceService } from './services/chat-persistence.service'
+import { ChatMessage } from './models/chat-message.model';
 
 interface LoginResponse {
   account: {
@@ -66,7 +61,7 @@ export class Commerceai {
   ) { }
 
 
-  getToken(){
+  getToken() {
     const loginData = {
       email: 'alice.smith123@example.com',
       password: 'newsecurepass123'
@@ -112,7 +107,7 @@ export class Commerceai {
   scrollToBottom() {
     try {
       this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
-    } catch (err) {}
+    } catch (err) { }
   }
 
   clearChat(): void {
@@ -162,8 +157,10 @@ export class Commerceai {
 
         for (const line of lines) {
           const data = line.replace('data: ', '').trim();
-          if (data === '[DONE]') return;
-
+          if (data === '[DONE]') {
+            this.chatPersistence.saveMessage(assistantMessage);
+            return;
+          }
           try {
             const json = JSON.parse(data);
             const delta = json?.choices?.[0]?.delta;
@@ -171,7 +168,6 @@ export class Commerceai {
             if (delta?.content) {
               assistantContent += delta.content;
               assistantMessage.content = assistantContent;
-              this.chatPersistence.saveMessage(assistantMessage);
             }
           } catch (e) {
             console.error('Error parsing stream chunk', e);
@@ -185,3 +181,4 @@ export class Commerceai {
 
 export * from './services/chat-persistence.service';
 export * from './models/chat-message.model';
+export * from './models/chat-session.model';
