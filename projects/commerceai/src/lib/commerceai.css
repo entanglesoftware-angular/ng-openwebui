@@ -1,5 +1,5 @@
 lib-sidebar {
-  flex: 0 0 250px; // Fixed width
+  flex: 0 0 250px;
 }
 .main-container {
   display: flex;
@@ -113,5 +113,5 @@ markdown {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
-  white-space: pre-wrap;
+  white-space: normal;
 }
