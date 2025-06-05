@@ -1,5 +1,5 @@
 <div class="main-container">
-  <lib-sidebar></lib-sidebar>
+  <lib-sidebar (sessionSelected)="onSessionSelected($event)"></lib-sidebar>
   <div class="chat-box-container">
     <div class="chat-box-container">
       <mat-card class="ai-name">{{ aiName }}</mat-card>

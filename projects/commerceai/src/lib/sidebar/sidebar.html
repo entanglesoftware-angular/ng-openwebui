@@ -6,7 +6,7 @@
   </button>
 </mat-toolbar>
 <mat-nav-list>
-  <mat-list-item *ngFor="let chat of chatNames">
-    <div matLine>New Chat {{ chat.sessionId }}</div>
+  <mat-list-item *ngFor="let session of chatNames" (click)="onSelectSession(session)">
+    <div matLine>{{ session.title || 'Untitled' }} (ID: {{ session.sessionId }})</div>
   </mat-list-item>
 </mat-nav-list>

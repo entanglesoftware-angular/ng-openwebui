@@ -3,7 +3,8 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
-  AfterViewChecked
+  AfterViewChecked,
+  ChangeDetectorRef
 } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
@@ -51,13 +52,15 @@ export class Commerceai {
   aiName: string = 'CommerceAI';
   domain: string = 'http://localhost:8000';
   chatMessages: ChatMessage[] = [];
+  currentSessionId: number | undefined = 0;
   @ViewChild('chatContainer') chatContainer!: ElementRef;
 
   constructor(
     private router: Router,
     private snackBar: MatSnackBar,
     private http: HttpClient,
-    private chatPersistence: ChatPersistenceService
+    private chatPersistence: ChatPersistenceService,
+    private cdr: ChangeDetectorRef
   ) { }
 
 
@@ -83,10 +86,23 @@ export class Commerceai {
     }
 
     try {
-      const loadedMessages = await this.chatPersistence.loadMessages();
-      this.chatMessages = loadedMessages || [];
-    } catch (err) {
-      console.error('Failed to load chat history:', err);
+      const loadedSessions = await this.chatPersistence.loadSessions();
+      const chatNames = Array.isArray(loadedSessions) ? loadedSessions : [];
+
+      if (chatNames.length === 0 || !chatNames[0]?.sessionId) {
+        console.warn('No valid chat sessions found.');
+        this.currentSessionId = 0;
+        this.chatMessages = [];
+      } else{
+        const sessionId = chatNames[0].sessionId;
+        this.currentSessionId = typeof sessionId === 'number' ? sessionId : 0;
+        const loadedMessages = await this.chatPersistence.loadMessages(this.currentSessionId);
+        this.chatMessages = Array.isArray(loadedMessages) ? loadedMessages : [];
+      }
+    } catch (error) {
+      console.error('Error loading chat sessions or messages:', error);
+      this.currentSessionId = 0;
+      this.chatMessages = [];
     }
 
 
@@ -99,6 +115,18 @@ export class Commerceai {
         this.aiName = 'Select Model';
       }
     });
+  }
+
+  async onSessionSelected(sessionId: number) {
+    this.currentSessionId = sessionId;
+
+    try {
+      const messages = await this.chatPersistence.loadMessages(sessionId);
+      this.chatMessages = messages || [];
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Error loading messages for session:', err);
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -115,11 +143,17 @@ export class Commerceai {
     this.chatMessages = [];
   }
 
-  onSend() {
+  async onSend() {
     const trimmed = this.message.trim();
     if (!trimmed) return;
 
-    const userMessage: ChatMessage = { role: 'user', content: trimmed };
+    if(!this.currentSessionId)
+    {
+      const newSession = await this.chatPersistence.saveSession();
+      this.currentSessionId = newSession.sessionId;
+    }
+    this.cdr.detectChanges();
+    const userMessage: ChatMessage = { role: 'user', content: trimmed, sessionId: this.currentSessionId };
     this.chatMessages.push(userMessage);
     this.chatPersistence.saveMessage(userMessage);
 
@@ -143,8 +177,7 @@ export class Commerceai {
       const decoder = new TextDecoder('utf-8');
 
       let assistantContent = '';
-      const assistantMessage: ChatMessage = { role: 'assistant', content: '' };
-      this.chatMessages.push(assistantMessage);
+      const assistantMessage: ChatMessage = { role: 'assistant', content: '', sessionId: this.currentSessionId };
 
       while (true) {
         const { done, value } = await reader!.read();
@@ -158,6 +191,7 @@ export class Commerceai {
         for (const line of lines) {
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
+            this.chatMessages.push(assistantMessage);
             this.chatPersistence.saveMessage(assistantMessage);
             return;
           }

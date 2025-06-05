@@ -8,7 +8,7 @@ import { ChatSession } from '../models/chat-session.model';
 })
 export abstract class ChatPersistenceService {
   abstract saveMessage(message: ChatMessage): void | Promise<void>;
-  abstract loadMessages(): Promise<ChatMessage[]>;
+  abstract loadMessages(sessionId: Number | undefined): Promise<ChatMessage[]>;
   abstract clearMessages(): void | Promise<void>;
   abstract saveSession(): Promise<ChatSession>;
   abstract loadSessions(): Promise<ChatSession[]>;

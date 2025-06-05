@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {HttpClientModule} from '@angular/common/http';
@@ -25,6 +25,7 @@ import { ChatSession } from '../models/chat-session.model';
 })
 export class Sidebar {
 
+  @Output() sessionSelected = new EventEmitter<number>();
   constructor(
     private chatPersistence: ChatPersistenceService,
     private cdr: ChangeDetectorRef
@@ -34,15 +35,31 @@ export class Sidebar {
   async addNewChat() {
     const newSession = await this.chatPersistence.saveSession();
     this.chatNames = [newSession, ...this.chatNames];
+    this.sessionSelected.emit(newSession.sessionId);
     this.cdr.detectChanges();
   }
-  async ngOnInit(): Promise<void> {
-    try {
-      const loadedSessions = await this.chatPersistence.loadSessions();
-      this.chatNames = loadedSessions || [];
-    } catch (err) {
-      console.error('Failed to load chat history:', err);
+  async ngOnInit() {
+  try {
+    const loadedSessions = await this.chatPersistence.loadSessions();
+    this.chatNames = Array.isArray(loadedSessions) ? loadedSessions : [];
+
+    if (this.chatNames.length > 0 && this.chatNames[0]?.sessionId) {
+      const sessionId = this.chatNames[0].sessionId;
+      this.sessionSelected.emit(sessionId);
+
+      // const loadedMessages = await this.chatPersistence.loadMessages(sessionId);
+      // this.chatMessages = Array.isArray(loadedMessages) ? loadedMessages : [];
+    } else {
+      // console.warn('No valid chat sessions found.');
+      // this.chatMessages = [];
     }
-    await this.chatPersistence.loadMessages();
+  } catch (err) {
+    // console.error('Failed to load chat history:', err);
+    // this.chatMessages = [];
+  }
+}
+
+  onSelectSession(session: ChatSession) {
+    this.sessionSelected.emit(session.sessionId);
   }
 }
