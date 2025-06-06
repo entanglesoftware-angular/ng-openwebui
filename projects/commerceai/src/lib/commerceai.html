@@ -13,6 +13,14 @@
           <!--            {{msg.content}}-->
           <div *ngIf="msg.role === 'user'">{{ msg.content }}</div>
           <markdown *ngIf="msg.role === 'assistant'" [data]="msg.content"></markdown>
+          <ng-container *ngIf="msg.role === 'form'">
+            <button
+              mat-raised-button
+              color="accent"
+              (click)="checkForFormTrigger(msg.content)">
+              Click To Open Form
+            </button>
+          </ng-container>
         </mat-card>
       </div>
 

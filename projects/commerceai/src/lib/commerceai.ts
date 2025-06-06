@@ -17,6 +17,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
 import { ChatPersistenceService } from './services/chat-persistence.service'
 import { ChatMessage } from './models/chat-message.model';
+import { MatDialog } from '@angular/material/dialog';
+import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component';
 
 interface LoginResponse {
   account: {
@@ -60,7 +62,8 @@ export class Commerceai {
     private snackBar: MatSnackBar,
     private http: HttpClient,
     private chatPersistence: ChatPersistenceService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) { }
 
 
@@ -144,6 +147,28 @@ export class Commerceai {
     this.chatMessages = [];
   }
 
+  checkForFormTrigger(message: string | null) {
+    if (message && message.includes('add product form')) {
+      const formData = {
+        data: [
+          {
+            user: 'epv',
+            sheet: 'EPV Trade Price List 03-June-2025',
+            fields: ['Category', 'Country', 'Price']
+          }
+        ]
+      };
+      this.openDynamicForm(formData);
+    }
+  }
+
+  openDynamicForm(formData: any): void {
+    this.dialog.open(DynamicFormDialogComponent, {
+      width: '600px',
+      data: formData
+    });
+  }
+
   async onSend() {
     const trimmed = this.message.trim();
     if (!trimmed) return;
@@ -158,6 +183,10 @@ export class Commerceai {
     const userMessage: ChatMessage = { role: 'user', content: trimmed, sessionId: this.currentSessionId };
     this.chatMessages.push(userMessage);
     this.chatPersistence.saveMessage(userMessage);
+    if (trimmed.includes('add product form')) {
+      const userMessage: ChatMessage = { role: 'form', content: trimmed, sessionId: this.currentSessionId };
+      this.chatMessages.push(userMessage);
+    }
 
     this.message = '';
 
