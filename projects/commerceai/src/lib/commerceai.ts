@@ -86,7 +86,8 @@ export class Commerceai {
     }
 
     try {
-      const loadedSessions = await this.chatPersistence.loadSessions();
+      const userId = 1;
+      const loadedSessions = await this.chatPersistence.loadSessions(userId);
       const chatNames = Array.isArray(loadedSessions) ? loadedSessions : [];
 
       if (chatNames.length === 0 || !chatNames[0]?.sessionId) {
@@ -149,7 +150,8 @@ export class Commerceai {
 
     if(!this.currentSessionId)
     {
-      const newSession = await this.chatPersistence.saveSession();
+      const userId = 1;
+      const newSession = await this.chatPersistence.saveSession(userId);
       this.currentSessionId = newSession.sessionId;
     }
     this.cdr.detectChanges();

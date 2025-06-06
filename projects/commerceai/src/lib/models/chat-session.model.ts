@@ -3,4 +3,5 @@ export interface ChatSession {
   title?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  userId: number;
 }
