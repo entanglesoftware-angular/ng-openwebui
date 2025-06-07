@@ -1,60 +1,101 @@
-import { Component, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
-import {FormsModule} from '@angular/forms';
+import { Component, ChangeDetectorRef } from '@angular/core';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http'; // Import HttpClientModule
 import { CommonModule } from '@angular/common';
-import {HttpClientModule} from '@angular/common/http';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
-import {MarkdownModule} from 'ngx-markdown';
+import { NgForOf, NgIf } from '@angular/common';
 import { MaterialModule } from '../modules/material.module';
-import {ChatPersistenceService } from '../services/chat-persistence.service'
 import { ChatSession } from '../models/chat-session.model';
+import { SelectedSessionService } from '../services/selected-session.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { catchError, throwError } from 'rxjs';
+import {MatLine} from "@angular/material/core";
 
 @Component({
   selector: 'lib-sidebar',
+  standalone: true,
   imports: [
     MaterialModule,
-    FormsModule,
-    HttpClientModule,
-    NgClass,
     NgForOf,
-    MarkdownModule,
     NgIf,
-    CommonModule
+    CommonModule,
+    HttpClientModule,
+    MatLine,
+    // Added HttpClientModule
   ],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
 export class Sidebar {
-
-  @Output() sessionSelected = new EventEmitter<number>();
-  constructor(
-    private chatPersistence: ChatPersistenceService,
-    private cdr: ChangeDetectorRef
-  ) { }
-
   chatNames: ChatSession[] = [];
-  async addNewChat() {
-    const userId = 1;
-    const newSession = await this.chatPersistence.saveSession(userId);
-    this.chatNames = [newSession, ...this.chatNames];
-    this.sessionSelected.emit(newSession.sessionId);
-    this.cdr.detectChanges();
-  }
-  async ngOnInit() {
-  try {
-    const userId = 1;
-    const loadedSessions = await this.chatPersistence.loadSessions(userId);
-    this.chatNames = Array.isArray(loadedSessions) ? loadedSessions : [];
 
-    if (this.chatNames.length > 0 && this.chatNames[0]?.sessionId) {
-      const sessionId = this.chatNames[0].sessionId;
-      this.sessionSelected.emit(sessionId);
-    }
-  } catch (err) {
-    console.error('Failed to load chat history:', err);
+  constructor(
+      private http: HttpClient,
+      private selectedSessionService: SelectedSessionService,
+      private cdr: ChangeDetectorRef,
+      private snackBar: MatSnackBar
+  ) {}
+
+  async ngOnInit() {
+    await this.loadSessions();
   }
-}
+
+  async loadSessions() {
+    const userId = 'entangle'; // Replace with dynamic user ID if needed
+    const headers = new HttpHeaders({
+      user_id: userId,
+      authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+    });
+
+    try {
+      const response = await this.http
+          .get<{ sessions: ChatSession[] }>('http://localhost:8000/sessions/get', { headers })
+          .pipe(
+              catchError((err) => {
+                console.error('Failed to load sessions:', err);
+                this.snackBar.open('Failed to load chat sessions.', 'Close', { duration: 3000 });
+                return throwError(() => err);
+              })
+          )
+          .toPromise();
+
+      this.chatNames = response?.sessions || [];
+      if (this.chatNames.length > 0 && this.chatNames[0]?.id) {
+        this.selectedSessionService.setSessionId(this.chatNames[0].id);
+      }
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Error fetching sessions:', err);
+      this.snackBar.open('Error fetching sessions.', 'Close', { duration: 3000 });
+    }
+  }
+
+  async addNewChat() {
+    const userId = 'entangle'; // Replace with dynamic user ID if needed
+    const headers = new HttpHeaders({
+      user_id: userId,
+      authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+    });
+
+    try {
+      const newSession = await this.http
+          .post<ChatSession>('http://localhost:8000/sessions/create', {}, { headers })
+          .toPromise();
+
+      if (newSession && newSession.id) {
+        this.chatNames = [newSession, ...this.chatNames];
+        this.selectedSessionService.setSessionId(newSession.id);
+        this.cdr.detectChanges();
+      } else {
+        throw new Error('Invalid session response from server');
+      }
+    } catch (err) {
+      console.error('Failed to create new session:', err);
+      this.snackBar.open('Failed to create new chat session.', 'Close', { duration: 3000 });
+    }
+  }
 
   onSelectSession(session: ChatSession) {
-    this.sessionSelected.emit(session.sessionId);
+    if (session.id) {
+      this.selectedSessionService.setSessionId(session.id);
+    }
   }
 }

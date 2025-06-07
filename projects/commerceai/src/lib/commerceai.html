@@ -1,59 +1,57 @@
 <div class="main-container">
-  <lib-sidebar (sessionSelected)="onSessionSelected($event)"></lib-sidebar>
-  <div class="chat-box-container">
+    <lib-sidebar></lib-sidebar>
     <div class="chat-box-container">
-      <mat-card class="ai-name">{{ aiName }}</mat-card>
+        <div class="chat-box-container">
+            <mat-card class="ai-name">{{ aiName }}</mat-card>
 
-      <div class="chat-messages" #chatContainer>
-        <mat-card
-          *ngFor="let msg of chatMessages"
-          class="message"
-          [ngClass]="{ 'user': msg.role === 'user', 'assistant': msg.role === 'assistant' }"
-        >
-          <!--            {{msg.content}}-->
-          <div *ngIf="msg.role === 'user'">{{ msg.content }}</div>
-          <markdown *ngIf="msg.role === 'assistant'" [data]="msg.content"></markdown>
-          <ng-container *ngIf="msg.role === 'form'">
-            <button
-              mat-raised-button
-              color="accent"
-              (click)="checkForFormTrigger(msg.content)">
-              Click To Open Form
-            </button>
-          </ng-container>
-        </mat-card>
-      </div>
+            <div class="chat-messages" #chatContainer>
+                <mat-card
+                        *ngFor="let msg of chatMessages"
+                        class="message"
+                        [ngClass]="{ 'user': msg.role === 'user', 'model': msg.role === 'model' }"
+                >
+                    <div *ngIf="msg.role === 'user'">{{ msg.messages.join('') }}</div>
+                    <markdown *ngIf="msg.role === 'model'" [data]="msg.messages.join('')"></markdown>
+                    <ng-container *ngIf="msg.role === 'form'">
+                        <button
+                                mat-raised-button
+                                color="accent"
+                                (click)="checkForFormTrigger(msg.messages.join(''))"
+                        >
+                            Click To Open Form
+                        </button>
+                    </ng-container>
+                </mat-card>
+            </div>
 
-      <mat-card
-        class="chat-input-container"
-      >
-        <mat-form-field class="chat-input" appearance="outline">
-          <input
-            matInput
-            placeholder="Type a message..."
-            [(ngModel)]="message"
-            (keyup.enter)="onSend()"
-          />
-        </mat-form-field>
+            <mat-card class="chat-input-container">
+                <mat-form-field class="chat-input" appearance="outline">
+                    <input
+                            matInput
+                            placeholder="Type a message..."
+                            [(ngModel)]="message"
+                            (keyup.enter)="onSend()"
+                    />
+                </mat-form-field>
 
-        <button
-          mat-icon-button
-          color="accent"
-          class="mic-button"
-          aria-label="Voice Input"
-        >
-          <mat-icon>mic</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          color="primary"
-          class="send-button"
-          (click)="onSend()"
-          [disabled]="!message.trim()"
-        >
-          <mat-icon>send</mat-icon>
-        </button>
-      </mat-card>
+                <button
+                        mat-icon-button
+                        color="accent"
+                        class="mic-button"
+                        aria-label="Voice Input"
+                >
+                    <mat-icon>mic</mat-icon>
+                </button>
+                <button
+                        mat-icon-button
+                        color="primary"
+                        class="send-button"
+                        (click)="onSend()"
+                        [disabled]="!message.trim()"
+                >
+                    <mat-icon>send</mat-icon>
+                </button>
+            </mat-card>
+        </div>
     </div>
-  </div>
 </div>
