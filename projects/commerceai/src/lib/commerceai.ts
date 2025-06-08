@@ -195,7 +195,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             this.currentSessionId = sessionId;
             isNewSession = true;
             this.selectedSessionService.setSessionId(sessionId);
-            this.selectedSessionService.notifyNewSessionCreated(); // Notify Sidebar
+            // this.selectedSessionService.notifyNewSessionCreated(); // Notify Sidebar
           } else {
             throw new Error('Invalid session response from server');
           }
@@ -242,7 +242,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           },
           body: JSON.stringify(body),
         });
+        if (response.status === 200) {
 
+        }
         const reader = response.body?.getReader();
         const decoder = new TextDecoder('utf-8');
         let modelContent = '';
@@ -259,7 +261,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
               modelMessage.messages = [modelContent];
               this.chatMessages.push(modelMessage);
               if (isNewSession) {
-                this.selectedSessionService.notifyNewSessionCreated(); // Notify again after messages are saved
+                // this.selectedSessionService.notifyNewSessionCreated(); // Notify again after messages are saved
               }
             }
             this.cdr.detectChanges();
