@@ -182,12 +182,28 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       let sessionId = this.currentSessionId;
       let isNewSession = false;
       if (!sessionId) {
-        const characters = 'abcdefghijklmnopqrstuvwxyz';
-        let result = '';
-        for (let i = 0; i < length; i++) {
-          result += characters.charAt(Math.floor(Math.random() * characters.length));
+        try {
+          const headers = new HttpHeaders({
+            user_id: this.userId,
+          });
+          const newSession = await this.http
+            .post<ChatSession>(`${this.domain}/session/create`, {}, { headers })
+            .toPromise();
+
+          if (newSession && newSession.id) {
+            sessionId = newSession.id;
+            this.currentSessionId = sessionId;
+            isNewSession = true;
+            this.selectedSessionService.setSessionId(sessionId);
+            this.selectedSessionService.notifyNewSessionCreated(); // Notify Sidebar
+          } else {
+            throw new Error('Invalid session response from server');
+          }
+        } catch (err) {
+          console.error('Failed to create new session:', err);
+          this.snackBar.open('Failed to create new session.', 'Close', { duration: 3000 });
+          return;
         }
-        sessionId = result;
       }
 
       const userMessage: ChatMessage = {
@@ -226,7 +242,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           },
           body: JSON.stringify(body),
         });
-        this.selectedSessionService.notifyNewSessionCreated();
+
         const reader = response.body?.getReader();
         const decoder = new TextDecoder('utf-8');
         let modelContent = '';
