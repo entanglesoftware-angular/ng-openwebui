@@ -1,6 +1,6 @@
 // src/app/services/selected-session.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -8,8 +8,13 @@ import { BehaviorSubject } from 'rxjs';
 export class SelectedSessionService {
     private selectedSessionId = new BehaviorSubject<string | null>(null);
     selectedSessionId$ = this.selectedSessionId.asObservable();
-
-    setSessionId(sessionId: string) {
+    private newSessionCreatedSource = new Subject<void>(); // New subject for session creation
+    newSessionCreated$ = this.newSessionCreatedSource.asObservable();
+    setSessionId(sessionId: string | null) {
         this.selectedSessionId.next(sessionId);
+    }
+
+    notifyNewSessionCreated() {
+      this.newSessionCreatedSource.next();
     }
 }

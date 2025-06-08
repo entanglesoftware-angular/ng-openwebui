@@ -60,7 +60,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     domain: string = 'http://localhost:8000';
     chatMessages: ChatMessage[] = [];
     currentSessionId: string | null = null;
-    userId: string = 'entangle'; // Replace with dynamic user ID if needed
+    userId: string = 'entangle';
     @ViewChild('chatContainer') chatContainer!: ElementRef;
     private sessionSubscription: Subscription;
 
@@ -75,34 +75,16 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         this.sessionSubscription = this.selectedSessionService.selectedSessionId$.subscribe((sessionId) => {
             if (sessionId) {
                 this.onSessionSelected(sessionId);
+            } else {
+              // Handle null session ID (new chat state)
+              this.currentSessionId = null;
+              this.chatMessages = [];
+              this.cdr.detectChanges();
             }
         });
     }
 
-    getToken() {
-        const loginData = {
-            email: 'alice.smith123@example.com',
-            password: 'newsecurepass123',
-        };
-        this.http
-            .post<LoginResponse>('https://micro-scale.software/api/login', loginData)
-            .subscribe({
-                next: (response) => {
-                    sessionStorage.setItem('jwt', response.JWT_Token);
-                },
-                error: (err) => {
-                    console.error('Login error:', err);
-                    this.snackBar.open('Failed to authenticate. Please try again.', 'Close', { duration: 3000 });
-                },
-            });
-    }
-
     async ngOnInit(): Promise<void> {
-        if (!sessionStorage.getItem('jwt')) {
-            this.getToken();
-        }
-
-        // Fetch AI model name
         this.http
             .get<any>(`${this.domain}/v1/models`, {
                 headers: new HttpHeaders({
@@ -124,10 +106,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
     async onSessionSelected(sessionId: string) {
         this.currentSessionId = sessionId;
+        this.chatMessages = [];
         try {
             const headers = new HttpHeaders({
                 user_id: this.userId,
-                authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
             });
             const response = await this.http
                 .get<SessionResponse>(`${this.domain}/session/${sessionId}`, { headers })
@@ -193,157 +175,118 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         });
     }
 
-    async onSend() {
-        const trimmed = this.message.trim();
-        if (!trimmed) return;
+  async onSend() {
+      const trimmed = this.message.trim();
+      if (!trimmed) return;
 
-        if (!this.currentSessionId) {
-            try {
-                const headers = new HttpHeaders({
-                    user_id: this.userId,
-                    authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-                });
-                const newSession = await this.http
-                    .post<ChatSession>(`${this.domain}/sessions/create`, {}, { headers })
-                    .toPromise();
-
-                if (newSession && newSession.id) {
-                    this.currentSessionId = newSession.id;
-                    this.selectedSessionService.setSessionId(newSession.id);
-                } else {
-                    throw new Error('Invalid session response from server');
-                }
-            } catch (err) {
-                console.error('Failed to create new session:', err);
-                this.snackBar.open('Failed to create new session.', 'Close', { duration: 3000 });
-                return;
-            }
+      let sessionId = this.currentSessionId;
+      let isNewSession = false;
+      if (!sessionId) {
+        const characters = 'abcdefghijklmnopqrstuvwxyz';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+          result += characters.charAt(Math.floor(Math.random() * characters.length));
         }
+        sessionId = result;
+      }
 
-        const userMessage: ChatMessage = {
-            role: 'user',
-            messages: [`user query: ${trimmed}; AuthToken: ${sessionStorage.getItem('jwt') || ''}`],
-            sessionId: this.currentSessionId,
+      const userMessage: ChatMessage = {
+        role: 'user',
+        messages: [trimmed],
+        sessionId,
+      };
+      this.chatMessages.push(userMessage);
+      this.cdr.detectChanges();
+
+      if (trimmed.includes('add product form')) {
+        const formMessage: ChatMessage = {
+          role: 'form',
+          messages: [trimmed],
+          sessionId,
         };
-        this.chatMessages.push(userMessage);
+        this.chatMessages.push(formMessage);
         this.cdr.detectChanges();
+      }
 
-        // Save user message to backend
-        try {
-            await this.http
-                .post(`${this.domain}/session/${this.currentSessionId}/messages`, userMessage, {
-                    headers: new HttpHeaders({
-                        user_id: this.userId,
-                        authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-                    }),
-                })
-                .toPromise();
-        } catch (err) {
-            console.error('Error saving user message:', err);
-            this.snackBar.open('Failed to save user message.', 'Close', { duration: 3000 });
-        }
+      this.message = '';
 
-        if (trimmed.includes('add product form')) {
-            const formMessage: ChatMessage = {
-                role: 'form',
-                messages: [`user query: ${trimmed}; AuthToken: ${sessionStorage.getItem('jwt') || ''}`],
-                sessionId: this.currentSessionId,
-            };
-            this.chatMessages.push(formMessage);
-            this.cdr.detectChanges();
-        }
+      const body = {
+        model: this.aiName,
+        messages: [{ role: 'user', content: trimmed }],
+        stream: true,
+      };
 
-        this.message = '';
-
-        const body = {
-            model: this.aiName,
-            messages: [{ role: 'user', content: trimmed }],
-            stream: true,
+      try {
+        const response = await fetch(`${this.domain}/v1/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            user_id: this.userId,
+            session_id: sessionId,
+          },
+          body: JSON.stringify(body),
+        });
+        this.selectedSessionService.notifyNewSessionCreated();
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let modelContent = '';
+        const modelMessage: ChatMessage = {
+          role: 'model',
+          messages: [],
+          sessionId,
         };
 
-        try {
-            const response = await fetch(`${this.domain}/v1/chat/completions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    user_id: this.userId,
-                    authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-                },
-                body: JSON.stringify(body),
-            });
-
-            const reader = response.body?.getReader();
-            const decoder = new TextDecoder('utf-8');
-            let modelContent = '';
-            const modelMessage: ChatMessage = {
-                role: 'model',
-                messages: [],
-                sessionId: this.currentSessionId!,
-            };
-
-            while (true) {
-                const { done, value } = await reader!.read();
-                if (done) {
-                    if (modelContent) {
-                        modelMessage.messages = [modelContent];
-                        this.chatMessages.push(modelMessage);
-                        // Save model message to backend
-                        await this.http
-                            .post(`${this.domain}/session/${this.currentSessionId}/messages`, modelMessage, {
-                                headers: new HttpHeaders({
-                                    user_id: this.userId,
-                                    authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-                                }),
-                            })
-                            .toPromise();
-                    }
-                    this.cdr.detectChanges();
-                    break;
-                }
-
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk
-                    .split('\n')
-                    .filter((line) => line.trim() !== '' && line.startsWith('data: '));
-
-                for (const line of lines) {
-                    const data = line.replace('data: ', '').trim();
-                    if (data === '[DONE]') {
-                        if (modelContent) {
-                            modelMessage.messages = [modelContent];
-                            this.chatMessages.push(modelMessage);
-                            await this.http
-                                .post(`${this.domain}/session/${this.currentSessionId}/messages`, modelMessage, {
-                                    headers: new HttpHeaders({
-                                        user_id: this.userId,
-                                        authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-                                    }),
-                                })
-                                .toPromise();
-                        }
-                        this.cdr.detectChanges();
-                        return;
-                    }
-                    try {
-                        const json = JSON.parse(data);
-                        const delta = json?.choices?.[0]?.delta;
-
-                        if (delta?.content) {
-                            modelContent += delta.content;
-                            modelMessage.messages = [modelContent];
-                            this.cdr.detectChanges();
-                        }
-                    } catch (e) {
-                        console.error('Error parsing stream chunk', e);
-                    }
-                }
+        while (true) {
+          const { done, value } = await reader!.read();
+          if (done) {
+            if (modelContent) {
+              modelMessage.messages = [modelContent];
+              this.chatMessages.push(modelMessage);
+              if (isNewSession) {
+                this.selectedSessionService.notifyNewSessionCreated(); // Notify again after messages are saved
+              }
             }
-        } catch (err) {
-            console.error('Error sending message:', err);
-            this.snackBar.open('Failed to send message.', 'Close', { duration: 3000 });
-        }
-    }
+            this.cdr.detectChanges();
+            break;
+          }
 
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk
+            .split('\n')
+            .filter((line) => line.trim() !== '' && line.startsWith('data: '));
+
+          for (const line of lines) {
+            const data = line.replace('data: ', '').trim();
+            if (data === '[DONE]') {
+              if (modelContent) {
+                modelMessage.messages = [modelContent];
+                this.chatMessages.push(modelMessage);
+                if (isNewSession) {
+                  this.selectedSessionService.notifyNewSessionCreated(); // Notify again after messages are saved
+                }
+              }
+              this.cdr.detectChanges();
+              return;
+            }
+            try {
+              const json = JSON.parse(data);
+              const delta = json?.choices?.[0]?.delta;
+
+              if (delta?.content) {
+                modelContent += delta.content;
+                modelMessage.messages = [modelContent];
+                this.cdr.detectChanges();
+              }
+            } catch (e) {
+              console.error('Error parsing stream chunk', e);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error sending message:', err);
+        this.snackBar.open('Failed to send message.', 'Close', { duration: 3000 });
+      }
+  }
     ngOnDestroy() {
         this.sessionSubscription.unsubscribe();
     }
