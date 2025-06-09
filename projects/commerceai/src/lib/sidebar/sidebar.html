@@ -1,12 +1,16 @@
 <mat-toolbar color="primary">
-    <span class="toolbar-title">Chats</span>
-    <span class="spacer"></span>
-    <button mat-icon-button (click)="addNewChat()" aria-label="New Chat">
-        <mat-icon>add</mat-icon>
-    </button>
+  <span class="toolbar-title">Chats</span>
+  <span class="spacer"></span>
+  <button mat-icon-button (click)="addNewChat()" aria-label="New Chat">
+    <mat-icon>add</mat-icon>
+  </button>
 </mat-toolbar>
 <mat-nav-list>
-    <mat-list-item *ngFor="let session of chatNames" (click)="onSelectSession(session)">
-        <div matLine>{{ session.id }}</div>
-    </mat-list-item>
+  <mat-list-item
+    *ngFor="let session of chatNames"
+    [ngClass]="{'selected': session.id === selectedSessionId}"
+    (click)="onSelectSession(session)"
+  >
+    <div matLine>{{ session.id }}</div>
+  </mat-list-item>
 </mat-nav-list>

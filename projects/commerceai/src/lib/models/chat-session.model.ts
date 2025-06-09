@@ -6,7 +6,6 @@
 //   userId: number;
 // }
 
-// src/app/models/chat-session.model.ts
 export interface ChatSession {
   id: string;
   app_name: string;

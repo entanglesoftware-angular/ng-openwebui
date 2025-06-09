@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { NgForOf, NgIf } from '@angular/common';
@@ -15,22 +15,32 @@ import { catchError, throwError, Subscription } from 'rxjs';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
-export class Sidebar {
+export class Sidebar implements OnInit, OnDestroy {
   chatNames: ChatSession[] = [];
+  selectedSessionId: string | null = null;
   private newSessionSubscription: Subscription;
+  private sessionIdSubscription: Subscription;
+
   constructor(
     private http: HttpClient,
     private selectedSessionService: SelectedSessionService,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar
   ) {
+    // Subscribe to new session creation events
     this.newSessionSubscription = this.selectedSessionService.newSessionCreated$.subscribe(() => {
       this.loadSessions();
-    })
+    });
+
+    // Subscribe to selected session ID changes
+    this.sessionIdSubscription = this.selectedSessionService.selectedSessionId$.subscribe((sessionId) => {
+      this.selectedSessionId = sessionId;
+      this.cdr.detectChanges();
+    });
   }
 
-  async ngOnInit() {
-    await this.loadSessions();
+  ngOnInit() {
+    this.loadSessions();
   }
 
   async loadSessions() {
@@ -70,5 +80,10 @@ export class Sidebar {
     if (session.id) {
       this.selectedSessionService.setSessionId(session.id);
     }
+  }
+
+  ngOnDestroy() {
+    this.newSessionSubscription.unsubscribe();
+    this.sessionIdSubscription.unsubscribe();
   }
 }
