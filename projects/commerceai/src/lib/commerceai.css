@@ -115,3 +115,105 @@ markdown {
   word-break: break-word;
   white-space: normal;
 }
+
+.file-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  background: #f1f1f1;
+  padding: 6px 10px;
+  border-radius: 16px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  max-width: 250px;
+  position: relative;
+}
+
+.file-icon {
+  margin-right: 6px;
+  color: #007bff;
+}
+
+.file-name {
+  flex-grow: 1;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-remove-btn {
+  padding: 0;
+  margin-left: 8px;
+  height: 20px;
+  width: 20px;
+}
+
+.chat-input-container {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 18px 20px 18px;
+  border-radius: 12px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 2;
+}
+
+.chat-input {
+  color: black !important;
+  border-color: black;
+  width: 100%;
+}
+
+.chat-input.mat-form-field.appearance-outline {
+  .mat-form-field-outline-start,
+  .mat-form-field-outline-end,
+  .mat-form-field-outline-gap {
+    border: 3px solid black !important;
+  }
+
+  &.mat-focused {
+    .mat-form-field-outline-start,
+    .mat-form-field-outline-end,
+    .mat-form-field-outline-gap {
+      border: 6px solid black !important;
+    }
+  }
+}
+
+.input-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.left-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.left-actions button,
+.right-actions button {
+  margin-right: 6px;
+}

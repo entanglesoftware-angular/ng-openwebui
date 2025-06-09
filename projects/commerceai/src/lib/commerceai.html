@@ -25,57 +25,63 @@
             </div>
 
             <mat-card class="chat-input-container">
-                <mat-form-field class="chat-input" appearance="outline">
-                    <input
-                            matInput
-                            placeholder="Type a message..."
-                            [(ngModel)]="message"
-                            (keyup.enter)="onSend()"
-                    />
-                </mat-form-field>
-                <mat-card *ngIf="selectedFiles.length > 0" class="file-preview mt-2 p-2">
-                  <div *ngFor="let file of selectedFiles; let i = index" class="flex items-center justify-between mb-1">
-                    <span><mat-icon>attach_file</mat-icon> {{ file.name }}</span>
-                    <button mat-icon-button (click)="removeFile(i)">
-                      <mat-icon>close</mat-icon>
-                    </button>
+              <!-- File Preview ABOVE the input -->
+              <div *ngIf="selectedFiles.length > 0" class="file-chip-container">
+                <div *ngFor="let file of selectedFiles; let i = index" class="file-chip">
+                  <div class="file-icon">
+                    <mat-icon>insert_drive_file</mat-icon>
                   </div>
-                </mat-card>
-                <input
-                  type="file"
-                  accept=".csv, .xls, .xlsx"
-                  multiple
-                  (change)="onFilesSelected($event)"
-                  hidden
-                  #fileInput
-                />
-                <button
-                  mat-icon-button
-                  color="warn"
-                  class="attach-button"
-                  matTooltip="Attach file"
-                  (click)="fileInput.click()"
-                >
-                  <mat-icon>attach_file</mat-icon>
-                </button>
+                  <div class="file-name">{{ file.name }}</div>
+                  <button mat-icon-button class="file-remove-btn" (click)="removeFile(i)">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              </div>
 
-                <button
-                        mat-icon-button
-                        color="accent"
-                        class="mic-button"
-                        aria-label="Voice Input"
-                >
+              <!-- Input Box -->
+              <mat-form-field class="chat-input" appearance="outline">
+                <input
+                  matInput
+                  placeholder="Type a message..."
+                  [(ngModel)]="message"
+                  (keyup.enter)="onSend()"
+                />
+              </mat-form-field>
+
+              <!-- Buttons BELOW the input -->
+              <div class="input-actions">
+                <div class="left-actions">
+                  <input
+                    type="file"
+                    accept=".csv, .xls, .xlsx"
+                    multiple
+                    (change)="onFilesSelected($event)"
+                    hidden
+                    #fileInput
+                  />
+                  <button
+                    mat-icon-button
+                    color="warn"
+                    matTooltip="Attach file"
+                    (click)="fileInput.click()"
+                  >
+                    <mat-icon>attach_file</mat-icon>
+                  </button>
+                </div>
+                <div class="right-actions">
+                  <button mat-icon-button color="accent" aria-label="Voice Input">
                     <mat-icon>mic</mat-icon>
-                </button>
-                <button
-                        mat-icon-button
-                        color="primary"
-                        class="send-button"
-                        (click)="onSend()"
-                        [disabled]="!message.trim()"
-                >
+                  </button>
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    (click)="onSend()"
+                    [disabled]="!message.trim()"
+                  >
                     <mat-icon>send</mat-icon>
-                </button>
+                  </button>
+                </div>
+              </div>
             </mat-card>
         </div>
     </div>
