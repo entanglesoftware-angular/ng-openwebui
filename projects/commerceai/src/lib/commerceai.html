@@ -33,6 +33,31 @@
                             (keyup.enter)="onSend()"
                     />
                 </mat-form-field>
+                <mat-card *ngIf="selectedFiles.length > 0" class="file-preview mt-2 p-2">
+                  <div *ngFor="let file of selectedFiles; let i = index" class="flex items-center justify-between mb-1">
+                    <span><mat-icon>attach_file</mat-icon> {{ file.name }}</span>
+                    <button mat-icon-button (click)="removeFile(i)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                </mat-card>
+                <input
+                  type="file"
+                  accept=".csv, .xls, .xlsx"
+                  multiple
+                  (change)="onFilesSelected($event)"
+                  hidden
+                  #fileInput
+                />
+                <button
+                  mat-icon-button
+                  color="warn"
+                  class="attach-button"
+                  matTooltip="Attach file"
+                  (click)="fileInput.click()"
+                >
+                  <mat-icon>attach_file</mat-icon>
+                </button>
 
                 <button
                         mat-icon-button

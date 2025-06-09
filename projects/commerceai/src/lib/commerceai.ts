@@ -61,6 +61,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     chatMessages: ChatMessage[] = [];
     currentSessionId: string | null = null;
     userId: string = 'entangle';
+    selectedFiles: File[] = [];
     @ViewChild('chatContainer') chatContainer!: ElementRef;
     private sessionSubscription: Subscription;
 
@@ -226,9 +227,37 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
       this.message = '';
 
+      const allMessages = [];
+      if (trimmed) {
+        allMessages.push({
+          role: 'user',
+          type: 'text',
+          content: trimmed,
+        });
+      }
+
+      if (this.selectedFiles && this.selectedFiles.length > 0) {
+        for (const file of this.selectedFiles) {
+          try {
+            const content = await this.convertFileToBase64(file);
+            const extension = file.name.split('.').pop()?.toLowerCase() ?? 'unknown';
+
+            allMessages.push({
+              role: 'user',
+              type: extension,
+              content: content,
+            } as any);
+          } catch (error) {
+            console.error(`Failed to convert file ${file.name}:`, error);
+            this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', { duration: 3000 });
+          }
+        }
+      }
+      this.clearAllFiles();
+
       const body = {
         model: this.aiName,
-        messages: [{ role: 'user', content: trimmed }],
+        messages: [allMessages],
         stream: true,
       };
 
@@ -304,6 +333,37 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         console.error('Error sending message:', err);
         this.snackBar.open('Failed to send message.', 'Close', { duration: 3000 });
       }
+  }
+
+  convertFileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  onFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      this.selectedFiles = Array.from(input.files);
+      this.snackBar.open(`${this.selectedFiles.length} file(s) selected.`, 'Close', {
+        duration: 2000,
+      });
+    }
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  clearAllFiles(): void {
+    this.selectedFiles = [];
   }
     ngOnDestroy() {
         this.sessionSubscription.unsubscribe();
