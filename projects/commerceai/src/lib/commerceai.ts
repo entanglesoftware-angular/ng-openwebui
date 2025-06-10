@@ -15,7 +15,7 @@ import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
-import { ChatMessage } from './models/chat-message.model';
+import {ChatMessage, ChatReq, ChatReqMessage} from './models/chat-message.model';
 import { ChatSession } from './models/chat-session.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component';
@@ -227,13 +227,19 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
       this.message = '';
 
-      const allMessages = [];
+      const allMessages:ChatReq = {
+          model:this.aiName,
+          messages:[],
+          stream:true,
+      };
+
       if (trimmed) {
-        allMessages.push({
-          role: 'user',
-          type: 'text',
-          content: trimmed,
-        });
+        const userMessage:ChatReqMessage = {
+            role: 'user',
+            type: 'text',
+            content: trimmed,
+        }
+        allMessages.messages.push(userMessage);
       }
 
       if (this.selectedFiles && this.selectedFiles.length > 0) {
@@ -241,12 +247,12 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           try {
             const content = await this.convertFileToBase64(file);
             const extension = file.name.split('.').pop()?.toLowerCase() ?? 'unknown';
-
-            allMessages.push({
-              role: 'user',
-              type: extension,
-              content: content,
-            } as any);
+            const userFile:ChatReqMessage = {
+                role: 'user',
+                type: extension,
+                content,
+            }
+            allMessages.messages.push(userFile);
           } catch (error) {
             console.error(`Failed to convert file ${file.name}:`, error);
             this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', { duration: 3000 });
@@ -257,7 +263,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
       const body = {
         model: this.aiName,
-        messages: [allMessages],
+        messages: allMessages,
         stream: true,
       };
 
