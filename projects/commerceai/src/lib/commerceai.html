@@ -31,7 +31,7 @@
                   <div class="file-icon">
                     <mat-icon>insert_drive_file</mat-icon>
                   </div>
-                  <div class="file-name">{{ file.name }}</div>
+                  <div class="file-name">{{ getShortenedFileName(file.name) }}</div>
                   <button mat-icon-button class="file-remove-btn" (click)="removeFile(i)">
                     <mat-icon>close</mat-icon>
                   </button>

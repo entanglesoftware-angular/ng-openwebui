@@ -36,3 +36,15 @@ mat-list-item.selected {
 .spacer {
   flex: 1 1 auto;
 }
+
+.session-list-container {
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+.file-name {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

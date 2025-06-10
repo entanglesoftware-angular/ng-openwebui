@@ -365,6 +365,19 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   clearAllFiles(): void {
     this.selectedFiles = [];
   }
+
+  getShortenedFileName(fileName: string): string {
+    const maxChars = 10;
+
+    const dotIndex = fileName.lastIndexOf('.');
+    const namePart = dotIndex !== -1 ? fileName.substring(0, dotIndex) : fileName;
+    const extension = dotIndex !== -1 ? fileName.substring(dotIndex) : '';
+
+    const trimmedName = namePart.length > maxChars ? namePart.substring(0, maxChars) + '...' : namePart;
+
+    return `${trimmedName}${extension}`;
+  }
+
     ngOnDestroy() {
         this.sessionSubscription.unsubscribe();
     }
