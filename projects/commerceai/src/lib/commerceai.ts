@@ -227,7 +227,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
       this.message = '';
 
-      const allMessages:ChatReq = {
+      const ReqBody:ChatReq = {
           model:this.aiName,
           messages:[],
           stream:true,
@@ -239,7 +239,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             type: 'text',
             content: trimmed,
         }
-        allMessages.messages.push(userMessage);
+          ReqBody.messages.push(userMessage);
       }
 
       if (this.selectedFiles && this.selectedFiles.length > 0) {
@@ -252,7 +252,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
                 type: extension,
                 content,
             }
-            allMessages.messages.push(userFile);
+              ReqBody.messages.push(userFile);
           } catch (error) {
             console.error(`Failed to convert file ${file.name}:`, error);
             this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', { duration: 3000 });
@@ -260,12 +260,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         }
       }
       this.clearAllFiles();
-
-      const body = {
-        model: this.aiName,
-        messages: allMessages,
-        stream: true,
-      };
 
       try {
         const response = await fetch(`${this.domain}/v1/chat/completions`, {
@@ -275,7 +269,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             user_id: this.userId,
             session_id: sessionId,
           },
-          body: JSON.stringify(body),
+          body: JSON.stringify(ReqBody),
         });
         if (response.status === 200) {
 
