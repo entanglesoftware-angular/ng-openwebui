@@ -196,6 +196,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             this.currentSessionId = sessionId;
             isNewSession = true;
             this.selectedSessionService.setSessionId(sessionId);
+            this.cdr.detectChanges();
             // this.selectedSessionService.notifyNewSessionCreated(); // Notify Sidebar
           } else {
             throw new Error('Invalid session response from server');
@@ -271,9 +272,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           },
           body: JSON.stringify(ReqBody),
         });
-        if (response.status === 200) {
-
-        }
         const reader = response.body?.getReader();
         const decoder = new TextDecoder('utf-8');
         let modelContent = '';
@@ -289,11 +287,11 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             if (modelContent) {
               modelMessage.messages = [modelContent];
               this.chatMessages.push(modelMessage);
-              if (isNewSession) {
-                // this.selectedSessionService.notifyNewSessionCreated(); // Notify again after messages are saved
-              }
+              this.cdr.detectChanges();
             }
-            this.cdr.detectChanges();
+            if (isNewSession) {
+              this.selectedSessionService.setSessionId(sessionId);
+            }
             break;
           }
 
@@ -308,11 +306,11 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
               if (modelContent) {
                 modelMessage.messages = [modelContent];
                 this.chatMessages.push(modelMessage);
-                if (isNewSession) {
-                  this.selectedSessionService.notifyNewSessionCreated(); // Notify again after messages are saved
-                }
+                this.cdr.detectChanges();
               }
-              this.cdr.detectChanges();
+              if (isNewSession) {
+                this.selectedSessionService.setSessionId(sessionId);
+              }
               return;
             }
             try {
