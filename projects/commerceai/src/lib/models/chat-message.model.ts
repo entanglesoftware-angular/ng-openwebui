@@ -6,10 +6,24 @@
 // }
 
 
-export interface ChatMessage {
+// export interface ChatMessage {
+//   role: 'user' | 'model' | 'form';
+//   messages: string[];
+//   sessionId: string;
+// }
+
+export interface EventMessage {
+  type:string
+  content: string
+}
+
+export interface event {
   role: 'user' | 'model' | 'form';
-  messages: string[];
-  sessionId: string;
+  messages: EventMessage[];
+}
+
+export interface Events {
+  events : event[]
 }
 
 export interface ChatReqMessage {
