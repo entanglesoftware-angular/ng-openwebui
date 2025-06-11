@@ -232,10 +232,12 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         try {
           const content = await this.convertFileToBase64(file);
           const mimeType = file.type || 'application/octet-stream';
+          console.log(`Mime type : ${mimeType}`)
           const userFile: ChatReqMessage = {
             role: 'user',
             type: mimeType,
             content,
+
           };
           ReqBody.messages.push(userFile);
 
@@ -243,11 +245,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             type: mimeType,
             content,
           };
-          const fileUserMessage: event = {
-            role: 'user',
-            messages: [fileEventMessage],
-          };
-          this.chatMessages.events.push(fileUserMessage);
+          this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
           this.cdr.detectChanges();
         } catch (error) {
           console.error(`Failed to convert file ${file.name}:`, error);

@@ -1,8 +1,7 @@
 <div class="main-container">
   <lib-sidebar></lib-sidebar>
-  <div class="chat-box-container">
     <div class="chat-box-container">
-      <mat-card class="ai-name">{{ aiName }}</mat-card>
+      <mat-card class="ai-name" style="margin-bottom: 0px">{{ aiName }}</mat-card>
 
       <div class="chat-messages" #chatContainer>
         <ng-container *ngFor="let event of chatMessages.events">
@@ -57,7 +56,7 @@
         </ng-container>
       </div>
 
-      <mat-card class="chat-input-container">
+      <mat-card class="chat-input-container" style="margin-top: 0px;">
         <!-- File Preview ABOVE the input -->
         <div *ngIf="selectedFiles.length > 0" class="file-chip-container">
           <div *ngFor="let file of selectedFiles; let i = index" class="file-chip">
@@ -117,5 +116,4 @@
         </div>
       </mat-card>
     </div>
-  </div>
 </div>
