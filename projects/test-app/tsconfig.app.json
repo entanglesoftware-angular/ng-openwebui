@@ -5,6 +5,7 @@
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
     "types": [],
+    "baseUrl": "./",
     "paths": {
       "commerceai": ["dist/commerceai"]
     }

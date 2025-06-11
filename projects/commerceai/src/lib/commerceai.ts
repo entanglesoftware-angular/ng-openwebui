@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
@@ -12,9 +12,8 @@ import { ChatSession } from './models/chat-session.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component';
 import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dialog.component';
-import { SelectedSessionService } from './services/selected-session.service';
-import { Subscription } from 'rxjs';
 import { MatTooltip } from '@angular/material/tooltip';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'lib-commerceai',
@@ -44,19 +43,21 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   selectedFiles: File[] = [];
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
-  private sessionSubscription: Subscription;
+  private routeSubscription: Subscription;
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private snackBar: MatSnackBar,
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog,
-    private selectedSessionService: SelectedSessionService
+    private dialog: MatDialog
   ) {
-    this.sessionSubscription = this.selectedSessionService.selectedSessionId$.subscribe((sessionId) => {
+    this.routeSubscription = this.route.params.subscribe(params => {
+      const sessionId = params['session_id'];
       if (sessionId) {
-        this.onSessionSelected(sessionId);
+        this.currentSessionId = sessionId;
+        this.loadSessionMessages(sessionId);
       } else {
         this.currentSessionId = null;
         this.chatMessages.events = [];
@@ -66,6 +67,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
+    console.log('Initializing...');
     this.http
       .get<any>(`${this.domain}/v1/models`, {
         headers: new HttpHeaders({
@@ -76,7 +78,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       .subscribe({
         next: (res) => {
           this.aiName = res?.data?.[0]?.id ?? 'Unknown AI';
-          console.log(res);
         },
         error: () => {
           this.aiName = 'Select Model';
@@ -85,13 +86,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       });
   }
 
-  async onSessionSelected(sessionId: string) {
-    console.log('[DEBUG] onSessionSelected called with prev session id:', this.currentSessionId);
-    console.log('[DEBUG] array:', this.chatMessages.events);
-    this.currentSessionId = sessionId;
-    console.log('[DEBUG] onSessionSelected called with sessionId:', this.currentSessionId);
-    console.log('[DEBUG] array:', this.chatMessages.events);
-
+  async loadSessionMessages(sessionId: string) {
     this.chatMessages.events = [];
     try {
       const headers = new HttpHeaders({
@@ -108,6 +103,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     } catch (err) {
       console.error('Error loading messages for session:', err);
       this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000 });
+      this.router.navigate(['..'], { relativeTo: this.route }); // Navigate to new chat
     }
   }
 
@@ -163,12 +159,12 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
   openCsvDialog(csvString: string): void {
     this.dialog.open(CsvPreviewDialogComponent, {
-      width: '70vw', // 70% of viewport width
-      maxHeight: '80vh', // Optional: limit height to 80% of viewport height
+      width: '70vw',
+      maxHeight: '80vh',
       panelClass: 'csv-dialog-panel',
       data: {
         csv: csvString,
-      }
+      },
     });
   }
 
@@ -186,12 +182,11 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         const newSession = await this.http
           .post<ChatSession>(`${this.domain}/session/create`, {}, { headers })
           .toPromise();
-        console.log('New session created 1:', newSession, this.chatMessages.events);
         if (newSession && newSession.id) {
           sessionId = newSession.id;
           this.currentSessionId = sessionId;
           isNewSession = true;
-          this.selectedSessionService.setSessionId(sessionId);
+          // this.router.navigate([sessionId], { relativeTo: this.route.parent });
         } else {
           throw new Error('Invalid session response from server');
         }
@@ -201,26 +196,19 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         return;
       }
     }
-    console.log('New session created 2:', this.chatMessages.events);
 
     if (trimmed) {
       const eventMessage: EventMessage = {
-        type: "text",
+        type: 'text',
         content: trimmed,
       };
       const userMessage: event = {
         role: 'user',
         messages: [eventMessage],
       };
-      console.log('New session created 3 :', this.chatMessages.events);
-
       this.chatMessages.events.push(userMessage);
-      console.log('New session created 4 :', this.chatMessages.events);
-
       this.cdr.detectChanges();
-      console.log('New session created 5 :', this.chatMessages.events);
     }
-    console.log('New session created 6 :', this.chatMessages.events);
 
     this.message = '';
 
@@ -251,7 +239,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           };
           ReqBody.messages.push(userFile);
 
-          // Add file message to chatMessages for UI display
           const fileEventMessage: EventMessage = {
             type: mimeType,
             content,
@@ -269,7 +256,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       }
     }
     this.clearAllFiles();
-    console.log('New session created 7:', this.chatMessages.events);
 
     try {
       const response = await fetch(`${this.domain}/v1/chat/completions`, {
@@ -286,28 +272,24 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       const decoder = new TextDecoder('utf-8');
       let modelContent = '';
       const eventMessage: EventMessage = {
-        type: "text",
+        type: 'text',
         content: modelContent,
       };
       const modelMessage: event = {
         role: 'model',
         messages: [eventMessage],
       };
-      console.log('New session created 8:', this.chatMessages.events);
 
       while (true) {
         const { done, value } = await reader!.read();
         if (done) {
           if (modelContent) {
             const tempMessage: EventMessage = {
-              type: "text",
+              type: 'text',
               content: modelContent,
             };
             modelMessage.messages = [tempMessage];
             this.chatMessages.events.push(modelMessage);
-            if (isNewSession) {
-              this.selectedSessionService.notifyNewSessionCreated();
-            }
           }
           this.cdr.detectChanges();
           break;
@@ -323,16 +305,15 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           if (data === '[DONE]') {
             if (modelContent) {
               const tempMessage: EventMessage = {
-                type: "text",
+                type: 'text',
                 content: modelContent,
               };
               modelMessage.messages = [tempMessage];
               this.chatMessages.events.push(modelMessage);
-              if (isNewSession) {
-                this.selectedSessionService.notifyNewSessionCreated();
-              }
             }
+            this.router.navigate([sessionId], { relativeTo: this.route.parent });
             this.cdr.detectChanges();
+
             return;
           }
           try {
@@ -342,19 +323,17 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             if (delta?.content) {
               modelContent += delta.content;
               const tempMessage: EventMessage = {
-                type: "text",
+                type: 'text',
                 content: modelContent,
               };
               modelMessage.messages = [tempMessage];
               this.cdr.detectChanges();
             }
-          } catch (e) {
-            console.error('Error parsing stream chunk', e);
+          } catch (err) {
+            console.error('Error parsing stream chunk:', err);
           }
         }
       }
-      console.log('New session created 9:', this.chatMessages.events);
-
     } catch (err) {
       console.error('Error sending message:', err);
       this.snackBar.open('Failed to send message.', 'Close', { duration: 3000 });
@@ -378,7 +357,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedFiles = Array.from(input.files);
-      this.snackBar.open(`${this.selectedFiles.length} file(s) selected.`, 'Close', {
+      this.snackBar.open(`${this.selectedFiles.length} file(s) selected`, 'Close', {
         duration: 2000,
       });
     }
@@ -393,6 +372,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.sessionSubscription.unsubscribe();
+    this.routeSubscription.unsubscribe();
   }
 }
