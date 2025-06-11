@@ -14,6 +14,7 @@ import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component
 import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dialog.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'lib-commerceai',
@@ -41,6 +42,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   currentSessionId: string | null = null;
   userId: string = 'entangle';
   selectedFiles: File[] = [];
+  excel_mime_types = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.ms-excel.sheet.macroEnabled.12"]
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
   private routeSubscription: Subscription;
@@ -167,6 +169,15 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       },
     });
   }
+  private async convertExcelToCsv(file: File): Promise<string> {
+    const data = new Uint8Array(await file.arrayBuffer());
+    const workbook = XLSX.read(data, { type: 'array' });
+
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    const result =  XLSX.utils.sheet_to_csv(firstSheet);
+    console.log("excel to csv")
+    return result;
+  }
 
   async onSend() {
     const trimmed = this.message.trim();
@@ -230,14 +241,28 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     if (this.selectedFiles && this.selectedFiles.length > 0) {
       for (const file of this.selectedFiles) {
         try {
-          const content = await this.convertFileToBase64(file);
-          const mimeType = file.type || 'application/octet-stream';
-          console.log(`Mime type : ${mimeType}`)
+          let mimeType:string = file.type || 'application/octet-stream';
+          let content:string = ""
+          if(mimeType == "text/csv"){
+            content = await file.text();
+          }
+          else if(mimeType.startsWith("image/")){
+            content = await this.convertFileToBase64(file);
+          }
+          else if(mimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || mimeType == "application/vnd.ms-excel" || mimeType == "application/vnd.ms-excel.sheet.macroEnabled.12"){
+            console.log("Excel file detected")
+            content = await this.convertExcelToCsv(file);
+            mimeType = "text/csv"
+          } else {
+            content = await this.convertFileToBase64(file);
+            console.log("File detected")
+            console.log(mimeType)
+          }
+          console.log(`Mime type : ${mimeType}, ${file.type}`)
           const userFile: ChatReqMessage = {
             role: 'user',
             type: mimeType,
-            content,
-
+            content:content,
           };
           ReqBody.messages.push(userFile);
 
@@ -245,6 +270,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             type: mimeType,
             content,
           };
+          console.log(fileEventMessage.type)
           this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
           this.cdr.detectChanges();
         } catch (error) {
