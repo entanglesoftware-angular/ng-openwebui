@@ -27,9 +27,16 @@
               <!-- CSV messages -->
               <mat-card *ngIf="message.type === 'text/csv' && message.content" class="message-content">
                 <div class="file-display">
-                  <mat-icon>table_chart</mat-icon>
-                  <button mat-button color="secondary" class="csv-label" (click)="openCsvDialog(message.content)">
-                    Open File
+                  <button matFab color="secondary" (click)="openCsvDialog(message.content)">
+                    Open
+                  </button>
+                  <button matFab (click)="downloadCsv(message.content)" style="display:flex; align-items: center; flex-direction: column;">
+                    <mat-icon>file_download</mat-icon>
+                    <div>CSV</div>
+                  </button>
+                  <button matFab (click)="downloadExcel(message.content)"  style="display:flex; align-items: center; flex-direction: column;">
+                    <mat-icon>file_download</mat-icon>
+                    <div>Excel</div>
                   </button>
                 </div>
               </mat-card>

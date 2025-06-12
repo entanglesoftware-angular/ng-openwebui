@@ -398,4 +398,68 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   ngOnDestroy() {
     this.routeSubscription.unsubscribe();
   }
+
+
+
+
+
+  downloadCsv(csvString:string): void {
+
+    if (!csvString) {
+      console.error('CSV string is empty');
+      return;
+    }
+
+    // Create a Blob from the CSV string
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+
+    // Create a temporary URL and trigger download
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `csvfile.csv`;
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  }
+
+  downloadExcel(csvString:string): void {
+    if (!csvString) {
+      console.error('CSV string is empty');
+      return;
+    }
+
+    try {
+      // Parse CSV string manually into an array of arrays (AoA)
+      const rows = csvString.split('\n').filter(row => row.trim() !== '');
+      const aoa: string[][] = rows.map(row => row.split(',').map(cell => cell.trim()));
+
+      // Create a workbook and worksheet using aoa_to_sheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+      // Generate XLSX file and trigger download
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      // Create a temporary URL and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `excelFile.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error generating Excel file:', error);
+    }
+  }
+
 }
