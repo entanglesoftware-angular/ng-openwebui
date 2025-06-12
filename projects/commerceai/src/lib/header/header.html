@@ -1,0 +1,33 @@
+<div class="header">
+  <div
+    class="model-selector"
+    (click)="toggleDropdown()"
+    [class.open]="dropdownOpen"
+  >
+    <button class="model-button">
+      {{ selectedModel || 'Select Model' }}
+      <mat-icon style="color: grey">expand_more</mat-icon>
+    </button>
+
+    <div *ngIf="dropdownOpen" class="dropdown-card">
+      <div
+        class="dropdown-item"
+        *ngFor="let item of modelMap"
+        (click)="selectModel(item.model); $event.stopPropagation()"
+      >
+        {{ item.model }}
+        <small style="color: gray">({{ item.domain }})</small>
+      </div>
+    </div>
+  </div>
+  <button mat-icon-button [matMenuTriggerFor]="profileMenu" class="profile-initial">
+    <span class="profile-initial">{{ userInitial }}</span>
+  </button>
+
+  <mat-menu #profileMenu="matMenu" [overlapTrigger]="false" panelClass="custom-profile-menu">
+    <button mat-menu-item (click)="goToSettings()">
+      <mat-icon>settings</mat-icon>
+      <span>Settings</span>
+    </button>
+  </mat-menu>
+</div>

@@ -1,0 +1,57 @@
+.dialog-box{
+     display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fff;
+}
+.container{
+  display: flex;
+  flex: 1;
+  height: calc(100% - 64px); 
+}
+.settings-sidebar {
+  width: 220px;
+  background-color: #fff;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  color:grey;
+
+  &:hover {
+    background-color: #fff;
+    color:black;
+  }
+}
+
+.content-area {
+  flex-grow: 1;
+  padding: 10px;
+}
+.connections{
+    h3{
+        margin:0px;
+        font-weight: 400;
+    }
+     .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .add-icon {
+      cursor: pointer;
+    }
+}
+}

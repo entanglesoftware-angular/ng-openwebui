@@ -1,0 +1,66 @@
+<div class="dialog-box">
+  <h2 style="font-weight: 400; padding-left: 12px">Settings</h2>
+  <div class="container">
+    <!-- Sidebar buttons -->
+    <aside class="settings-sidebar">
+      <div class="sidebar-item" (click)="selectedSection = 'connections'">
+        <mat-icon>cloud</mat-icon>
+        <span>Connections</span>
+      </div>
+      <!-- add more buttons for other sections -->
+    </aside>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- Default View -->
+      <ng-container *ngIf="selectedSection === 'default'"> </ng-container>
+
+      <!-- Connections View -->
+      <ng-container *ngIf="selectedSection === 'connections'">
+        <div class="connections">
+          <div class="content-header">
+            <h3>Manage Direct Connections</h3>
+            <mat-icon class="add-icon" (click)="onClick()">add</mat-icon>
+          </div>
+          <p>Total connections: {{ savedConnections.length }}</p>
+          <div
+            *ngFor="let conn of savedConnections"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 8px 0;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+              <span>{{ conn.url }}</span>
+              <span>{{ conn.visible ? conn.key : '•••' }}</span>
+            </div>
+
+            <div style="width: 150px; text-align: center">
+              
+              <button style="background-color: white;border: none;"
+                mat-icon-button
+                matSuffix
+                (click)="conn.visible = !conn.visible"
+                type="button"
+              >
+                <mat-icon
+                  >{{ conn.visible ? 'visibility_off' : 'visibility'
+                  }}</mat-icon
+                >
+              </button>
+            </div>
+          </div>
+
+          <small style="color: gray">
+            Connect to your own OpenAI compatible API endpoints. <br />
+            CORS must be properly configured by the provider to allow requests
+            from Open WebUI.
+          </small>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  <!-- <button (click)="clearConnections()">Clear</button> -->
+</div>

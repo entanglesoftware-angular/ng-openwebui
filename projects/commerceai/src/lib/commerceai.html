@@ -2,28 +2,7 @@
   <lib-sidebar></lib-sidebar>
   <div class="chat-box-container">
     <div class="chat-box-container">
-       <mat-card style="height:55px;border-radius:0;">
-      <div
-        class="model-selector"
-        (click)="toggleDropdown()"
-        [class.open]="dropdownOpen"
-      >
-        <button class="model-button">
-          {{ selectedModel || 'Select Model' }}
-          <mat-icon style="color:grey">expand_more</mat-icon>
-        </button>
-
-        <div *ngIf="dropdownOpen" class="dropdown-card">
-          <div
-            class="dropdown-item"
-            *ngFor="let model of models"
-            (click)="selectModel(model); $event.stopPropagation()"
-          >
-            {{ model }}
-          </div>
-        </div>
-      </div>
-      </mat-card>
+      <lib-header></lib-header>
       <div class="chat-messages" #chatContainer>
         <mat-card
           *ngFor="let msg of chatMessages"

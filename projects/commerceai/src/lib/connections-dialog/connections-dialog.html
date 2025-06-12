@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>Add Connection</h2>
+<div class="container">
+<mat-dialog-content class="connection-form">
+  <!-- URL Field -->
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>API Base URL</mat-label>
+    <input matInput placeholder="API Base URL" [(ngModel)]="apiUrl" />
+  </mat-form-field>
+
+  <!-- Row: Key + Prefix ID -->
+  <div class="row">
+    <mat-form-field appearance="fill" class="half-width">
+      <mat-label>API Key</mat-label>
+      <input matInput [type]="showKey ? 'text' : 'password'" [(ngModel)]="apikey" maxlength="3"/>
+      <button mat-icon-button matSuffix (click)="showKey = !showKey" type="button">
+        <mat-icon>{{ showKey ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="half-width">
+      <mat-label>Prefix ID</mat-label>
+      <input matInput [type]="showPrefix ? 'text' : 'password'" [(ngModel)]="prefixID" />
+      <button mat-icon-button matSuffix (click)="showPrefix = !showPrefix" type="button">
+        <mat-icon>{{ showPrefix ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <!-- Tags Section -->
+  <div class="tags">
+    <mat-icon>add_circle</mat-icon>
+    <span>Add Tags</span>
+  </div>
+
+  <!-- Model ID Hint -->
+  <div class="model-ids-hint">
+    <small>Leave empty to include all models from "/models" endpoint</small>
+  </div>
+
+  <!-- Add model ID -->
+  <div class="add-model-id">
+    <input matInput placeholder="Add a model ID" [(ngModel)]="modelId" />
+    <button mat-icon-button (click)="addModelId()">
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
+</mat-dialog-content>
+</div>
+<!-- Actions -->
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-flat-button color="primary" [disabled]="!apiUrl" (click)="saveConnection()">Save</button>
+</mat-dialog-actions>

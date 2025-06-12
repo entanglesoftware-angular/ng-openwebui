@@ -1,0 +1,51 @@
+.connection-form {
+  .row {
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+  }
+
+  .full-width {
+    width: 100%;
+  }
+
+  .half-width {
+    width: 48%;
+  }
+
+  .tags {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .model-ids-hint {
+    font-size: 12px;
+    color: gray;
+    margin-top: 10px;
+  }
+
+  .add-model-id {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+
+    input {
+      flex: 1;
+      margin-right: 8px;
+    }
+  }
+}
+/* ::ng-deep .mat-mdc-dialog-container-with-actions .mat-mdc-dialog-content {
+  padding: 0 !important;
+} */
+/* ::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-content{
+    padding:0 !important;
+} */
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-content {
+    padding:20px !important;
+}
