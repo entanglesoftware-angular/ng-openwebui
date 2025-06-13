@@ -303,22 +303,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         role: 'model',
         messages: [eventMessage],
       };
+      this.chatMessages.events.push(modelMessage);
 
       while (true) {
         const { done, value } = await reader!.read();
-        if (done) {
-          if (modelContent) {
-            const tempMessage: EventMessage = {
-              type: 'text',
-              content: modelContent,
-            };
-            modelMessage.messages = [tempMessage];
-            this.chatMessages.events.push(modelMessage);
-          }
-          this.cdr.detectChanges();
-          break;
-        }
-
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk
           .split('\n')
@@ -327,30 +315,19 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         for (const line of lines) {
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
-            if (modelContent) {
-              const tempMessage: EventMessage = {
-                type: 'text',
-                content: modelContent,
-              };
-              modelMessage.messages = [tempMessage];
-              this.chatMessages.events.push(modelMessage);
-            }
             this.router.navigate([sessionId], { relativeTo: this.route.parent });
             this.cdr.detectChanges();
-
             return;
           }
           try {
             const json = JSON.parse(data);
             const delta = json?.choices?.[0]?.delta;
-
+            // console.log(delta.content)
             if (delta?.content) {
-              modelContent += delta.content;
-              const tempMessage: EventMessage = {
-                type: 'text',
-                content: modelContent,
-              };
-              modelMessage.messages = [tempMessage];
+              let n = this.chatMessages.events.length - 1
+              let m = this.chatMessages.events[n].messages.length - 1
+              this.chatMessages.events[n].messages[m].content += delta.content;
+              this.scrollToBottom()
               this.cdr.detectChanges();
             }
           } catch (err) {
@@ -461,5 +438,4 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       console.error('Error generating Excel file:', error);
     }
   }
-
 }
