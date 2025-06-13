@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { NgForOf, NgIf } from '@angular/common';
@@ -16,8 +16,12 @@ import { catchError, throwError } from 'rxjs';
   styleUrl: './sidebar.css',
 })
 export class Sidebar implements OnInit, OnDestroy {
+  @ViewChild('dropdownMenu') dropdownMenu!: ElementRef;
   chatNames: ChatSession[] = [];
   selectedSessionId: string | null = null;
+  menuOpen = false;
+  menuPosition = { x: 0, y: 0 };
+  selectedSession: any = null;
 
   constructor(
     private http: HttpClient,
@@ -71,6 +75,24 @@ export class Sidebar implements OnInit, OnDestroy {
     if (session.id) {
       this.router.navigate([session.id], { relativeTo: this.route.parent });
     }
+  }
+
+  openMenu(event: MouseEvent, session: any) {
+    event.stopPropagation();
+    const button = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.menuPosition = { x: button.left, y: button.bottom };
+    this.menuOpen = true;
+    this.selectedSession = session;
+  }
+
+  delete(session: any) {
+    console.log("Delete clicked for:", session.id);
+    this.menuOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    this.menuOpen = false;
   }
 
   ngOnDestroy() {}
