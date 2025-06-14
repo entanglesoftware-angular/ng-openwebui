@@ -42,6 +42,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   currentSessionId: string | null = null;
   userId: string = 'entangle';
   selectedFiles: File[] = [];
+  private scrollThrottleTimer: any = null;
+  isStreaming = false;
+
   excel_mime_types = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.ms-excel.sheet.macroEnabled.12"]
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
@@ -63,7 +66,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       } else {
         this.currentSessionId = null;
         this.chatMessages.events = [];
-        this.cdr.detectChanges();
+        requestAnimationFrame(() => {
+          this.cdr.detectChanges();
+        });
       }
     });
   }
@@ -101,7 +106,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         ...msg,
         sessionId,
       }));
-      this.cdr.detectChanges();
+      requestAnimationFrame(() => {
+        this.cdr.detectChanges();
+      });
     } catch (err) {
       console.error('Error loading messages for session:', err);
       this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000 });
@@ -110,14 +117,26 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngAfterViewChecked(): void {
-    this.scrollToBottom();
+    this.scrollToBottomAfterViewChecked();
   }
 
-  scrollToBottom() {
+  scrollToBottomAfterViewChecked() {
     try {
       this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
     } catch (err) {}
   }
+  scrollToBottom() {
+  if (!this.scrollThrottleTimer) {
+    this.scrollThrottleTimer = setTimeout(() => {
+      try {
+        this.chatContainer.nativeElement.scrollTop =
+          this.chatContainer.nativeElement.scrollHeight;
+      } catch {}
+      this.scrollThrottleTimer = null;
+    }, 100); // Throttle every 100ms
+  }
+}
+
 
   clearChat(): void {
     this.chatMessages.events = [];
@@ -134,7 +153,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           this.snackBar.open('Failed to clear messages.', 'Close', { duration: 3000 });
         });
     }
-    this.cdr.detectChanges();
+        requestAnimationFrame(() => {
+          this.cdr.detectChanges();
+        });
   }
 
   checkForFormTrigger(message: string | null) {
@@ -180,6 +201,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   async onSend() {
+
     const trimmed = this.message.trim();
     if (!trimmed && this.selectedFiles.length === 0) return;
 
@@ -218,7 +240,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         messages: [eventMessage],
       };
       this.chatMessages.events.push(userMessage);
-      this.cdr.detectChanges();
+      requestAnimationFrame(() => {
+        this.cdr.detectChanges();
+      });
     }
 
     this.message = '';
@@ -237,6 +261,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       };
       ReqBody.messages.push(userMessage);
     }
+    this.isStreaming = true;
 
     if (this.selectedFiles && this.selectedFiles.length > 0) {
       for (const file of this.selectedFiles) {
@@ -272,7 +297,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           };
           console.log(fileEventMessage.type)
           this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
-          this.cdr.detectChanges();
+          requestAnimationFrame(() => {
+            this.cdr.detectChanges();
+          });
         } catch (error) {
           console.error(`Failed to convert file ${file.name}:`, error);
           this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', { duration: 3000 });
@@ -280,6 +307,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       }
     }
     this.clearAllFiles();
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     try {
       const response = await fetch(`${this.domain}/v1/chat/completions`, {
@@ -304,6 +333,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         messages: [eventMessage],
       };
       this.chatMessages.events.push(modelMessage);
+      this.isStreaming = false;
 
       while (true) {
         const { done, value } = await reader!.read();
@@ -315,8 +345,12 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         for (const line of lines) {
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
+
+            controller.abort();
             this.router.navigate([sessionId], { relativeTo: this.route.parent });
-            this.cdr.detectChanges();
+            requestAnimationFrame(() => {
+              this.cdr.detectChanges();
+            });
             return;
           }
           try {
@@ -327,8 +361,11 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
               let n = this.chatMessages.events.length - 1
               let m = this.chatMessages.events[n].messages.length - 1
               this.chatMessages.events[n].messages[m].content += delta.content;
+              // setTimeout()
               this.scrollToBottom()
-              this.cdr.detectChanges();
+              requestAnimationFrame(() => {
+                this.cdr.detectChanges();
+              });
             }
           } catch (err) {
             console.error('Error parsing stream chunk:', err);

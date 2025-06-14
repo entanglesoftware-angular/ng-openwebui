@@ -61,6 +61,10 @@
             </div>
           </mat-card>
         </ng-container>
+          <mat-card *ngIf="isStreaming" class="typing-indicator model">
+            <span>Responding</span><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+          </mat-card>
+
       </div>
 
       <mat-card class="chat-input-container" style="margin-top: 0px;">

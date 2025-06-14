@@ -347,3 +347,41 @@ markdown {
 .file-remove-btn {
   margin-left: 4px;
 }
+
+
+
+.typing-indicator {
+  padding:15px;
+  font-style: italic;
+  color: gray;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 10px;
+}
+
+.typing-indicator .dot {
+  animation: blink 1s infinite;
+  opacity: 0;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.typing-indicator .dot:nth-child(4) {
+  animation-delay: 0.6s;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
