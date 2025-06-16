@@ -6,10 +6,24 @@
 // }
 
 
-export interface ChatMessage {
+// export interface ChatMessage {
+//   role: 'user' | 'model' | 'form';
+//   messages: string[];
+//   sessionId: string;
+// }
+
+export interface EventMessage {
+  type:string
+  content: string
+}
+
+export interface event {
   role: 'user' | 'model' | 'form';
-  messages: string[];
-  sessionId: string;
+  messages: EventMessage[];
+}
+
+export interface Events {
+  events : event[]
 }
 
 export interface ChatReqMessage {
@@ -24,3 +38,19 @@ export interface ChatReq {
   stream: boolean;
 }
 
+
+
+export interface ChatCompletionChunk {
+  id: string;
+  object: string;
+  created: number;
+  model: string;
+  choices: Array<{
+    index: number;
+    delta: {
+      role?: "assistant" | "user" | null;
+      content?: string | null;
+    };
+    finish_reason: string | null;
+  }>;
+}

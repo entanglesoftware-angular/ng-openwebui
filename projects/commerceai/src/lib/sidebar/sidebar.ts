@@ -4,9 +4,9 @@ import { CommonModule } from '@angular/common';
 import { NgForOf, NgIf } from '@angular/common';
 import { MaterialModule } from '../modules/material.module';
 import { ChatSession } from '../models/chat-session.model';
-import { SelectedSessionService } from '../services/selected-session.service';
+import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { catchError, throwError, Subscription } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 
 @Component({
   selector: 'lib-sidebar',
@@ -18,29 +18,21 @@ import { catchError, throwError, Subscription } from 'rxjs';
 export class Sidebar implements OnInit, OnDestroy {
   chatNames: ChatSession[] = [];
   selectedSessionId: string | null = null;
-  private newSessionSubscription: Subscription;
-  private sessionIdSubscription: Subscription;
 
   constructor(
     private http: HttpClient,
-    private selectedSessionService: SelectedSessionService,
+    private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar
-  ) {
-    // Subscribe to new session creation events
-    this.newSessionSubscription = this.selectedSessionService.newSessionCreated$.subscribe(() => {
-      this.loadSessions();
-    });
-
-    // Subscribe to selected session ID changes
-    this.sessionIdSubscription = this.selectedSessionService.selectedSessionId$.subscribe((sessionId) => {
-      this.selectedSessionId = sessionId;
-      this.cdr.detectChanges();
-    });
-  }
+  ) {}
 
   ngOnInit() {
     this.loadSessions();
+    this.route.params.subscribe(params => {
+      this.selectedSessionId = params['session_id'] || null;
+      this.cdr.detectChanges();
+    });
   }
 
   async loadSessions() {
@@ -71,19 +63,15 @@ export class Sidebar implements OnInit, OnDestroy {
   }
 
   addNewChat() {
-    // Nullify the current session to enter "new chat" state
-    this.selectedSessionService.setSessionId(null);
+    this.router.navigate(['..'], { relativeTo: this.route }); // Navigate to new chat
     this.cdr.detectChanges();
   }
 
   onSelectSession(session: ChatSession) {
     if (session.id) {
-      this.selectedSessionService.setSessionId(session.id);
+      this.router.navigate([session.id], { relativeTo: this.route.parent });
     }
   }
 
-  ngOnDestroy() {
-    this.newSessionSubscription.unsubscribe();
-    this.sessionIdSubscription.unsubscribe();
-  }
+  ngOnDestroy() {}
 }
