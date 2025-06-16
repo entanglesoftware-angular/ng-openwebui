@@ -356,7 +356,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           try {
             const json = JSON.parse(data);
             const delta = json?.choices?.[0]?.delta;
-            // console.log(delta.content)
+            console.log(delta.content)
             if (delta?.content) {
               let n = this.chatMessages.events.length - 1
               let m = this.chatMessages.events[n].messages.length - 1
