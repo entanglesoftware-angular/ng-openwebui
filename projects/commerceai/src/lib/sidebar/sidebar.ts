@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, Inject } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { NgForOf, NgIf } from '@angular/common';
@@ -6,6 +6,8 @@ import { MaterialModule } from '../modules/material.module';
 import { ChatSession } from '../models/chat-session.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import {CommerceAIConfig } from '../config/commerceai-config';
+import { CommerceAIConfigValidator } from '../services/commerceai-config-validator.service';
 import { catchError, throwError } from 'rxjs';
 
 @Component({
@@ -18,14 +20,18 @@ import { catchError, throwError } from 'rxjs';
 export class Sidebar implements OnInit, OnDestroy {
   chatNames: ChatSession[] = [];
   selectedSessionId: string | null = null;
+  private config: CommerceAIConfig;
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private snackBar: MatSnackBar
-  ) {}
+    private snackBar: MatSnackBar,
+    private configValidator: CommerceAIConfigValidator
+  ) {
+    this.config = this.configValidator.getConfig();
+  }
 
   ngOnInit() {
     this.loadSessions();
@@ -38,13 +44,13 @@ export class Sidebar implements OnInit, OnDestroy {
   async loadSessions() {
     const userId = 'entangle';
     const headers = new HttpHeaders({
-      user_id: userId,
+      user_id: this.config.userId,
       authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
     });
 
     try {
       const response = await this.http
-        .get<{ sessions: ChatSession[] }>('http://localhost:8000/sessions/get', { headers })
+        .get<{ sessions: ChatSession[] }>(`${this.config.domain}/sessions/get`, { headers })
         .pipe(
           catchError((err) => {
             console.error('Failed to load sessions:', err);

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy, Input, Optional, Inject } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -14,6 +14,9 @@ import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component
 import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dialog.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
+import { CommerceAIConfig } from './config/commerceai-config';
+import { COMMERCE_AI_CONFIG } from './config/commerceai-config.token';
+import { CommerceAIConfigValidator } from './services/commerceai-config-validator.service';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -30,6 +33,7 @@ import * as XLSX from 'xlsx';
     HttpClientModule,
     MatTooltip,
   ],
+  providers: [],
   templateUrl: './commerceai.html',
   styleUrl: './commerceai.css',
 })
@@ -37,10 +41,8 @@ import * as XLSX from 'xlsx';
 export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   message: string = '';
   aiName: string = 'CommerceAI';
-  domain: string = 'http://localhost:8000';
   chatMessages: Events = { events: [] };
   currentSessionId: string | null = null;
-  userId: string = 'entangle';
   selectedFiles: File[] = [];
   private scrollThrottleTimer: any = null;
   isStreaming = false;
@@ -56,7 +58,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     private snackBar: MatSnackBar,
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private configValidator: CommerceAIConfigValidator,
+    @Inject(COMMERCE_AI_CONFIG) private config: CommerceAIConfig
   ) {
     this.routeSubscription = this.route.params.subscribe(params => {
       const sessionId = params['session_id'];
@@ -71,16 +75,14 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         });
       }
     });
+    this.config = this.configValidator.getConfig();
   }
 
   async ngOnInit(): Promise<void> {
     console.log('Initializing...');
     this.http
-      .get<any>(`${this.domain}/v1/models`, {
-        headers: new HttpHeaders({
-          user_id: this.userId,
-          authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-        }),
+      .get<any>(`${this.config.domain}/v1/models`, {
+        headers: this.buildHeaders()
       })
       .subscribe({
         next: (res) => {
@@ -96,11 +98,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   async loadSessionMessages(sessionId: string) {
     this.chatMessages.events = [];
     try {
-      const headers = new HttpHeaders({
-        user_id: this.userId,
-      });
+      const headers = this.buildHeaders();
       const response = await this.http
-        .get<Events>(`${this.domain}/session/${sessionId}`, { headers })
+        .get<Events>(`${this.config.domain}/session/${sessionId}`, { headers })
         .toPromise();
       this.chatMessages.events = (response?.events || []).map((msg) => ({
         ...msg,
@@ -141,12 +141,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   clearChat(): void {
     this.chatMessages.events = [];
     if (this.currentSessionId) {
-      const headers = new HttpHeaders({
-        user_id: this.userId,
-        authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-      });
+      const headers = this.buildHeaders();
       this.http
-        .delete(`${this.domain}/session/${this.currentSessionId}/messages`, { headers })
+        .delete(`${this.config.domain}/session/${this.currentSessionId}/messages`, { headers })
         .toPromise()
         .catch((err) => {
           console.error('Error clearing messages:', err);
@@ -208,11 +205,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     let isNewSession = false;
     if (!sessionId) {
       try {
-        const headers = new HttpHeaders({
-          user_id: this.userId,
-        });
+        const headers = this.buildHeaders();
         const newSession = await this.http
-          .post<ChatSession>(`${this.domain}/session/create`, {}, { headers })
+          .post<ChatSession>(`${this.config.domain}/session/create`, {}, { headers })
           .toPromise();
         if (newSession && newSession.id) {
           sessionId = newSession.id;
@@ -310,13 +305,20 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     const signal = controller.signal;
 
     try {
-      const response = await fetch(`${this.domain}/v1/chat/completions`, {
+      const headersObj = {
+        'Content-Type': 'application/json',
+        user_id: this.config.userId,
+        session_id: sessionId,
+      };
+
+      const finalHeaders = this.buildHeaders(headersObj);
+      const headersPlainObject: { [key: string]: string } = {};
+      finalHeaders.keys().forEach((key) => {
+        headersPlainObject[key] = finalHeaders.get(key) as string;
+      });
+      const response = await fetch(`${this.config.domain}/v1/chat/completions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          user_id: this.userId,
-          session_id: sessionId,
-        },
+        headers: headersPlainObject,
         body: JSON.stringify(ReqBody),
       });
 
@@ -480,5 +482,14 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     } catch (error) {
       console.error('Error generating Excel file:', error);
     }
+  }
+
+  private buildHeaders(additionalHeaders: { [key: string]: string } = {}): HttpHeaders {
+    const headers: { [key: string]: string } = {
+      user_id: this.config.userId,
+      authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+      ...additionalHeaders
+    };
+    return new HttpHeaders(headers);
   }
 }
