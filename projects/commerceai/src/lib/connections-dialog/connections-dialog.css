@@ -45,5 +45,5 @@
 
 /* // Optional: Dialog padding override (remains unchanged) */
 ::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-content {
-  padding: 20px !important;
+  padding: 34px !important;
 }

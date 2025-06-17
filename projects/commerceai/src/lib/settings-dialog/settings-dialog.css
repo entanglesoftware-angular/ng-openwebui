@@ -32,8 +32,8 @@
   color:grey;
 
   &:hover {
-    background-color: #fff;
-    color:black;
+    background-color:#525050;
+    color: #fff;
   }
 }
 
