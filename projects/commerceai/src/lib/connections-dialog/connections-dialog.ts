@@ -24,35 +24,31 @@ import { MatDialogRef } from '@angular/material/dialog';
 })
 export class ConnectionsDialog {
   apiUrl = '';
-  apikey='';
+  apikey = '';
   prefixID = '';
   modelId = '';
-showKey: boolean = false;
-showPrefix: boolean = false;
+  showKey: boolean = false;
+  showPrefix: boolean = false;
 
-constructor(public dialogRef: MatDialogRef<ConnectionsDialog>) {}
+  constructor(public dialogRef: MatDialogRef<ConnectionsDialog>) {}
 
-toggleKeyVisibility() {
-  this.showKey = !this.showKey;
-}
-togglePrefixVisibility() {
-  this.showPrefix = !this.showPrefix;
-}
+  toggleKeyVisibility() {
+    this.showKey = !this.showKey;
+  }
+  togglePrefixVisibility() {
+    this.showPrefix = !this.showPrefix;
+  }
 
+  addModelId() {}
 
-addModelId(){
+  savedConnections: any[] = [];
 
-}
-savedConnections: any[] = [];
+  saveConnection() {
+    const connectionData = {
+      key: this.apikey,
+      url: this.apiUrl,
+    };
 
-saveConnection() {
-  const connectionData = {
-    key: this.apikey,
-    url: this.apiUrl
-  };
-
-  this.dialogRef.close(connectionData); // sends data to first dialog
-}
-
-
+    this.dialogRef.close(connectionData); 
+  }
 }

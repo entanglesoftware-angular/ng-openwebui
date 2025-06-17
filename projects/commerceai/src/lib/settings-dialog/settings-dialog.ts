@@ -1,25 +1,25 @@
-import { Component,ViewEncapsulation } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-
+import { Component } from '@angular/core';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ConnectionsDialog } from '../connections-dialog/connections-dialog';
 import { ChangeDetectorRef } from '@angular/core';
+import { EditDialog } from '../edit-dialog/edit-dialog';
+import { MatCard } from '@angular/material/card';
 
 @Component({
   selector: 'lib-settings-dialog',
-  imports: [MatIcon, NgIf, NgFor],
+  imports: [MatIcon, NgIf, NgFor, MatCard, MatDialogModule],
   templateUrl: './settings-dialog.html',
   styleUrl: './settings-dialog.css',
-  encapsulation: ViewEncapsulation.None
 })
 export class SettingsDialog {
   ngOnInit(): void {
-  const data = localStorage.getItem('savedConnections');
-  if (data) {
-    this.savedConnections = JSON.parse(data);
+    const data = localStorage.getItem('savedConnections');
+    if (data) {
+      this.savedConnections = JSON.parse(data);
+    }
   }
-}
   constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef) {}
 
   selectedSection = 'default';
@@ -37,7 +37,10 @@ export class SettingsDialog {
             ...result,
             visible: false,
           });
-          localStorage.setItem('savedConnections', JSON.stringify(this.savedConnections));
+          localStorage.setItem(
+            'savedConnections',
+            JSON.stringify(this.savedConnections)
+          );
           console.log('Updated savedConnections:', this.savedConnections);
           this.cdr.detectChanges();
         }
@@ -52,9 +55,46 @@ export class SettingsDialog {
   togglePrefixVisibility() {
     this.showPrefix = !this.showPrefix;
   }
-//   clearConnections() {
-//   this.savedConnections = [];
-//   localStorage.removeItem('savedConnections');
-// }
+  onEdit(conn: any) {
+    this.dialog
+      .open(EditDialog, {
+        width: '500px',
+        data: {
+          url: conn.url || '',
+          key: conn.key || '',
+          prefixId: conn.prefixId || '',
+          modelId: conn.modelId || '',
+          enabled: conn.visible ?? false,
+        },
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        const index = this.savedConnections.findIndex(
+          (c) => c.url === conn.url
+        );
 
+        if (result?.delete && index > -1) {
+          this.savedConnections.splice(index, 1);
+          localStorage.setItem(
+            'savedConnections',
+            JSON.stringify(this.savedConnections)
+          );
+          this.cdr.detectChanges();
+        } else if (result && index > -1) {
+          this.savedConnections[index] = {
+            ...this.savedConnections[index],
+            url: result.url,
+            key: result.key,
+            prefixId: result.prefixId,
+            modelId: result.modelId,
+            visible: result.enabled,
+          };
+          localStorage.setItem(
+            'savedConnections',
+            JSON.stringify(this.savedConnections)
+          );
+          this.cdr.detectChanges();
+        }
+      });
+  }
 }

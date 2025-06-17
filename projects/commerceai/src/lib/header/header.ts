@@ -11,6 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { SettingsDialog } from '../settings-dialog/settings-dialog';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatCard } from '@angular/material/card';
 
 
 
@@ -36,6 +38,8 @@ interface LoginResponse {
     MatIcon,
     MatMenuModule,
     MatButtonModule,
+    MatToolbar,
+    MatCard
   ],
   templateUrl: './header.html',
   styleUrl: './header.css',
@@ -74,9 +78,9 @@ export class Header {
     if (
     !sessionStorage.getItem('jwt')
   ) {
-    this.getToken(); // Token will be fetched and then use it to get account
+    this.getToken();
   } else {
-    this.fetchAccountDetails(); // fetch directly if token exists
+    this.fetchAccountDetails();
   }
 
   }
@@ -129,19 +133,10 @@ closeModelDropdown(event: Event) {
 
 goToSettings() {
   this.dialog.open(SettingsDialog, {
-    width: '789px', 
+    width: '789px',
     height:'500px',
-  panelClass: 'custom-dialog-surface'
+  maxWidth: 'none',
   });
-  setTimeout(() => {
-    const dialogEl = document.querySelector('.cdk-overlay-pane.custom-dialog-surface') as HTMLElement;
-    if (dialogEl) {
-      dialogEl.style.maxWidth = 'none';
-      dialogEl.style.minWidth = 'unset';
-      dialogEl.style.width = '789px';
-      dialogEl.style.borderRadius = '26px';
-    }
-  }, 100);
 }
 
  getToken() {

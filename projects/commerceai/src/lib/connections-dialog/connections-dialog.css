@@ -1,3 +1,5 @@
+/* // @use '../_theme' as theme; */
+
 .connection-form {
   .row {
     display: flex;
@@ -20,12 +22,12 @@
     margin: 12px 0;
     cursor: pointer;
     font-weight: 500;
-    color: #333;
+    color: var(--text-color); 
   }
 
   .model-ids-hint {
     font-size: 12px;
-    color: gray;
+    color: var(--text-color); 
     margin-top: 10px;
   }
 
@@ -40,12 +42,8 @@
     }
   }
 }
-/* ::ng-deep .mat-mdc-dialog-container-with-actions .mat-mdc-dialog-content {
-  padding: 0 !important;
-} */
-/* ::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-content{
-    padding:0 !important;
-} */
+
+/* // Optional: Dialog padding override (remains unchanged) */
 ::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-content {
-    padding:20px !important;
+  padding: 20px !important;
 }

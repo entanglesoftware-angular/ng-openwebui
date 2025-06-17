@@ -1,21 +1,15 @@
-<div class="dialog-box">
-  <h2 style="font-weight: 400; padding-left: 12px">Settings</h2>
+<h2 mat-dialog-title>Settings</h2>
+<mat-dialog-content class="settings-dialog-content">
   <div class="container">
-    <!-- Sidebar buttons -->
     <aside class="settings-sidebar">
       <div class="sidebar-item" (click)="selectedSection = 'connections'">
         <mat-icon>cloud</mat-icon>
         <span>Connections</span>
       </div>
-      <!-- add more buttons for other sections -->
     </aside>
 
-    <!-- Content Area -->
     <div class="content-area">
-      <!-- Default View -->
       <ng-container *ngIf="selectedSection === 'default'"> </ng-container>
-
-      <!-- Connections View -->
       <ng-container *ngIf="selectedSection === 'connections'">
         <div class="connections">
           <div class="content-header">
@@ -23,6 +17,7 @@
             <mat-icon class="add-icon" (click)="onClick()">add</mat-icon>
           </div>
           <p>Total connections: {{ savedConnections.length }}</p>
+
           <div
             *ngFor="let conn of savedConnections"
             style="
@@ -32,23 +27,30 @@
               padding: 8px 0;
             "
           >
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1">
               <span>{{ conn.url }}</span>
               <span>{{ conn.visible ? conn.key : '•••' }}</span>
             </div>
 
-            <div style="width: 150px; text-align: center">
-              
-              <button style="background-color: white;border: none;"
+            <div style="text-align: center">
+              <button
+                style="border: none; background-color: black"
                 mat-icon-button
                 matSuffix
                 (click)="conn.visible = !conn.visible"
                 type="button"
               >
-                <mat-icon
+                <mat-icon style="color: white"
                   >{{ conn.visible ? 'visibility_off' : 'visibility'
                   }}</mat-icon
                 >
+              </button>
+              <button
+                style="border: none; background-color: black"
+                mat-icon-button
+                (click)="onEdit(conn)"
+              >
+                <mat-icon style="color: white">settings</mat-icon>
               </button>
             </div>
           </div>
@@ -62,5 +64,4 @@
       </ng-container>
     </div>
   </div>
-  <!-- <button (click)="clearConnections()">Clear</button> -->
-</div>
+</mat-dialog-content>

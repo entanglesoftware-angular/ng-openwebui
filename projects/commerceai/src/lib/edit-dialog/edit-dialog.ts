@@ -53,12 +53,13 @@ export class EditDialog {
   if (this.form.valid) {
     this.dialogRef.close({
       ...this.form.value,
-      enabled: this.enabled  // ✅ Include toggle state in the result
+      enabled: this.enabled  
     });
   }
 }
 
-  // onDelete() {
-  //   this.dialogRef.close({ delete: true });
-  // }
+  onDelete() {
+    this.dialogRef.close({ delete: true });
+  }
+  
 }
