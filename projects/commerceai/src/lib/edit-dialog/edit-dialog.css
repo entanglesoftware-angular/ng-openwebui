@@ -1,0 +1,13 @@
+.full-width {
+  width: 100%;
+}
+
+::ng-deep .mat-dialog-container {
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* .hint {
+  font-size: 12px;
+  color: mat-color($foreground, secondary-text); 
+} */
