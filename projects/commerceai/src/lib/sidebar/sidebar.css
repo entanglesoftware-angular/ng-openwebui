@@ -29,6 +29,10 @@ mat-list-item:hover {
   background: #eee;
 }
 
+::ng-deep mat-nav-list mat-list-item.active {
+  background: #eee;
+}
+
 mat-list-item.selected {
   background: lightgrey;
   border: 2px solid darkgrey;
@@ -111,7 +115,7 @@ mat-list-item.selected {
   opacity: 0;
 }
 
-::ng-deep mat-list-item:hover .options-button {
+::ng-deep mat-list-item:hover .options-button, ::ng-deep mat-list-item.active .hover-btn {
   opacity: 1;
 }
 

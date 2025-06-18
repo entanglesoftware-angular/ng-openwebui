@@ -143,24 +143,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
 }
 
-
-  clearChat(): void {
-    this.chatMessages.events = [];
-    if (this.currentSessionId) {
-      const headers = this.buildHeaders();
-      this.http
-        .delete(`${this.config.domain}/session/${this.currentSessionId}/messages`, { headers })
-        .toPromise()
-        .catch((err) => {
-          console.error('Error clearing messages:', err);
-          this.snackBar.open('Failed to clear messages.', 'Close', { duration: 3000 });
-        });
-    }
-        requestAnimationFrame(() => {
-          this.cdr.detectChanges();
-        });
-  }
-
   checkForFormTrigger(message: string | null) {
     if (message && message.includes('add product form')) {
       const formData = {

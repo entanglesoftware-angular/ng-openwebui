@@ -6,7 +6,7 @@ import { MaterialModule } from '../modules/material.module';
 import { ChatSession } from '../models/chat-session.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {CommerceAIConfig } from '../config/commerceai-config';
+import { CommerceAIConfig } from '../config/commerceai-config';
 import { CommerceAIConfigValidator } from '../services/commerceai-config-validator.service';
 import { catchError, throwError } from 'rxjs';
 
@@ -46,12 +46,7 @@ export class Sidebar implements OnInit, OnDestroy {
   }
 
   async loadSessions() {
-    const userId = 'entangle';
-    const headers = new HttpHeaders({
-      user_id: this.config.userId,
-      authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
-    });
-
+    const headers = this.buildHeaders();
     try {
       const response = await this.http
         .get<{ sessions: ChatSession[] }>(`${this.config.domain}/sessions/get`, { headers })
@@ -85,20 +80,72 @@ export class Sidebar implements OnInit, OnDestroy {
 
   openMenu(event: MouseEvent, session: any) {
     event.stopPropagation();
-    const button = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    this.clearActiveListItems();
+    const element = event.currentTarget as HTMLElement;
+    element.classList.add('hover-btn');
+    element.closest('mat-list-item')?.classList.add('active');
+    const button = element.getBoundingClientRect();
     this.menuPosition = { x: button.left, y: button.bottom };
     this.menuOpen = true;
     this.selectedSession = session;
   }
 
-  delete(session: any) {
-    console.log("Delete clicked for:", session.id);
+  async delete(session: any) {
+    try {
+      const headers = this.buildHeaders();
+      const response = await this.http
+        .delete<{ status: string; message?: string }>(`${this.config.domain}/session/delete/${session.id}`, { headers })
+        .pipe(
+          catchError((err) => {
+            console.error('HTTP error while deleting session:', err);
+            this.snackBar.open('Failed to delete chat session.', 'Close', { duration: 3000 });
+            return throwError(() => err);
+          })
+        )
+        .toPromise();
+      if (response?.status !== 'error') {
+        this.snackBar.open('Chat session deleted successfully.', 'Close', { duration: 3000 });
+        this.router.navigate(['..'], { relativeTo: this.route });
+        this.cdr.detectChanges();
+      } else {
+        console.error('Server responded with error:', response?.message);
+        this.snackBar.open(`Error: ${response?.message || 'Unknown error'}`, 'Close', { duration: 3000 });
+      }
+    } catch (err) {
+      console.error('Unexpected error while deleting session:', err);
+      this.snackBar.open('Unexpected error occurred.', 'Close', { duration: 3000 });
+    }
     this.menuOpen = false;
+    this.clearActiveListItems();
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     this.menuOpen = false;
+    this.clearActiveListItems();
+  }
+
+  clearActiveListItems() {
+    const activeItems = document.querySelectorAll('mat-list-item.active');
+
+    activeItems.forEach((item) => {
+      const buttons = item.querySelectorAll('button');
+
+      buttons.forEach((button) => {
+        button.classList.remove('hover-btn');
+      });
+
+      item.classList.remove('active');
+    });
+  }
+
+  private buildHeaders(additionalHeaders: { [key: string]: string } = {}): HttpHeaders {
+    const headers: { [key: string]: string } = {
+      user_id: this.config.userId,
+      authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+      ...additionalHeaders
+    };
+    return new HttpHeaders(headers);
   }
 
   ngOnDestroy() {}
