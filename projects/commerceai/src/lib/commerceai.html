@@ -48,17 +48,6 @@
                 </div>
               </div>
             </div>
-            <!-- Form role handling -->
-            <div *ngIf="event.role === 'form'" class="message-content">
-              <button
-                mat-raised-button
-                color="accent"
-                [disabled]="!event.messages[0]?.content"
-                (click)="checkForFormTrigger(event.messages[0]?.content ?? null)"
-              >
-                Click To Open Form
-              </button>
-            </div>
           </mat-card>
         </ng-container>
         <mat-card *ngIf="isStreaming" class="typing-indicator model">

@@ -1,15 +1,15 @@
 <h2 mat-dialog-title class="dialog-title">{{ sheetName }}</h2>
 
 <form [formGroup]="form" (ngSubmit)="submitForm()" mat-dialog-content class="form-container">
-  <div *ngFor="let field of fields" class="form-field-wrapper">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>{{ field }}</mat-label>
-      <input matInput [formControlName]="field" />
-    </mat-form-field>
-  </div>
+    <div *ngFor="let field of fields" class="form-field-wrapper">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ field }}</mat-label>
+            <input matInput [formControlName]="normalizeFieldName(field)" />
+        </mat-form-field>
+    </div>
 
-  <div mat-dialog-actions align="end" class="form-actions">
-    <button mat-button type="button" mat-dialog-close>Cancel</button>
-    <button mat-flat-button color="primary" type="submit">Submit</button>
-  </div>
+    <div mat-dialog-actions align="end" class="form-actions">
+        <button mat-button type="button" mat-dialog-close>Cancel</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="!isAnyFieldFilled()">Submit</button>
+    </div>
 </form>

@@ -17,6 +17,7 @@ import { Subscription } from 'rxjs';
 import { CommerceAIConfig } from './config/commerceai-config';
 import { COMMERCE_AI_CONFIG } from './config/commerceai-config.token';
 import { CommerceAIConfigValidator } from './services/commerceai-config-validator.service';
+import { SharedService } from './services/shared.service';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -60,6 +61,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private configValidator: CommerceAIConfigValidator,
+    private sharedService: SharedService,
     @Inject(COMMERCE_AI_CONFIG) private config: CommerceAIConfig
   ) {
     this.routeSubscription = this.route.params.subscribe(params => {
@@ -80,6 +82,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     console.log('Initializing...');
+    this.sharedService.formSubmitted$.subscribe(data => {
+      this.message = data;
+      this.onSend();
+    });
     this.http
       .get<any>(`${this.config.domain}/v1/models`, {
         headers: this.buildHeaders()
@@ -344,6 +350,24 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           .filter((line) => line.trim() !== '' && line.startsWith('data: '));
 
         for (const line of lines) {
+          const data1 = {
+                            "id": "7373902885",
+                            "object": "chat.completion.chunk",
+                            "created": 1750224245,
+                            "model": "EcommerceAI",
+                            "choices": [
+                                {
+                                    "index": 0,
+                                    "delta": {
+                                        "role": null,
+                                        "content": "{\"data\":[{\"user\":\"epv\",\"sheet\":\"EPV Trade Price List 03-June-2025\",\"fields\":[\"Category\",\"Country 國家\",\"Region產區\",\"Type 類別\",\"Wine酒莊\",\"Vintage年份\",\"Size\",\"Bottle支數\",\"Price價錢\",\"Packing\",\"Score分數\",\"Special\",\"Remarks/備注\"]},{\"user\":\"epv\",\"sheet\":\"EPV Trade Price List\",\"fields\":[\"Category\",\"Country 國家\",\"Region產區\",\"Type 類別\",\"Wine酒莊\",\"Vintage年份\",\"Size\",\"Bottle支數\",\"Price價錢\",\"Packing\",\"Score分數\",\"Special\",\"Remarks/備注\"]}]}"
+
+                                    },
+                                    "finish_reason": "stop"
+                                }
+                            ]
+                        };
+          const line = 'data: ' + JSON.stringify(data1);
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
 
@@ -359,14 +383,25 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             const delta = json?.choices?.[0]?.delta;
             console.log(delta.content)
             if (delta?.content) {
-              let n = this.chatMessages.events.length - 1
-              let m = this.chatMessages.events[n].messages.length - 1
-              this.chatMessages.events[n].messages[m].content += delta.content;
-              // setTimeout()
-              this.scrollToBottom()
-              requestAnimationFrame(() => {
-                this.cdr.detectChanges();
-              });
+              let formData;
+              try {
+                formData = JSON.parse(delta.content);
+                this.openDynamicForm(formData);
+                this.scrollToBottom()
+                requestAnimationFrame(() => {
+                  this.cdr.detectChanges();
+                });
+                return;
+              } catch {
+                let n = this.chatMessages.events.length - 1
+                let m = this.chatMessages.events[n].messages.length - 1
+                this.chatMessages.events[n].messages[m].content += delta.content;
+                // setTimeout()
+                this.scrollToBottom()
+                requestAnimationFrame(() => {
+                  this.cdr.detectChanges();
+                });
+              }
             }
           } catch (err) {
             console.error('Error parsing stream chunk:', err);
