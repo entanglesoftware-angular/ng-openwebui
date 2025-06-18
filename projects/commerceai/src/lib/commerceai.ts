@@ -350,24 +350,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           .filter((line) => line.trim() !== '' && line.startsWith('data: '));
 
         for (const line of lines) {
-          const data1 = {
-                            "id": "7373902885",
-                            "object": "chat.completion.chunk",
-                            "created": 1750224245,
-                            "model": "EcommerceAI",
-                            "choices": [
-                                {
-                                    "index": 0,
-                                    "delta": {
-                                        "role": null,
-                                        "content": "{\"data\":[{\"user\":\"epv\",\"sheet\":\"EPV Trade Price List 03-June-2025\",\"fields\":[\"Category\",\"Country 國家\",\"Region產區\",\"Type 類別\",\"Wine酒莊\",\"Vintage年份\",\"Size\",\"Bottle支數\",\"Price價錢\",\"Packing\",\"Score分數\",\"Special\",\"Remarks/備注\"]},{\"user\":\"epv\",\"sheet\":\"EPV Trade Price List\",\"fields\":[\"Category\",\"Country 國家\",\"Region產區\",\"Type 類別\",\"Wine酒莊\",\"Vintage年份\",\"Size\",\"Bottle支數\",\"Price價錢\",\"Packing\",\"Score分數\",\"Special\",\"Remarks/備注\"]}]}"
-
-                                    },
-                                    "finish_reason": "stop"
-                                }
-                            ]
-                        };
-          const line = 'data: ' + JSON.stringify(data1);
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
 
