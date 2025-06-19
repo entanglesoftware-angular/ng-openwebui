@@ -18,7 +18,7 @@ export interface EventMessage {
 }
 
 export interface event {
-  role: 'user' | 'model' | 'form';
+  role: 'user' | 'model' | 'form' | 'function_call';
   messages: EventMessage[];
 }
 

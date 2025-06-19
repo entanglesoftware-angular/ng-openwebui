@@ -66,9 +66,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       } else {
         this.currentSessionId = null;
         this.chatMessages.events = [];
-        requestAnimationFrame(() => {
           this.cdr.detectChanges();
-        });
       }
     });
   }
@@ -106,9 +104,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         ...msg,
         sessionId,
       }));
-      requestAnimationFrame(() => {
         this.cdr.detectChanges();
-      });
     } catch (err) {
       console.error('Error loading messages for session:', err);
       this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000 });
@@ -153,9 +149,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           this.snackBar.open('Failed to clear messages.', 'Close', { duration: 3000 });
         });
     }
-        requestAnimationFrame(() => {
           this.cdr.detectChanges();
-        });
   }
 
   checkForFormTrigger(message: string | null) {
@@ -240,9 +234,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         messages: [eventMessage],
       };
       this.chatMessages.events.push(userMessage);
-      requestAnimationFrame(() => {
         this.cdr.detectChanges();
-      });
+
     }
 
     this.message = '';
@@ -297,9 +290,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           };
           console.log(fileEventMessage.type)
           this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
-          requestAnimationFrame(() => {
             this.cdr.detectChanges();
-          });
         } catch (error) {
           console.error(`Failed to convert file ${file.name}:`, error);
           this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', { duration: 3000 });
@@ -307,8 +298,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       }
     }
     this.clearAllFiles();
-    const controller = new AbortController();
-    const signal = controller.signal;
 
     try {
       const response = await fetch(`${this.domain}/v1/chat/completions`, {
@@ -320,7 +309,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         },
         body: JSON.stringify(ReqBody),
       });
-
+      if (response.status !== 200) {
+        this.snackBar.open(`Error : ${response.status} ${response}`, 'Close',{ duration: 3000 })
+        return
+      }
       const reader = response.body?.getReader();
       const decoder = new TextDecoder('utf-8');
       let modelContent = '';
@@ -334,6 +326,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       };
       this.chatMessages.events.push(modelMessage);
       this.isStreaming = false;
+      let n = this.chatMessages.events.length - 1
+      let m = this.chatMessages.events[n].messages.length - 1
 
       while (true) {
         const { done, value } = await reader!.read();
@@ -345,36 +339,58 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         for (const line of lines) {
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
-
-            controller.abort();
             this.router.navigate([sessionId], { relativeTo: this.route.parent });
-            requestAnimationFrame(() => {
-              this.cdr.detectChanges();
-            });
+            this.cdr.detectChanges();
             return;
           }
           try {
+            console.log(`RAW DATA ${data}`)
             const json = JSON.parse(data);
             const delta = json?.choices?.[0]?.delta;
+            console.log(json)
             console.log(delta.content)
-            if (delta?.content) {
-              let n = this.chatMessages.events.length - 1
-              let m = this.chatMessages.events[n].messages.length - 1
-              this.chatMessages.events[n].messages[m].content += delta.content;
-              // setTimeout()
-              this.scrollToBottom()
-              requestAnimationFrame(() => {
+            // if(delta?.role == "form"){
+            //   const raw = delta?.content
+            //   console.log("raw ", raw)
+            //   const onceParsed = JSON.parse(raw);
+            //   console.log("once ", onceParsed)
+            //   const result = JSON.parse(onceParsed);
+            //   console.log("result ", result)
+            //
+            // }
+            if(delta?.role === "text/csv"){
+              const raw = delta?.content
+              console.log("raw ", raw)
+              const onceParsed = JSON.parse(raw);
+              console.log("once ", onceParsed)
+              const result = JSON.parse(onceParsed);
+              console.log("result ", result)
+
+              console.log(result.csv)
+                const fileEventMessage: EventMessage = {
+                  type: delta.role,
+                  content: result.csv,
+                };
+                console.log(fileEventMessage.type)
+                this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
                 this.cdr.detectChanges();
-              });
+            }
+            if (delta?.content && delta?.role == "model") {
+              this.chatMessages.events[n].messages[m].content += delta.content;
+              this.scrollToBottom()
+              this.cdr.detectChanges();
             }
           } catch (err) {
+            this.snackBar.open(`Error parsing stream chunk: ${err}`, 'CLose', { duration: 3000 })
             console.error('Error parsing stream chunk:', err);
+            return
           }
         }
       }
     } catch (err) {
       console.error('Error sending message:', err);
       this.snackBar.open('Failed to send message.', 'Close', { duration: 3000 });
+      return
     }
   }
 
