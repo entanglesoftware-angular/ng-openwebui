@@ -137,19 +137,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
 }
 
-  checkForFormTrigger(message: string | null) {
-    if (message && message.includes('add product form')) {
-      const formData = {
-        data: [
-          {
-            user: 'epv',
-            sheet: 'EPV Trade Price List 03-June-2025',
-            fields: ['Category', 'Country', 'Price'],
-          },
-        ],
-      };
-      this.openDynamicForm(formData);
-    }
+  checkForFormTrigger(content: string) {
+    let formData = JSON.parse(content);
+    this.openDynamicForm(formData);
   }
 
   openDynamicForm(formData: any): void {
@@ -324,6 +314,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       this.chatMessages.events.push(modelMessage);
       this.isStreaming = false;
 
+      let lastGeneralIndex = this.chatMessages.events.length - 1;
+      let lastFormEvent: event | null = null;
       while (true) {
         const { done, value } = await reader!.read();
         const chunk = decoder.decode(value, { stream: true });
@@ -334,7 +326,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         for (const line of lines) {
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
-
             controller.abort();
             this.router.navigate([sessionId], { relativeTo: this.route.parent });
             requestAnimationFrame(() => {
@@ -345,28 +336,33 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           try {
             const json = JSON.parse(data);
             const delta = json?.choices?.[0]?.delta;
-            console.log(delta.content)
-            if (delta?.content) {
-              let formData;
-              if(delta.role == 'form') {
-                formData = JSON.parse(delta.content);
-                this.openDynamicForm(formData);
-                this.scrollToBottom()
-                requestAnimationFrame(() => {
-                  this.cdr.detectChanges();
-                });
-                return;
-              } else {
-                let n = this.chatMessages.events.length - 1
-                let m = this.chatMessages.events[n].messages.length - 1
-                this.chatMessages.events[n].messages[m].content += delta.content;
-                // setTimeout()
-                this.scrollToBottom()
-                requestAnimationFrame(() => {
-                  this.cdr.detectChanges();
-                });
+            const content = delta?.content;
+            const role = delta?.role;
+
+            if (!content) continue;
+
+            if (role === 'form') {
+              if (!lastFormEvent) {
+                lastFormEvent = {
+                  role: 'form',
+                  messages: [
+                    {
+                      type: 'text',
+                      content: '',
+                    },
+                  ],
+                };
+                this.chatMessages.events.push(lastFormEvent);
               }
+              lastFormEvent.messages[0].content += content;
+            } else {
+              const generalEvent = this.chatMessages.events[lastGeneralIndex];
+              generalEvent.messages[0].content += content;
             }
+            this.scrollToBottom();
+            requestAnimationFrame(() => {
+              this.cdr.detectChanges();
+            });
           } catch (err) {
             console.error('Error parsing stream chunk:', err);
           }
