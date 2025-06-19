@@ -1,130 +1,118 @@
 <div class="main-container">
-  <lib-sidebar></lib-sidebar>
-    <div class="chat-box-container">
-      <mat-card class="ai-name" style="margin-bottom: 0px">{{ aiName }}</mat-card>
-
-      <div class="chat-messages" #chatContainer>
-        <ng-container *ngFor="let event of chatMessages.events">
-          <mat-card
-            class="message"
-            [ngClass]="{ 'user': event.role === 'user', 'model': event.role === 'model', 'form': event.role === 'form' }"
-          >
-            <!-- Render all messages within this event -->
-            <div *ngFor="let message of event.messages">
-              <!-- Text messages -->
-              <div *ngIf="message.type === 'text' && event.role === 'user'" class="message-content">
-                {{ message.content }}
+  <lib-sidebar *ngIf="isSidebarOpen"></lib-sidebar>
+  <div class="chat-box-container">
+    <lib-header (menuClicked)="toggleSidebar()"></lib-header>
+    <div class="chat-messages" #chatContainer>
+      <ng-container *ngFor="let event of chatMessages.events">
+        <mat-card
+          class="message"
+          [ngClass]="{
+            'user': event.role === 'user',
+            'model': event.role === 'model',
+            'form': event.role === 'form'
+          }"
+        >
+          <div *ngFor="let message of event.messages">
+            <div *ngIf="message.type === 'text' && event.role === 'user'" class="message-content">
+              {{ message.content }}
+            </div>
+            <markdown *ngIf="message.type === 'text' && event.role === 'model'" [data]="message.content" class="message-content"></markdown>
+            <div *ngIf="message.type.startsWith('image/') && message.content" class="message-content">
+              <div class="file-display">
+                <mat-icon>image</mat-icon>
+                <span>Image: {{ message.type }}</span>
               </div>
-              <markdown *ngIf="message.type === 'text' && event.role === 'model'" [data]="message.content" class="message-content"></markdown>
-              <!-- Image messages -->
-              <div *ngIf="message.type.startsWith('image/') && message.content" class="message-content">
-                <div class="file-display">
-                  <mat-icon>image</mat-icon>
-                  <span>Image: {{ message.type }}</span>
-                </div>
-                <img [src]="'data:' + message.type + ';base64,' + message.content" alt="Image" class="inline-image" />
+              <img [src]="'data:' + message.type + ';base64,' + message.content" alt="Image" class="inline-image" />
+            </div>
+            <mat-card *ngIf="message.type === 'text/csv' && message.content" class="message-content">
+              <div class="file-display">
+                <button matFab color="secondary" (click)="openCsvDialog(message.content)">Open</button>
+                <button matFab (click)="downloadCsv(message.content)" style="display:flex; align-items:center; flex-direction:column;">
+                  <mat-icon>file_download</mat-icon>
+                  <div>CSV</div>
+                </button>
+                <button matFab (click)="downloadExcel(message.content)" style="display:flex; align-items:center; flex-direction:column;">
+                  <mat-icon>file_download</mat-icon>
+                  <div>Excel</div>
+                </button>
               </div>
-              <!-- CSV messages -->
-              <mat-card *ngIf="message.type === 'text/csv' && message.content" class="message-content">
-                <div class="file-display">
-                  <button matFab color="secondary" (click)="openCsvDialog(message.content)">
-                    Open
-                  </button>
-                  <button matFab (click)="downloadCsv(message.content)" style="display:flex; align-items: center; flex-direction: column;">
-                    <mat-icon>file_download</mat-icon>
-                    <div>CSV</div>
-                  </button>
-                  <button matFab (click)="downloadExcel(message.content)"  style="display:flex; align-items: center; flex-direction: column;">
-                    <mat-icon>file_download</mat-icon>
-                    <div>Excel</div>
-                  </button>
-                </div>
-              </mat-card>
-              <!-- Other non-text messages -->
-              <div *ngIf="message.type !== 'text' && !message.type.startsWith('image/') && message.type !== 'text/csv' && message.content" class="message-content">
-                <div class="file-display">
-                  <mat-icon>insert_drive_file</mat-icon>
-                  <span>File: {{ message.type }}</span>
-                </div>
+            </mat-card>
+            <div *ngIf="message.type !== 'text' && !message.type.startsWith('image/') && message.type !== 'text/csv' && message.content" class="message-content">
+              <div class="file-display">
+                <mat-icon>insert_drive_file</mat-icon>
+                <span>File: {{ message.type }}</span>
               </div>
             </div>
-            <!-- Form role handling -->
-            <div *ngIf="event.role === 'form'" class="message-content">
-              <button
-                mat-raised-button
-                color="accent"
-                [disabled]="!event.messages[0]?.content"
-                (click)="checkForFormTrigger(event.messages[0]?.content ?? null)"
-              >
-                Click To Open Form
-              </button>
-            </div>
-          </mat-card>
-        </ng-container>
-          <mat-card *ngIf="isStreaming" class="typing-indicator model">
-            <span>Thinking</span><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
-          </mat-card>
-
-      </div>
-
-      <mat-card class="chat-input-container" style="margin-top: 0px;">
-        <!-- File Preview ABOVE the input -->
-        <div *ngIf="selectedFiles.length > 0" class="file-chip-container">
-          <div *ngFor="let file of selectedFiles; let i = index" class="file-chip">
-            <div class="file-icon">
-              <mat-icon>insert_drive_file</mat-icon>
-            </div>
-            <div class="file-name">{{ file.name }}</div>
-            <button mat-icon-button class="file-remove-btn" (click)="removeFile(i)">
-              <mat-icon>close</mat-icon>
-            </button>
           </div>
-        </div>
-
-        <!-- Input Box -->
-        <mat-form-field class="chat-input" appearance="outline">
-          <input
-            matInput
-            placeholder="Type a message..."
-            [(ngModel)]="message"
-            (keyup.enter)="onSend()"
-          />
-        </mat-form-field>
-
-        <!-- Buttons BELOW the input -->
-        <div class="input-actions">
-          <div class="left-actions">
-            <input
-              type="file"
-              accept=".csv, .xls, .xlsx, image/*"
-              multiple
-              (change)="onFilesSelected($event)"
-              hidden
-              #fileInput
-            />
+          <div *ngIf="event.role === 'form'" class="message-content">
             <button
-              mat-icon-button
-              color="warn"
-              matTooltip="Attach file"
-              (click)="fileInput.click()"
+              mat-raised-button
+              color="accent"
+              [disabled]="!event.messages[0]?.content"
+              (click)="checkForFormTrigger(event.messages[0]?.content ?? null)"
             >
-              <mat-icon>attach_file</mat-icon>
+              Click To Open Form
             </button>
           </div>
-          <div class="right-actions">
-            <button mat-icon-button color="accent" aria-label="Voice Input">
-              <mat-icon>mic</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              color="primary"
-              (click)="onSend()"
-              [disabled]="!message.trim() && selectedFiles.length === 0"
-            >
-              <mat-icon>send</mat-icon>
-            </button>
-          </div>
-        </div>
+        </mat-card>
+      </ng-container>
+      <mat-card *ngIf="isStreaming" class="typing-indicator model">
+        <span>Thinking</span><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
       </mat-card>
     </div>
+    <mat-card class="chat-input-container" style="margin-top: 0px;">
+      <div *ngIf="selectedFiles.length > 0" class="file-chip-container">
+        <div *ngFor="let file of selectedFiles; let i = index" class="file-chip">
+          <div class="file-icon">
+            <mat-icon>insert_drive_file</mat-icon>
+          </div>
+          <div class="file-name">{{ file.name }}</div>
+          <button mat-icon-button class="file-remove-btn" (click)="removeFile(i)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+      <mat-form-field class="chat-input" appearance="outline">
+        <input
+          matInput
+          placeholder="Type a message..."
+          [(ngModel)]="message"
+          (keyup.enter)="onSend()"
+        />
+      </mat-form-field>
+      <div class="input-actions">
+        <div class="left-actions">
+          <input
+            type="file"
+            accept=".csv, .xls, .xlsx, image/*"
+            multiple
+            (change)="onFilesSelected($event)"
+            hidden
+            #fileInput
+          />
+          <button
+            mat-icon-button
+            color="warn"
+            matTooltip="Attach file"
+            (click)="fileInput.click()"
+          >
+            <mat-icon>attach_file</mat-icon>
+          </button>
+        </div>
+        <div class="right-actions">
+          <button mat-icon-button color="accent" aria-label="Voice Input">
+            <mat-icon>mic</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="primary"
+            (click)="onSend()"
+            [disabled]="!message.trim() && selectedFiles.length === 0"
+          >
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
 </div>

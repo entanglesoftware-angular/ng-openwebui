@@ -15,6 +15,7 @@ import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dial
 import { MatTooltip } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import * as XLSX from 'xlsx';
+import { Header } from "./header/header";
 
 @Component({
   selector: 'lib-commerceai',
@@ -29,7 +30,8 @@ import * as XLSX from 'xlsx';
     Sidebar,
     HttpClientModule,
     MatTooltip,
-  ],
+    Header
+],
   templateUrl: './commerceai.html',
   styleUrl: './commerceai.css',
 })
@@ -413,9 +415,11 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     this.routeSubscription.unsubscribe();
   }
 
+isSidebarOpen = false;
 
-
-
+toggleSidebar() {
+  this.isSidebarOpen = !this.isSidebarOpen;
+}
 
   downloadCsv(csvString:string): void {
 
