@@ -294,6 +294,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         type: 'application/json',
         content: this.formData,
       };
+      ReqBody.messages.push(userMessage);
     }
     this.clearAllFiles();
     const controller = new AbortController();
