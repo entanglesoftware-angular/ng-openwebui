@@ -3,7 +3,6 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MaterialModule } from '../modules/material.module';
 import { CommonModule } from '@angular/common';
-import { SharedService } from '../services/shared.service';
 
 @Component({
     selector: 'lib-dynamic-form-dialog',
@@ -25,7 +24,6 @@ export class DynamicFormDialogComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         @Inject(MAT_DIALOG_DATA) public data: any,
-        private sharedService: SharedService,
         private dialogRef: MatDialogRef<DynamicFormDialogComponent>
     ) { }
 
@@ -58,7 +56,6 @@ export class DynamicFormDialogComponent implements OnInit {
 
     submitForm(): void {
         console.log('Submitted Data:', this.form.value);
-        this.sharedService.notifyFormSubmitted(JSON.stringify(this.form.value));
         this.dialogRef.close(this.form.value);
     }
 
