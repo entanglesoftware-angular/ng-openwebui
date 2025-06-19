@@ -46,6 +46,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   selectedFiles: File[] = [];
   private scrollThrottleTimer: any = null;
   isStreaming = false;
+  formData = '';
 
   excel_mime_types = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.ms-excel.sheet.macroEnabled.12"]
 
@@ -149,9 +150,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     });
     dialogRef.afterClosed().subscribe(formData => {
       if (formData) {
-        this.message = JSON.stringify(formData);
+        this.formData = JSON.stringify(formData);
         this.onSend();
       }
+      this.clearAllForm();
     });
   }
 
@@ -278,6 +280,21 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         }
       }
     }
+
+    if(this.formData)
+    {
+      const userMessage: ChatReqMessage = {
+        role: 'user',
+        type: 'text',
+        content: 'explain json content',
+      };
+      ReqBody.messages.push(userMessage);
+      const userFormMessage: ChatReqMessage = {
+        role: 'user',
+        type: 'application/json',
+        content: this.formData,
+      };
+    }
     this.clearAllFiles();
     const controller = new AbortController();
     const signal = controller.signal;
@@ -341,7 +358,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
             if (!content) continue;
 
-            if (role === 'form') {
+            if (role === 'form' && this.isValidJson(content)) {
               if (!lastFormEvent) {
                 lastFormEvent = {
                   role: 'form',
@@ -387,6 +404,15 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     });
   }
 
+  isValidJson(str: string): boolean {
+    try {
+      JSON.parse(str);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
@@ -403,6 +429,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
   clearAllFiles(): void {
     this.selectedFiles = [];
+  }
+
+  clearAllForm(): void {
+    this.chatMessages.events = this.chatMessages.events.filter(e => e.role !== 'form');
   }
 
   
