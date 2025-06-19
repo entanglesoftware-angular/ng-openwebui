@@ -44,7 +44,7 @@ export class DynamicFormDialogComponent implements OnInit {
         const formGroup: Record<string, any> = {};
 
         this.fields.forEach(field => {
-            const key = this.normalizeFieldName(field);
+            const key = field;
             formGroup[key] = [''];
         });
 

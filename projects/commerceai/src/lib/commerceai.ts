@@ -18,6 +18,7 @@ import { CommerceAIConfig } from './config/commerceai-config';
 import { COMMERCE_AI_CONFIG } from './config/commerceai-config.token';
 import { CommerceAIConfigValidator } from './services/commerceai-config-validator.service';
 import { SharedService } from './services/shared.service';
+import { take } from 'rxjs/operators';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -82,10 +83,13 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     console.log('Initializing...');
-    this.sharedService.formSubmitted$.subscribe(data => {
-      this.message = data;
-      this.onSend();
-    });
+    this.sharedService.formSubmitted$
+      .pipe(take(1))
+      .subscribe(data => {
+        console.log('Received data:', data);
+        this.message = data;
+        this.onSend();
+      });
     this.http
       .get<any>(`${this.config.domain}/v1/models`, {
         headers: this.buildHeaders()

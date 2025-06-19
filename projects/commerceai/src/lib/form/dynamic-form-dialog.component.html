@@ -4,7 +4,7 @@
     <div *ngFor="let field of fields" class="form-field-wrapper">
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>{{ field }}</mat-label>
-            <input matInput [formControlName]="normalizeFieldName(field)" />
+            <input matInput [formControlName]="field" />
         </mat-form-field>
     </div>
 
