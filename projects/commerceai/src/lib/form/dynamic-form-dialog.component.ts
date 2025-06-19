@@ -30,15 +30,16 @@ export class DynamicFormDialogComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        const item = this.data?.data?.[0];
+        const item = typeof this.data === 'string' ? JSON.parse(this.data) : this.data;
         if (!item) {
             console.warn('No data provided to dialog.');
             return;
         }
 
         this.fields = item.fields || [];
-        this.sheetName = item.sheet || '';
-        this.user = item.user || '';
+        console.log(this.fields);
+        this.sheetName = item.sheet_name || '';
+        this.user = item.user_id || '';
 
         const formGroup: Record<string, any> = {};
 
@@ -49,6 +50,7 @@ export class DynamicFormDialogComponent implements OnInit {
 
         this.form = this.fb.group(formGroup);
     }
+
 
     public normalizeFieldName(field: string): string {
         return field.trim().toLowerCase().split(' ')[0];

@@ -1,22 +1,29 @@
-lib-sidebar {
-  flex: 0 0 250px;
-}
+/* Layout */
 .main-container {
   display: flex;
   height: 100vh;
+  overflow: hidden;
+}
+
+lib-sidebar {
+  flex: 0 0 250px;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .chat-box-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background-color: gainsboro;
   overflow: hidden;
+  padding: 8px;
 }
 
+/* Header */
 .ai-name {
-  flex: 0 0 auto;
+  flex-shrink: 0;
   padding: 16px;
   font-size: 25px;
   font-weight: 500;
@@ -25,9 +32,11 @@ lib-sidebar {
   top: 0;
   border-bottom: 1px solid black;
   z-index: 1;
-
+  text-align: center;
+  margin-bottom: 16px;
 }
 
+/* Chat messages scrollable area */
 .chat-messages {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -35,10 +44,9 @@ lib-sidebar {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  /*margin-top: 7px;*/
-  /*margin-bottom: 7px;*/
 }
 
+/* Message styling */
 .message {
   max-width: 70%;
   padding: 10px 15px;
@@ -54,225 +62,15 @@ lib-sidebar {
   color: white;
 }
 
-.message.assistant {
+.message.assistant,
+.message.model {
   align-self: flex-start;
   background-color: white;
   color: #1c244e;
 }
 
-mat-card {
-  display: flex;
-  flex-direction: row;
-  border-color: black;
-  background-color: white;
-  color: black;
-}
-
-.send-button{
-  cursor: pointer;
-}
-.chat-input-container {
-  display: flex;
-  align-items: baseline;
-  padding: 8px;
-  padding-bottom: 0px;
-  margin-left: 18px;
-  margin-right: 18px;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  position: sticky;
-  margin-top: auto;
-}
-
-.chat-input {
-  color: black !important;
-  border-color: black;
-  border-width: 10px;
-  flex: 1;
-  margin-right: 8px;
-
-}
-.chat-input.mat-form-field.appearance-outline {
-  .mat-form-field-outline-start,
-  .mat-form-field-outline-end,
-  .mat-form-field-outline-gap {
-    border: 3px solid black !important;
-  }
-
-  &.mat-focused {
-    .mat-form-field-outline-start,
-    .mat-form-field-outline-end,
-    .mat-form-field-outline-gap {
-      border: 6px solid black !important;
-    }
-  }
-}
-markdown {
-  overflow-x: auto;
-  display: block;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
-  white-space: normal;
-}
-
-.file-chip-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.file-chip {
-  display: flex;
-  align-items: center;
-  background: #f1f1f1;
-  padding: 6px 10px;
-  border-radius: 16px;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
-  max-width: 250px;
-  position: relative;
-}
-
-.file-icon {
-  margin-right: 6px;
-  color: #007bff;
-}
-
-.file-name {
-  flex-grow: 1;
-  font-size: 14px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-remove-btn {
-  padding: 0;
-  margin-left: 8px;
-  height: 20px;
-  width: 20px;
-}
-
-.chat-input-container {
-  display: flex;
-  flex-direction: column;
-  padding: 8px 18px 20px 18px;
-  border-radius: 12px;
-  position: sticky;
-  bottom: 0;
-  background-color: #fff;
-  z-index: 2;
-}
-
-.chat-input {
-  color: black !important;
-  border-color: black;
-  width: 100%;
-}
-
-.chat-input.mat-form-field.appearance-outline {
-  .mat-form-field-outline-start,
-  .mat-form-field-outline-end,
-  .mat-form-field-outline-gap {
-    border: 3px solid black !important;
-  }
-
-  &.mat-focused {
-    .mat-form-field-outline-start,
-    .mat-form-field-outline-end,
-    .mat-form-field-outline-gap {
-      border: 6px solid black !important;
-    }
-  }
-}
-
-.input-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-  width: 100%;
-}
-
-.left-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.right-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.mat-mdc-form-field-subscript-wrapper {
-  display: none !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.left-actions button,
-.right-actions button {
-  margin-right: 6px;
-}
-
-
-
-
-
-
-
-
-
-
-.main-container {
-  display: flex;
-  height: 100vh;
-}
-
-.chat-box-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
-}
-
-.ai-name {
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  /*padding: 16px;*/
-}
-
-.message {
-  margin-bottom: 16px;
-  padding: 12px;
-  border-radius: 8px;
-  max-width: 80%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.user {
-  background-color: #e3f2fd;
-  margin-left: 20%;
-}
-
-.model {
-  background-color: #f5f5f5;
-  margin-right: 20%;
-}
-
 .message-content {
-  margin-bottom: 8px;
-  padding:8px
+  padding: 8px;
 }
 
 .inline-image {
@@ -296,29 +94,69 @@ markdown {
   padding: 0;
 }
 
+/* Chat input container */
 .chat-input-container {
-  padding: 8px;
-  margin-top: 8px;
-  margin-left: -0px;
-  margin-right: -0px;
-
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 18px 8px 18px;
+  border-radius: 12px;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 2;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 25px;
 }
 
+/* Chat input */
 .chat-input {
   width: 100%;
+  flex: 1;
+  color: black !important;
+  border-color: black;
+  margin-right: 8px;
 }
 
+.chat-input.mat-form-field.appearance-outline {
+  .mat-form-field-outline-start,
+  .mat-form-field-outline-end,
+  .mat-form-field-outline-gap {
+    border: 3px solid black !important;
+  }
+
+  &.mat-focused {
+    .mat-form-field-outline-start,
+    .mat-form-field-outline-end,
+    .mat-form-field-outline-gap {
+      border: 6px solid black !important;
+    }
+  }
+}
+
+/* Input action buttons */
 .input-actions {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 8px;
+  width: 100%;
 }
 
-.left-actions, .right-actions {
+.left-actions,
+.right-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
+.left-actions button,
+.right-actions button {
+  margin-right: 6px;
+}
+
+/* File chip display */
 .file-chip-container {
   display: flex;
   flex-wrap: wrap;
@@ -332,29 +170,56 @@ markdown {
   background-color: #f0f0f0;
   border-radius: 16px;
   padding: 4px 8px;
+  max-width: 250px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
 .file-icon {
   margin-right: 4px;
+  color: #007bff;
 }
 
 .file-name {
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  flex-grow: 1;
 }
 
 .file-remove-btn {
   margin-left: 4px;
+  padding: 0;
+  height: 20px;
+  width: 20px;
 }
 
+/* Markdown styling */
+markdown {
+  overflow-x: auto;
+  display: block;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
 
+/* Remove Material subscript spacing */
+::ng-deep .mat-mdc-form-field-subscript-wrapper,
+.mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
+/* Typing indicator animation */
 .typing-indicator {
-  padding:15px;
+  padding: 15px;
   font-style: italic;
   color: gray;
-  display: flex;
+  display: block;
   align-items: center;
   gap: 2px;
   padding-left: 10px;
@@ -384,4 +249,9 @@ markdown {
   50% {
     opacity: 1;
   }
+}
+
+/* Send button cursor */
+.send-button {
+  cursor: pointer;
 }

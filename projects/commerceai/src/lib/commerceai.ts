@@ -348,7 +348,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             console.log(delta.content)
             if (delta?.content) {
               let formData;
-              try {
+              if(delta.role == 'form') {
                 formData = JSON.parse(delta.content);
                 this.openDynamicForm(formData);
                 this.scrollToBottom()
@@ -356,7 +356,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
                   this.cdr.detectChanges();
                 });
                 return;
-              } catch {
+              } else {
                 let n = this.chatMessages.events.length - 1
                 let m = this.chatMessages.events[n].messages.length - 1
                 this.chatMessages.events[n].messages[m].content += delta.content;
