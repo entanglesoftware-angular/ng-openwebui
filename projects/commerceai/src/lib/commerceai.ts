@@ -323,8 +323,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
       let lastGeneralIndex = this.chatMessages.events.length - 1;
       let lastFormEvent: event | null = null;
-      const TIMEOUT_MS = 15000; // 15 seconds timeout for no data
+      const TIMEOUT_MS = 25000; // 25 seconds timeout for no data
       let timeoutHandle: any;
+      let hasContent = false;
       const resetTimeout = () => {
         clearTimeout(timeoutHandle);
         timeoutHandle = setTimeout(() => {
@@ -366,6 +367,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
               resetTimeout();
 
               if (!content) continue;
+              hasContent = true;
 
               if (role === 'form' && this.isValidJson(content)) {
                 if (!lastFormEvent) {
@@ -412,6 +414,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         return;
       } finally {
         clearTimeout(timeoutHandle);
+        if (!hasContent) {
+          this.chatMessages.events.pop();
+        }
         return;
       }
     } catch (err) {
