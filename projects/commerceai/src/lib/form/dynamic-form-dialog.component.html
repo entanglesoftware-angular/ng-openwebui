@@ -9,7 +9,7 @@
     </div>
 
     <div mat-dialog-actions align="end" class="form-actions">
-        <button mat-button type="button" mat-dialog-close>Cancel</button>
+        <button mat-button [mat-dialog-close]="{ closedByUser: true }">Close</button>
         <button mat-flat-button color="primary" type="submit" [disabled]="!isAnyFieldFilled()">Submit</button>
     </div>
 </form>

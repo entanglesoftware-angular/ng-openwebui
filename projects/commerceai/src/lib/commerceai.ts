@@ -149,11 +149,13 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       data: formData,
     });
     dialogRef.afterClosed().subscribe(formData => {
-      if (formData) {
+      if (formData?.closedByUser) {
+        this.clearAllForm();
+      } else if (formData) {
         this.formData = JSON.stringify(formData);
         this.onSend();
+        this.clearAllForm();
       }
-      this.clearAllForm();
     });
   }
 
@@ -179,7 +181,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
   async onSend() {
     const trimmed = this.message.trim();
-    if (!trimmed && this.selectedFiles.length === 0) return;
+    if (!trimmed && this.selectedFiles.length === 0 && !this.formData) return;
 
     let sessionId = this.currentSessionId;
     let isNewSession = false;
@@ -285,12 +287,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     {
       const userMessage: ChatReqMessage = {
         role: 'user',
-        type: 'text',
-        content: 'explain json content',
-      };
-      ReqBody.messages.push(userMessage);
-      const userFormMessage: ChatReqMessage = {
-        role: 'user',
         type: 'application/json',
         content: this.formData,
       };
@@ -334,57 +330,83 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
       let lastGeneralIndex = this.chatMessages.events.length - 1;
       let lastFormEvent: event | null = null;
-      while (true) {
-        const { done, value } = await reader!.read();
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk
-          .split('\n')
-          .filter((line) => line.trim() !== '' && line.startsWith('data: '));
-
-        for (const line of lines) {
-          const data = line.replace('data: ', '').trim();
-          if (data === '[DONE]') {
-            controller.abort();
-            this.router.navigate([sessionId], { relativeTo: this.route.parent });
-            requestAnimationFrame(() => {
-              this.cdr.detectChanges();
-            });
-            return;
+      const TIMEOUT_MS = 15000; // 15 seconds timeout for no data
+      let timeoutHandle: any;
+      const resetTimeout = () => {
+        clearTimeout(timeoutHandle);
+        timeoutHandle = setTimeout(() => {
+          controller.abort();
+          this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000 });
+          this.cdr.detectChanges();
+        }, TIMEOUT_MS);
+      };
+      try {
+        resetTimeout();
+        while (true) {
+          const { done, value } = await reader!.read();
+          if (done) {
+            break;
           }
-          try {
-            const json = JSON.parse(data);
-            const delta = json?.choices?.[0]?.delta;
-            const content = delta?.content;
-            const role = delta?.role;
 
-            if (!content) continue;
+          resetTimeout();
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk
+            .split('\n')
+            .filter((line) => line.trim() !== '' && line.startsWith('data: '));
 
-            if (role === 'form' && this.isValidJson(content)) {
-              if (!lastFormEvent) {
-                lastFormEvent = {
-                  role: 'form',
-                  messages: [
-                    {
-                      type: 'text',
-                      content: '',
-                    },
-                  ],
-                };
-                this.chatMessages.events.push(lastFormEvent);
-              }
-              lastFormEvent.messages[0].content += content;
-            } else {
-              const generalEvent = this.chatMessages.events[lastGeneralIndex];
-              generalEvent.messages[0].content += content;
+          for (const line of lines) {
+            const data = line.replace('data: ', '').trim();
+            if (data === '[DONE]') {
+              clearTimeout(timeoutHandle);
+              controller.abort();
+              this.router.navigate([sessionId], { relativeTo: this.route.parent });
+              requestAnimationFrame(() => {
+                this.cdr.detectChanges();
+              });
+              return;
             }
-            this.scrollToBottom();
-            requestAnimationFrame(() => {
-              this.cdr.detectChanges();
-            });
-          } catch (err) {
-            console.error('Error parsing stream chunk:', err);
+            try {
+              const json = JSON.parse(data);
+              const delta = json?.choices?.[0]?.delta;
+              const content = delta?.content;
+              const role = delta?.role;
+              resetTimeout();
+
+              if (!content) continue;
+
+              if (role === 'form' && this.isValidJson(content)) {
+                if (!lastFormEvent) {
+                  lastFormEvent = {
+                    role: 'form',
+                    messages: [
+                      {
+                        type: 'text',
+                        content: '',
+                      },
+                    ],
+                  };
+                  this.chatMessages.events.push(lastFormEvent);
+                }
+                lastFormEvent.messages[0].content += content;
+              } else {
+                const generalEvent = this.chatMessages.events[lastGeneralIndex];
+                generalEvent.messages[0].content += content;
+              }
+              this.scrollToBottom();
+              requestAnimationFrame(() => {
+                this.cdr.detectChanges();
+              });
+            } catch (err) {
+              console.error('Error parsing stream chunk:', err);
+            }
           }
         }
+      } catch (error) {
+        console.error('Stream aborted or failed:', error);
+        this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000 });
+        this.cdr.detectChanges();
+      } finally {
+        clearTimeout(timeoutHandle);
       }
     } catch (err) {
       console.error('Error sending message:', err);
@@ -434,6 +456,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
   clearAllForm(): void {
     this.chatMessages.events = this.chatMessages.events.filter(e => e.role !== 'form');
+    this.formData = '';
   }
 
   

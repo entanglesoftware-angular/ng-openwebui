@@ -59,6 +59,10 @@ export class DynamicFormDialogComponent implements OnInit {
         this.dialogRef.close(this.form.value);
     }
 
+    onCloseClick(): void {
+        this.dialogRef.close({ closedByUser: true });
+    }
+
     isAnyFieldFilled(): boolean {
         return Object.values(this.form.value).some(value =>
             typeof value === 'string' ? value.trim() !== '' : !!value
