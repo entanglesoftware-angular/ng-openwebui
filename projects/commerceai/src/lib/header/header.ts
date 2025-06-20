@@ -1,4 +1,4 @@
-import { Component,ViewEncapsulation } from '@angular/core';
+import { Component,ViewEncapsulation,Output,EventEmitter } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -50,6 +50,10 @@ interface LoginResponse {
 
 
 export class Header {
+  @Output() menuClicked = new EventEmitter<void>();
+  onMenuClick() {
+  this.menuClicked.emit();
+}
   modelMap: { model: string; domain: string }[] = [];
   selectedModel: string = '';
   selectedDomain: string = '';
@@ -71,11 +75,7 @@ export class Header {
     private dialog: MatDialog,
     private userService: UserService
   ) {}
-  @ViewChild('sidenav') sidenav!: MatSidenav;
 
-  toggleSidenav() {
-    this.sidenav.toggle();
-  }
   ngOnInit(): void {
     this.getToken();
     this.fetchModels();

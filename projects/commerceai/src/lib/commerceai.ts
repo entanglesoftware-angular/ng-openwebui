@@ -122,7 +122,11 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     private dialog: MatDialog
   ) // private chatPersistence: ChatPersistenceService
   {}
+  isSidebarOpen = false;
 
+toggleSidebar() {
+  this.isSidebarOpen = !this.isSidebarOpen;
+}
   async ngOnInit(): Promise<void> {
     console.log('Initializing...');
     this.http
