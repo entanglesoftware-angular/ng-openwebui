@@ -6,6 +6,7 @@ import { ConnectionsDialog } from '../connections-dialog/connections-dialog';
 import { ChangeDetectorRef } from '@angular/core';
 import { EditDialog } from '../edit-dialog/edit-dialog';
 import { MatCard } from '@angular/material/card';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'lib-settings-dialog',
@@ -14,13 +15,15 @@ import { MatCard } from '@angular/material/card';
   styleUrl: './settings-dialog.css',
 })
 export class SettingsDialog {
+   user: { name?: string; email?: string; initial?: string } = {};
   ngOnInit(): void {
     const data = localStorage.getItem('savedConnections');
     if (data) {
       this.savedConnections = JSON.parse(data);
     }
+    this.user = this.userService.getUser();
   }
-  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef) {}
+  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef, private userService: UserService) {}
 
   selectedSection = 'default';
 

@@ -13,7 +13,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { SettingsDialog } from '../settings-dialog/settings-dialog';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatCard } from '@angular/material/card';
-
+import { UserService } from '../user.service';
+import { ViewChild } from '@angular/core';
+import { MatSidenav } from '@angular/material/sidenav';
 
 
 interface LoginResponse {
@@ -66,8 +68,14 @@ export class Header {
    constructor(
     private http: HttpClient,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private userService: UserService
   ) {}
+  @ViewChild('sidenav') sidenav!: MatSidenav;
+
+  toggleSidenav() {
+    this.sidenav.toggle();
+  }
   ngOnInit(): void {
     this.getToken();
     this.fetchModels();
@@ -133,8 +141,8 @@ closeModelDropdown(event: Event) {
 
 goToSettings() {
   this.dialog.open(SettingsDialog, {
-    width: '789px',
-    height:'500px',
+    width: '950px',
+    height:'600px',
   maxWidth: 'none',
   });
 }
@@ -168,6 +176,11 @@ goToSettings() {
     next: (res) => {
       const name = res?.account?.name || '';
       this.userInitial = this.getInitials(name);
+      this.userService.setUser({
+        name: name,
+        email: res.account.email,
+        initial: this.userInitial
+      });
     },
     error: (err) => {
       console.error('Error fetching account info:', err);

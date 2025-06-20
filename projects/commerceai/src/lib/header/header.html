@@ -1,4 +1,6 @@
 <mat-toolbar color="primary">
+  <div class="icon">
+  <mat-icon style="margin-top:21px"(click)="toggleSidenav()">menu</mat-icon>
   <div
     class="model-selector"
     (click)="toggleDropdown()"
@@ -19,6 +21,7 @@
         <small style="color: gray">({{ item.domain }})</small>
       </div>
     </div>
+  </div>
   </div>
   <button mat-icon-button [matMenuTriggerFor]="profileMenu" class="profile-initial">
     <span class="profile-initial">{{ userInitial }}</span>

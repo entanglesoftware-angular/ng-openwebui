@@ -3,6 +3,9 @@ mat-toolbar {
   justify-content: space-between;
   align-items: center;
 }
+.icon{
+  display:flex;
+}
 .model-selector {
   position: relative;
   user-select: none;

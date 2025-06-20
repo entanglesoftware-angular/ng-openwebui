@@ -2,6 +2,9 @@
   "name": "ai",
   "version": "0.0.0",
   "scripts": {
+    "buildf": "ng build commerceai && cd dist/commerceai && npm pack",
+    "build:stats": "ng build commerceai --stats-json",
+    "analyze": "webpack-bundle-analyzer dist/commerceai/stats.json",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
@@ -18,9 +21,11 @@
     "@angular/material": "~20.0.1",
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
+    "ngx-csv-parser": "2.0.0",
     "ngx-markdown": "20.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xlsx": "0.18.5",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -35,6 +40,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^20.0.0",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.2",
+    "webpack-bundle-analyzer": "4.10.2"
   }
 }

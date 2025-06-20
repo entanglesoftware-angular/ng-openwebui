@@ -22,6 +22,12 @@ mat-list-item {
 mat-list-item:hover {
   background: #eee;
 }
-::ng-deep .mdc-list-item__primary-text {
-  color: black !important;
+
+mat-list-item.selected {
+  background: lightgrey;
+  border: 2px solid darkgrey;
+}
+
+.spacer {
+  flex: 1 1 auto;
 }
