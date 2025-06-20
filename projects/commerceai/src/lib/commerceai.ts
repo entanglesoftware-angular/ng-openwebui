@@ -124,19 +124,19 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   scrollToBottomAfterViewChecked() {
     try {
       this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
-    } catch (err) {}
+    } catch (err) { }
   }
   scrollToBottom() {
-  if (!this.scrollThrottleTimer) {
-    this.scrollThrottleTimer = setTimeout(() => {
-      try {
-        this.chatContainer.nativeElement.scrollTop =
-          this.chatContainer.nativeElement.scrollHeight;
-      } catch {}
-      this.scrollThrottleTimer = null;
-    }, 100); // Throttle every 100ms
+    if (!this.scrollThrottleTimer) {
+      this.scrollThrottleTimer = setTimeout(() => {
+        try {
+          this.chatContainer.nativeElement.scrollTop =
+            this.chatContainer.nativeElement.scrollHeight;
+        } catch { }
+        this.scrollThrottleTimer = null;
+      }, 100); // Throttle every 100ms
+    }
   }
-}
 
   checkForFormTrigger(content: string) {
     let formData = JSON.parse(content);
@@ -174,8 +174,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     const workbook = XLSX.read(data, { type: 'array' });
 
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    const result =  XLSX.utils.sheet_to_csv(firstSheet);
-    console.log("excel to csv")
+    const result = XLSX.utils.sheet_to_csv(firstSheet);
     return result;
   }
 
@@ -242,28 +241,24 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     if (this.selectedFiles && this.selectedFiles.length > 0) {
       for (const file of this.selectedFiles) {
         try {
-          let mimeType:string = file.type || 'application/octet-stream';
-          let content:string = ""
-          if(mimeType == "text/csv"){
+          let mimeType: string = file.type || 'application/octet-stream';
+          let content: string = ""
+          if (mimeType == "text/csv") {
             content = await file.text();
           }
-          else if(mimeType.startsWith("image/")){
+          else if (mimeType.startsWith("image/")) {
             content = await this.convertFileToBase64(file);
           }
-          else if(mimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || mimeType == "application/vnd.ms-excel" || mimeType == "application/vnd.ms-excel.sheet.macroEnabled.12"){
-            console.log("Excel file detected")
+          else if (mimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || mimeType == "application/vnd.ms-excel" || mimeType == "application/vnd.ms-excel.sheet.macroEnabled.12") {
             content = await this.convertExcelToCsv(file);
             mimeType = "text/csv"
           } else {
             content = await this.convertFileToBase64(file);
-            console.log("File detected")
-            console.log(mimeType)
           }
-          console.log(`Mime type : ${mimeType}, ${file.type}`)
           const userFile: ChatReqMessage = {
             role: 'user',
             type: mimeType,
-            content:content,
+            content: content,
           };
           ReqBody.messages.push(userFile);
 
@@ -271,7 +266,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             type: mimeType,
             content,
           };
-          console.log(fileEventMessage.type)
           this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
           requestAnimationFrame(() => {
             this.cdr.detectChanges();
@@ -283,8 +277,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       }
     }
 
-    if(this.formData)
-    {
+    if (this.formData) {
       const userMessage: ChatReqMessage = {
         role: 'user',
         type: 'application/json',
@@ -388,6 +381,15 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
                   this.chatMessages.events.push(lastFormEvent);
                 }
                 lastFormEvent.messages[0].content += content;
+              } else if (role === "text/csv") {
+                const raw = delta?.content
+                const onceParsed = JSON.parse(raw);
+                const result = JSON.parse(onceParsed);
+                const fileEventMessage: EventMessage = {
+                  type: delta.role,
+                  content: result.csv,
+                };
+                this.chatMessages.events[lastGeneralIndex].messages.push(fileEventMessage);
               } else {
                 const generalEvent = this.chatMessages.events[lastGeneralIndex];
                 generalEvent.messages[0].content += content;
@@ -397,7 +399,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
                 this.cdr.detectChanges();
               });
             } catch (err) {
+              this.snackBar.open(`Error parsing stream chunk: ${err}`, 'CLose', { duration: 3000 })
               console.error('Error parsing stream chunk:', err);
+              return;
             }
           }
         }
@@ -405,12 +409,15 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         console.error('Stream aborted or failed:', error);
         this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000 });
         this.cdr.detectChanges();
+        return;
       } finally {
         clearTimeout(timeoutHandle);
+        return;
       }
     } catch (err) {
       console.error('Error sending message:', err);
       this.snackBar.open('Failed to send message.', 'Close', { duration: 3000 });
+      return;
     }
   }
 
@@ -459,11 +466,11 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     this.formData = '';
   }
 
-  
+
   ngOnDestroy() {
     this.routeSubscription.unsubscribe();
   }
-  
+
   getShortenedFileName(fileName: string): string {
     const maxChars = 10;
     const dotIndex = fileName.lastIndexOf('.');
@@ -474,7 +481,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     return `${trimmedName}${extension}`;
   }
 
-  downloadCsv(csvString:string): void {
+  downloadCsv(csvString: string): void {
 
     if (!csvString) {
       console.error('CSV string is empty');
@@ -497,7 +504,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     window.URL.revokeObjectURL(url);
   }
 
-  downloadExcel(csvString:string): void {
+  downloadExcel(csvString: string): void {
     if (!csvString) {
       console.error('CSV string is empty');
       return;

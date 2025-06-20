@@ -35,7 +35,6 @@ export class DynamicFormDialogComponent implements OnInit {
         }
 
         this.fields = item.fields || [];
-        console.log(this.fields);
         this.sheetName = item.sheet_name || '';
         this.user = item.user_id || '';
 
@@ -55,7 +54,6 @@ export class DynamicFormDialogComponent implements OnInit {
     }
 
     submitForm(): void {
-        console.log('Submitted Data:', this.form.value);
         this.dialogRef.close(this.form.value);
     }
 

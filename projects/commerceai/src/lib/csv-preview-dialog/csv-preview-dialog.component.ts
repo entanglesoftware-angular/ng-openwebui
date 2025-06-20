@@ -60,9 +60,7 @@ export class CsvPreviewDialogComponent implements OnInit {
 
   parseCsv(): void {
     try {
-      console.log("CSV ", this.data.csv);
       const csvText = this.data.csv.trim();
-      console.log("CSV TEXT ", csvText);
       const lines = csvText.split('\n').filter(line => line.trim() !== '');
 
       if (lines.length === 0) {
