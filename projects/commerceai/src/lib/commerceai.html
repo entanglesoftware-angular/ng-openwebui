@@ -34,7 +34,7 @@
                 <img [src]="'data:' + message.type + ';base64,' + message.content" alt="Image" class="inline-image" />
               </div>
               <!-- CSV messages -->
-              <mat-card *ngIf="message.type === 'text/csv' && message.content" class="message-content">
+              <mat-card *ngIf="message.type === 'text/csv' && message.content" class="message-content export-file">
                 <div class="file-display">
                   <button matFab color="secondary" (click)="openCsvDialog(message.content)">
                     Open

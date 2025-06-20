@@ -242,6 +242,10 @@ markdown {
   animation-delay: 0.6s;
 }
 
+.export-file {
+  width: fit-content;
+}
+
 @keyframes blink {
   0%, 100% {
     opacity: 0;
