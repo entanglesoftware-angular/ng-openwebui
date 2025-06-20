@@ -7,7 +7,7 @@
         <ng-container *ngFor="let event of chatMessages.events">
           <mat-card
             class="message"
-            [ngClass]="{ 'user': event.role === 'user', 'model': event.role === 'model', 'form': event.role === 'model' }"
+            [ngClass]="{ 'user': event.role === 'user', 'model': event.role === 'model', 'form': event.role === 'form', }"
           >
             <!-- Render all messages within this event -->
             <div *ngFor="let message of event.messages">
@@ -17,7 +17,7 @@
               </div>
               <markdown *ngIf="message.type === 'text' && event.role === 'model'" [data]="message.content" class="message-content"></markdown>
               <!-- Form Button -->
-              <ng-container *ngIf="event.role === 'form'">
+              <ng-container *ngIf="event.role === 'form' || message.type === 'form'">
                 <button
                   mat-raised-button
                   color="accent"
@@ -50,7 +50,7 @@
                 </div>
               </mat-card>
               <!-- Other non-text messages -->
-              <div *ngIf="message.type !== 'text' && !message.type.startsWith('image/') && message.type !== 'text/csv' && message.content" class="message-content">
+              <div *ngIf="message.type !== 'text' && !message.type.startsWith('image/') && message.type !== 'text/csv' && message.type !== 'form' && message.content" class="message-content">
                 <div class="file-display">
                   <mat-icon>insert_drive_file</mat-icon>
                   <span>File: {{ message.type }}</span>

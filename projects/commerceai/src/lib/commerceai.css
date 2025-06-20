@@ -246,6 +246,11 @@ markdown {
   width: fit-content;
 }
 
+.message.form {
+  background-color: #fff;
+  width: fit-content;
+}
+
 @keyframes blink {
   0%, 100% {
     opacity: 0;
