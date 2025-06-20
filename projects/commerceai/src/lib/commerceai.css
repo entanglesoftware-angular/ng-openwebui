@@ -271,6 +271,7 @@ markdown {
 }
 
 .message-content {
+  width: fit-content;
   margin-bottom: 8px;
   padding:8px
 }

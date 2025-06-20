@@ -344,30 +344,13 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             return;
           }
           try {
-            console.log(`RAW DATA ${data}`)
             const json = JSON.parse(data);
             const delta = json?.choices?.[0]?.delta;
-            console.log(json)
-            console.log(delta.content)
-            // if(delta?.role == "form"){
-            //   const raw = delta?.content
-            //   console.log("raw ", raw)
-            //   const onceParsed = JSON.parse(raw);
-            //   console.log("once ", onceParsed)
-            //   const result = JSON.parse(onceParsed);
-            //   console.log("result ", result)
-            //
-            // }
             if(delta?.role === "text/csv"){
               const raw = delta?.content
-              console.log("raw ", raw)
               const onceParsed = JSON.parse(raw);
-              console.log("once ", onceParsed)
               const result = JSON.parse(onceParsed);
-              console.log("result ", result)
-
-              console.log(result.csv)
-                const fileEventMessage: EventMessage = {
+               const fileEventMessage: EventMessage = {
                   type: delta.role,
                   content: result.csv,
                 };
