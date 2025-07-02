@@ -12,10 +12,18 @@
             <!-- Render all messages within this event -->
             <div *ngFor="let message of event.messages">
               <!-- Text messages -->
-              <div *ngIf="message.type === 'text' && event.role === 'user'" class="message-content">
+              <div *ngIf="message.type === 'text' && event.role === 'user'" class="message-content user-message">
                 {{ message.content }}
+                <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" matTooltip="Copy">
+                  <mat-icon class="small-icon">content_copy</mat-icon>
+                </button>
               </div>
-              <markdown *ngIf="message.type === 'text' && event.role === 'model'" [data]="message.content" class="message-content"></markdown>
+              <div *ngIf="message.type === 'text' && event.role === 'model'"  class="message-content with-copy model-message">
+                <markdown [data]="message.content"></markdown>
+                <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" matTooltip="Copy">
+                  <mat-icon class="small-icon">content_copy</mat-icon>
+                </button>
+              </div>
               <!-- Form Button -->
               <ng-container *ngIf="event.role === 'form' || message.type === 'form'">
                 <button

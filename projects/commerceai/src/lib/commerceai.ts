@@ -553,4 +553,12 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     };
     return new HttpHeaders(headers);
   }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.snackBar.open('Copied!', 'Close', { duration: 3000 });
+    }).catch(err => {
+      this.snackBar.open('Failed to copy message.', 'Close', { duration: 3000 });
+    });
+  }
 }
