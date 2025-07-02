@@ -100,6 +100,8 @@ mat-list-item.selected {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: absolute;
+  left: 200px;
 }
 
 .options-button svg {
@@ -121,6 +123,11 @@ mat-list-item.selected {
 
 ::ng-deep mat-list-item:hover .options-button .mat-mdc-button-persistent-ripple {
   opacity: 0;
+}
+
+::ng-deep .mat-line {
+  max-width: 190px;
+  overflow: hidden;
 }
 
 .dropdown-menu {
