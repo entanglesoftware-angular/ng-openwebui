@@ -13,6 +13,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatLineModule } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 // Add more as needed
 
@@ -31,6 +32,7 @@ import { MatLineModule } from '@angular/material/core';
     MatDialogModule,
     MatSnackBarModule,
     MatLineModule,
+    MatProgressSpinnerModule,
 
   ],
   exports: [
@@ -45,7 +47,8 @@ import { MatLineModule } from '@angular/material/core';
     MatTableModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatLineModule
+    MatLineModule,
+    MatProgressSpinnerModule
   ]
 })
 export class MaterialModule { }

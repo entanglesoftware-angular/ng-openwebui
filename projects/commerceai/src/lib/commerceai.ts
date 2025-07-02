@@ -47,6 +47,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   private scrollThrottleTimer: any = null;
   isStreaming = false;
   formData = '';
+  isListening: boolean = false;
+  speechRecognition: any;
 
   excel_mime_types = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.ms-excel.sheet.macroEnabled.12"]
 
@@ -552,6 +554,44 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       ...additionalHeaders
     };
     return new HttpHeaders(headers);
+  }
+
+  startVoiceInput(): void {
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Your browser does not support speech recognition.');
+      return;
+    }
+
+    if (this.isListening && this.speechRecognition) {
+      this.isListening = false;
+      this.speechRecognition.stop();
+      return;
+    }
+
+    this.speechRecognition = new SpeechRecognition();
+    this.speechRecognition.lang = 'en-US';
+    this.speechRecognition.interimResults = false;
+    this.speechRecognition.maxAlternatives = 1;
+
+    this.speechRecognition.onstart = () => {
+      this.isListening = true;
+    };
+
+    this.speechRecognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      this.message = this.message +' '+transcript;
+    };
+
+    this.speechRecognition.onend = () => {
+      this.isListening = false;
+    };
+
+    this.speechRecognition.onerror = (event: any) => {
+      this.isListening = false;
+    };
+
+    this.speechRecognition.start();
   }
 
   copyToClipboard(text: string): void {

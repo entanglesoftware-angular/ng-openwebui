@@ -288,6 +288,29 @@ markdown {
   line-height: 16px;
 }
 
+.chat-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+::ng-deep mat-progress-spinner {
+  width: 24px !important;
+  height: 24px !important;
+}
+
 @keyframes blink {
   0%, 100% {
     opacity: 0;

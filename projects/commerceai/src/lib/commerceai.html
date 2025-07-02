@@ -117,8 +117,24 @@
             </button>
           </div>
           <div class="right-actions">
-            <button mat-icon-button color="accent" aria-label="Voice Input">
-              <mat-icon>mic</mat-icon>
+            <button
+              mat-icon-button
+              color="accent"
+              aria-label="Voice Input"
+              (click)="startVoiceInput()"
+              matTooltip="{{ isListening ? 'Stop voice input' : 'Start voice input' }}"
+            >
+              <ng-container *ngIf="!isListening; else listening">
+                <mat-icon>mic</mat-icon>
+              </ng-container>
+              <ng-template #listening>
+                <mat-progress-spinner
+                  diameter="24"
+                  mode="indeterminate"
+                  strokeWidth="3"
+                  color="accent">
+                </mat-progress-spinner>
+              </ng-template>
             </button>
             <button
               mat-icon-button
