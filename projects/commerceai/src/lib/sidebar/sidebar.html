@@ -19,7 +19,7 @@
 <mat-nav-list>
   <mat-list-item *ngFor="let session of chatNames" [ngClass]="{'selected': session.id === selectedSessionId}"
     (click)="onSelectSession(session)">
-    <div matLine>{{ session.id }}</div>
+    <div matLine>{{ session.title || session.id }}</div>
     <button mat-icon-button type="button" aria-label="Open conversation options" class="options-button" (click)="openMenu($event, session)">
       <mat-icon>more_vert</mat-icon>
     </button>

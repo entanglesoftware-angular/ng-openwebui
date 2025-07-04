@@ -13,7 +13,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatLineModule } from '@angular/material/core';
-
+import { A11yModule } from '@angular/cdk/a11y';
 // Add more as needed
 
 @NgModule({
@@ -31,7 +31,7 @@ import { MatLineModule } from '@angular/material/core';
     MatDialogModule,
     MatSnackBarModule,
     MatLineModule,
-
+    A11yModule
   ],
   exports: [
     MatButtonModule,
@@ -45,7 +45,8 @@ import { MatLineModule } from '@angular/material/core';
     MatTableModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatLineModule
+    MatLineModule,
+    A11yModule
   ]
 })
 export class MaterialModule { }

@@ -7,6 +7,7 @@ import {
   MatDialogTitle
 } from '@angular/material/dialog';
 // import { NgxCsvParser, NgxCSVParserError } from 'ngx-csv-parser';
+import { Papa } from 'ngx-papaparse'
 import {
   MatCell, MatCellDef, MatColumnDef,
   MatHeaderCell, MatHeaderCellDef,
@@ -51,6 +52,7 @@ export class CsvPreviewDialogComponent implements OnInit {
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: { csv: string },
     private dialogRef: MatDialogRef<CsvPreviewDialogComponent>,
+    private papa: Papa
     // private csvParser: NgxCsvParser
   ) {}
 
@@ -60,23 +62,19 @@ export class CsvPreviewDialogComponent implements OnInit {
 
   parseCsv(): void {
     try {
-      const csvText = this.data.csv.trim();
-      const lines = csvText.split('\n').filter(line => line.trim() !== '');
-
-      if (lines.length === 0) {
-        this.error = 'CSV is empty.';
-        return;
-      }
-
-      this.headerRow = lines[0].split(',').map(h => h.trim());
-      this.displayedColumns = this.headerRow
-
-      this.dataSource.data = lines.slice(1).map(line => {
-        const values = line.split(',').map(v => v.trim());
-        return this.headerRow.reduce((obj, header, idx) => {
-          obj[header] = values[idx] || '';
-          return obj;
-        }, {} as any);
+      const trimmed = this.data.csv.trim();
+      this.papa.parse(trimmed, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          if (result.errors && result.errors.length > 0) {
+            this.error = 'CSV parse error: ' + result.errors[0].message;
+            return;
+          }
+          this.headerRow = result.meta.fields || [];
+          this.displayedColumns = this.headerRow;
+          this.dataSource.data = result.data as any[];
+        }
       });
     } catch (err) {
       this.error = 'Failed to parse CSV: ' + (err instanceof Error ? err.message : 'Unknown error');

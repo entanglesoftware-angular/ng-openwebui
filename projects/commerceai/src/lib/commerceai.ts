@@ -12,12 +12,14 @@ import { ChatSession } from './models/chat-session.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component';
 import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dialog.component';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { CommerceAIConfig } from './config/commerceai-config';
 import { COMMERCE_AI_CONFIG } from './config/commerceai-config.token';
 import { CommerceAIConfigValidator } from './services/commerceai-config-validator.service';
 import * as XLSX from 'xlsx';
+import { A11yModule } from '@angular/cdk/a11y';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'lib-commerceai',
@@ -31,13 +33,13 @@ import * as XLSX from 'xlsx';
     NgIf,
     Sidebar,
     HttpClientModule,
-    MatTooltip,
+    MatTooltipModule,
+    A11yModule
   ],
   providers: [],
   templateUrl: './commerceai.html',
   styleUrl: './commerceai.css',
 })
-
 export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   message: string = '';
   aiName: string = 'CommerceAI';
@@ -113,28 +115,44 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     } catch (err) {
       console.error('Error loading messages for session:', err);
       this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000 });
-      this.router.navigate(['..'], { relativeTo: this.route }); // Navigate to new chat
+      this.router.navigate(['..'], { relativeTo: this.route });
     }
   }
 
   ngAfterViewChecked(): void {
-    this.scrollToBottomAfterViewChecked();
+    // Removed automatic scroll to bottom here to handle it with GSAP
   }
 
-  scrollToBottomAfterViewChecked() {
-    try {
-      this.chatContainer.nativeElement.scrollTop = this.chatContainer.nativeElement.scrollHeight;
-    } catch (err) { }
+  animateNewMessage(element: HTMLElement) {
+    gsap.fromTo(
+      element,
+      {
+        y: 50,
+        opacity: 0,
+      },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.5,
+        ease: 'power2.out',
+        onComplete: () => this.scrollToBottomWithAnimation(),
+      }
+    );
   }
-  scrollToBottom() {
+
+  scrollToBottomWithAnimation() {
     if (!this.scrollThrottleTimer) {
       this.scrollThrottleTimer = setTimeout(() => {
         try {
-          this.chatContainer.nativeElement.scrollTop =
-            this.chatContainer.nativeElement.scrollHeight;
+          const container = this.chatContainer.nativeElement;
+          gsap.to(container, {
+            scrollTop: container.scrollHeight,
+            duration: 0.5,
+            ease: 'power2.out',
+          });
         } catch { }
         this.scrollThrottleTimer = null;
-      }, 100); // Throttle every 100ms
+      }, 100);
     }
   }
 
@@ -169,10 +187,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       },
     });
   }
+
   private async convertExcelToCsv(file: File): Promise<string> {
     const data = new Uint8Array(await file.arrayBuffer());
     const workbook = XLSX.read(data, { type: 'array' });
-
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
     const result = XLSX.utils.sheet_to_csv(firstSheet);
     return result;
@@ -194,7 +212,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           sessionId = newSession.id;
           this.currentSessionId = sessionId;
           isNewSession = true;
-          // this.router.navigate([sessionId], { relativeTo: this.route.parent });
         } else {
           throw new Error('Invalid session response from server');
         }
@@ -217,6 +234,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       this.chatMessages.events.push(userMessage);
       requestAnimationFrame(() => {
         this.cdr.detectChanges();
+        const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
+        if (lastMessage) {
+          this.animateNewMessage(lastMessage);
+        }
       });
     }
 
@@ -242,16 +263,14 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       for (const file of this.selectedFiles) {
         try {
           let mimeType: string = file.type || 'application/octet-stream';
-          let content: string = ""
+          let content: string = "";
           if (mimeType == "text/csv") {
             content = await file.text();
-          }
-          else if (mimeType.startsWith("image/")) {
+          } else if (mimeType.startsWith("image/")) {
             content = await this.convertFileToBase64(file);
-          }
-          else if (mimeType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || mimeType == "application/vnd.ms-excel" || mimeType == "application/vnd.ms-excel.sheet.macroEnabled.12") {
+          } else if (this.excel_mime_types.includes(mimeType)) {
             content = await this.convertExcelToCsv(file);
-            mimeType = "text/csv"
+            mimeType = "text/csv";
           } else {
             content = await this.convertFileToBase64(file);
           }
@@ -269,6 +288,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
           requestAnimationFrame(() => {
             this.cdr.detectChanges();
+            const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
+            if (lastMessage) {
+              this.animateNewMessage(lastMessage);
+            }
           });
         } catch (error) {
           console.error(`Failed to convert file ${file.name}:`, error);
@@ -319,11 +342,18 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         messages: [eventMessage],
       };
       this.chatMessages.events.push(modelMessage);
+      requestAnimationFrame(() => {
+        this.cdr.detectChanges();
+        const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
+        if (lastMessage) {
+          this.animateNewMessage(lastMessage);
+        }
+      });
       this.isStreaming = false;
 
       let lastGeneralIndex = this.chatMessages.events.length - 1;
       let lastFormEvent: event | null = null;
-      const TIMEOUT_MS = 15000; // 15 seconds timeout for no data
+      const TIMEOUT_MS = 15000;
       let timeoutHandle: any;
       const resetTimeout = () => {
         clearTimeout(timeoutHandle);
@@ -379,10 +409,17 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
                     ],
                   };
                   this.chatMessages.events.push(lastFormEvent);
+                  requestAnimationFrame(() => {
+                    this.cdr.detectChanges();
+                    const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
+                    if (lastMessage) {
+                      this.animateNewMessage(lastMessage);
+                    }
+                  });
                 }
                 lastFormEvent.messages[0].content += content;
               } else if (role === "text/csv") {
-                const raw = delta?.content
+                const raw = delta?.content;
                 const onceParsed = JSON.parse(raw);
                 const result = JSON.parse(onceParsed);
                 const fileEventMessage: EventMessage = {
@@ -390,16 +427,23 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
                   content: result.csv,
                 };
                 this.chatMessages.events[lastGeneralIndex].messages.push(fileEventMessage);
+                requestAnimationFrame(() => {
+                  this.cdr.detectChanges();
+                  const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
+                  if (lastMessage) {
+                    this.animateNewMessage(lastMessage);
+                  }
+                });
               } else {
                 const generalEvent = this.chatMessages.events[lastGeneralIndex];
                 generalEvent.messages[0].content += content;
               }
-              this.scrollToBottom();
+              this.scrollToBottomWithAnimation();
               requestAnimationFrame(() => {
                 this.cdr.detectChanges();
               });
             } catch (err) {
-              this.snackBar.open(`Error parsing stream chunk: ${err}`, 'CLose', { duration: 3000 })
+              this.snackBar.open(`Error parsing stream chunk: ${err}`, 'Close', { duration: 3000 });
               console.error('Error parsing stream chunk:', err);
               return;
             }
@@ -466,7 +510,6 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     this.formData = '';
   }
 
-
   ngOnDestroy() {
     this.routeSubscription.unsubscribe();
   }
@@ -482,24 +525,18 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   downloadCsv(csvString: string): void {
-
     if (!csvString) {
       console.error('CSV string is empty');
       return;
     }
 
-    // Create a Blob from the CSV string
     const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-
-    // Create a temporary URL and trigger download
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `csvfile.csv`;
     document.body.appendChild(link);
     link.click();
-
-    // Clean up
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   }
@@ -511,28 +548,19 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     try {
-      // Parse CSV string manually into an array of arrays (AoA)
       const rows = csvString.split('\n').filter(row => row.trim() !== '');
       const aoa: string[][] = rows.map(row => row.split(',').map(cell => cell.trim()));
-
-      // Create a workbook and worksheet using aoa_to_sheet
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.aoa_to_sheet(aoa);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-      // Generate XLSX file and trigger download
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-      // Create a temporary URL and trigger download
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = `excelFile.xlsx`;
       document.body.appendChild(link);
       link.click();
-
-      // Clean up
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
