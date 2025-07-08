@@ -49,6 +49,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   private scrollThrottleTimer: any = null;
   isStreaming = false;
   formData = '';
+  isListening: boolean = false;
+  speechRecognition: any;
 
   excel_mime_types = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.ms-excel.sheet.macroEnabled.12"]
 
@@ -357,8 +359,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
       let lastGeneralIndex = this.chatMessages.events.length - 1;
       let lastFormEvent: event | null = null;
-      const TIMEOUT_MS = 15000;
+      const TIMEOUT_MS = 25000; // 25 seconds timeout for no data
       let timeoutHandle: any;
+      let hasContent = false;
       const resetTimeout = () => {
         clearTimeout(timeoutHandle);
         timeoutHandle = setTimeout(() => {
@@ -400,6 +403,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
               resetTimeout();
 
               if (!content) continue;
+              hasContent = true;
 
               if (role === 'form' && this.isValidJson(content)) {
                 if (!lastFormEvent) {
@@ -460,6 +464,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         return;
       } finally {
         clearTimeout(timeoutHandle);
+        if (!hasContent) {
+          this.chatMessages.events.pop();
+        }
         return;
       }
     } catch (err) {
@@ -579,5 +586,51 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       ...additionalHeaders
     };
     return new HttpHeaders(headers);
+  }
+
+  startVoiceInput(): void {
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Your browser does not support speech recognition.');
+      return;
+    }
+
+    if (this.isListening && this.speechRecognition) {
+      this.isListening = false;
+      this.speechRecognition.stop();
+      return;
+    }
+
+    this.speechRecognition = new SpeechRecognition();
+    this.speechRecognition.lang = 'en-US';
+    this.speechRecognition.interimResults = false;
+    this.speechRecognition.maxAlternatives = 1;
+
+    this.speechRecognition.onstart = () => {
+      this.isListening = true;
+    };
+
+    this.speechRecognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      this.message = this.message +' '+transcript;
+    };
+
+    this.speechRecognition.onend = () => {
+      this.isListening = false;
+    };
+
+    this.speechRecognition.onerror = (event: any) => {
+      this.isListening = false;
+    };
+
+    this.speechRecognition.start();
+  }
+
+  copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.snackBar.open('Copied!', 'Close', { duration: 3000 });
+    }).catch(err => {
+      this.snackBar.open('Failed to copy message.', 'Close', { duration: 3000 });
+    });
   }
 }

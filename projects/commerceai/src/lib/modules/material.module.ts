@@ -14,6 +14,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatLineModule } from '@angular/material/core';
 import { A11yModule } from '@angular/cdk/a11y';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 // Add more as needed
 
 @NgModule({
@@ -31,7 +32,8 @@ import { A11yModule } from '@angular/cdk/a11y';
     MatDialogModule,
     MatSnackBarModule,
     MatLineModule,
-    A11yModule
+    A11yModule,
+    MatProgressSpinnerModule
   ],
   exports: [
     MatButtonModule,
@@ -46,7 +48,8 @@ import { A11yModule } from '@angular/cdk/a11y';
     MatDialogModule,
     MatSnackBarModule,
     MatLineModule,
-    A11yModule
+    A11yModule,
+    MatProgressSpinnerModule
   ]
 })
 export class MaterialModule { }
