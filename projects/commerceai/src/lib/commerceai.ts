@@ -66,6 +66,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     @Inject(COMMERCE_AI_CONFIG) private config: CommerceAIConfig
   ) {
     this.routeSubscription = this.route.params.subscribe(params => {
+      const userId = params['user_id'];
+      if(userId){
+        this.config.userId = userId
+      }
       const sessionId = params['session_id'];
       if (sessionId) {
         this.currentSessionId = sessionId;
@@ -382,7 +386,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
             if (data === '[DONE]') {
               clearTimeout(timeoutHandle);
               controller.abort();
-              this.router.navigate([sessionId], { relativeTo: this.route.parent });
+              this.router.navigate([this.config.userId, sessionId], { relativeTo: this.route.parent });
               requestAnimationFrame(() => {
                 this.cdr.detectChanges();
               });

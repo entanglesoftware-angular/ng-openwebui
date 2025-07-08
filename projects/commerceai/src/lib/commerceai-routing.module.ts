@@ -4,7 +4,8 @@ import { Commerceai } from './commerceai';
 
 const routes: Routes = [
   { path: '', component: Commerceai }, // New chat
-  { path: ':session_id', component: Commerceai }, // Existing session
+  { path: ':user_id', component: Commerceai },          // User chat without session
+  { path: ':user_id/:session_id', component: Commerceai }, // Existing session
 ];
 
 @NgModule({

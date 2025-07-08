@@ -73,8 +73,17 @@ export class Sidebar implements OnInit, OnDestroy {
   }
 
   onSelectSession(session: ChatSession) {
+    const userId = this.route.snapshot.paramMap.get('user_id');
+    let nav = []
+    if(userId){
+      nav.push(userId)
+    }
     if (session.id) {
-      this.router.navigate([session.id], { relativeTo: this.route.parent });
+      nav.push(session.id)
+    }
+    console.log(nav)
+    if(nav.length > 0){
+      this.router.navigate(nav, { relativeTo: this.route.parent });
     }
   }
 
