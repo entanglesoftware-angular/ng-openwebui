@@ -68,7 +68,13 @@ export class Sidebar implements OnInit, OnDestroy {
   }
 
   addNewChat() {
-    this.router.navigate(['..'], { relativeTo: this.route }); // Navigate to new chat
+    const userId = this.route.snapshot.paramMap.get('user_id');
+      if(userId){
+        this.router.navigate([userId], { relativeTo: this.route.parent });
+      }
+      else {
+        this.router.navigate(['..'], { relativeTo: this.route.parent });
+      }
     this.cdr.detectChanges();
   }
 
@@ -114,7 +120,13 @@ export class Sidebar implements OnInit, OnDestroy {
         .toPromise();
       if (response?.status !== 'error') {
         this.snackBar.open('Chat session deleted successfully.', 'Close', { duration: 3000 });
-        this.router.navigate(['..'], { relativeTo: this.route });
+        const userId = this.route.snapshot.paramMap.get('user_id');
+        if(userId){
+          this.router.navigate([userId], { relativeTo: this.route.parent });
+        }
+        else {
+          this.router.navigate(['..'], { relativeTo: this.route });
+        }
         this.cdr.detectChanges();
       } else {
         console.error('Server responded with error:', response?.message);
