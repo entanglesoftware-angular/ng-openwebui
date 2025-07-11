@@ -1,6 +1,6 @@
 .toolbar-title {
   margin-left: 8px;
-  font-weight: 600;
+  color: #8f8f8f;
 }
 
 :host {
@@ -8,7 +8,8 @@
   height: auto;
   display: block;
   border-right: 1px solid #ccc;
-  background: #fafafa;
+  background: #e9e9e980;
+
 }
 
 mat-nav-list {
@@ -25,17 +26,20 @@ mat-list-item {
   align-items: center;
 }
 
-mat-list-item:hover {
-  background: #eee;
+::ng-deep mat-list-item:hover {
+  background: #0000000a !important;
 }
 
 ::ng-deep mat-nav-list mat-list-item.active {
-  background: #eee;
+  background: #0000000a !important;
 }
 
-mat-list-item.selected {
-  background: lightgrey;
-  border: 2px solid darkgrey;
+::ng-deep mat-list-item.selected {
+  background: #0000000f !important;
+}
+
+::ng-deep .mdc-list-item:hover::before {
+  background: none !important;
 }
 
 .spacer {
@@ -56,7 +60,7 @@ mat-list-item.selected {
 }
 .mat-toolbar-single-row {
   display: flex;
-  gap: 15px;
+  gap: 5px;
   box-sizing: border-box;
   padding: 16px;
   width: 100%;
@@ -64,6 +68,7 @@ mat-list-item.selected {
   white-space: nowrap;
   height: auto;
   align-items: start;
+  background: none;
 }
 
 .new-chat-button {
@@ -161,4 +166,13 @@ mat-list-item.selected {
 
 .menu-item.delete {
   color: red;
+}
+
+.toolbar-title-upper {
+  margin-bottom: 10px;
+  padding-left: 10px;
+}
+
+.toolbar-title-upper .icon {
+  width: 110px;
 }

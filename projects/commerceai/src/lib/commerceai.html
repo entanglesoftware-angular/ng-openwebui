@@ -17,11 +17,17 @@
                 <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" matTooltip="Copy">
                   <mat-icon class="small-icon">content_copy</mat-icon>
                 </button>
+                <button mat-icon-button class="speak-btn" (click)="speak(message.content)" matTooltip="Speak">
+                  <mat-icon class="small-icon">volume_up</mat-icon>
+                </button>
               </div>
               <div *ngIf="message.type === 'text' && event.role === 'model'"  class="message-content with-copy model-message">
                 <markdown [data]="message.content"></markdown>
                 <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" matTooltip="Copy">
                   <mat-icon class="small-icon">content_copy</mat-icon>
+                </button>
+                <button mat-icon-button class="speak-btn" (click)="speak(message.content)" matTooltip="Speak">
+                  <mat-icon class="small-icon">volume_up</mat-icon>
                 </button>
               </div>
               <!-- Form Button -->
@@ -44,16 +50,14 @@
               <!-- CSV messages -->
               <mat-card *ngIf="message.type === 'text/csv' && message.content" class="message-content export-file">
                 <div class="file-display">
-                  <button matFab color="secondary" (click)="openCsvDialog(message.content)">
-                    Open
+                  <button color="secondary" (click)="openCsvDialog(message.content)">
+                    <img src="/assets/images/open.png" alt="Wine Icon" class="file-icon open">
                   </button>
-                  <button matFab (click)="downloadCsv(message.content)" style="display:flex; align-items: center; flex-direction: column;">
-                    <mat-icon>file_download</mat-icon>
-                    <div>CSV</div>
+                  <button (click)="downloadCsv(message.content)" style="display:flex; align-items: center; flex-direction: column;">
+                    <img src="/assets/images/csv.png" alt="Wine Icon" class="file-icon csv">
                   </button>
-                  <button matFab (click)="downloadExcel(message.content)"  style="display:flex; align-items: center; flex-direction: column;">
-                    <mat-icon>file_download</mat-icon>
-                    <div>Excel</div>
+                  <button (click)="downloadExcel(message.content)"  style="display:flex; align-items: center; flex-direction: column;">
+                    <img src="/assets/images/excel.png" alt="Wine Icon" class="file-icon excel">
                   </button>
                 </div>
               </mat-card>

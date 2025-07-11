@@ -69,7 +69,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   ) {
     this.routeSubscription = this.route.params.subscribe(params => {
       const userId = params['user_id'];
-      if(userId){
+      if (userId) {
         this.config.userId = userId
       }
       const sessionId = params['session_id'];
@@ -612,7 +612,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
 
     this.speechRecognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
-      this.message = this.message +' '+transcript;
+      this.message = this.message + ' ' + transcript;
     };
 
     this.speechRecognition.onend = () => {
@@ -632,5 +632,21 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     }).catch(err => {
       this.snackBar.open('Failed to copy message.', 'Close', { duration: 3000 });
     });
+  }
+
+  speak(text: string): void {
+    if (!text) return;
+
+    const synth = window.speechSynthesis;
+
+    // Stop current speaking if already in progress
+    if (synth.speaking) {
+      synth.cancel();
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US'; // or set dynamically
+
+    synth.speak(utterance);
   }
 }

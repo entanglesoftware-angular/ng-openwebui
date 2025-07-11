@@ -1,6 +1,6 @@
 <mat-toolbar color="primary" class="flex-col">
-  <div class="flex items-center justify-between w-full">
-    <span class="toolbar-title">Chats</span>
+  <div class="toolbar-title-upper">
+    <img src="/assets/images/vinoagent_logo.png" alt="Wine Icon" class="icon">
   </div>
   <div class="mt-2 new-chat-outer">
     <button color="accent" (click)="addNewChat()" aria-label="New Chat" class="new-chat-button">
@@ -17,6 +17,9 @@
   </div>
 </mat-toolbar>
 <mat-nav-list>
+  <div class="toolbar-title-upper">
+    <span class="toolbar-title">Chats</span>
+  </div>
   <mat-list-item *ngFor="let session of chatNames" [ngClass]="{'selected': session.id === selectedSessionId}"
     (click)="onSelectSession(session)">
     <div matLine>{{ session.title || session.id }}</div>

@@ -16,7 +16,6 @@ lib-sidebar {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: gainsboro;
   overflow: hidden;
   padding: 8px;
 }
@@ -28,19 +27,21 @@ lib-sidebar {
   font-size: 25px;
   font-weight: 500;
   background-color: white;
-  position: sticky;
+  position: absolute;
   top: 0;
-  border-bottom: 1px solid black;
   z-index: 1;
   text-align: center;
   margin-bottom: 16px;
+  max-width: fit-content;
+  background: none;
+  box-shadow: none;
 }
 
 /* Chat messages scrollable area */
 .chat-messages {
   flex: 1 1 auto;
   overflow-y: auto;
-  padding: 10px;
+  padding: 0px 200px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -58,8 +59,8 @@ lib-sidebar {
 
 .message.user {
   align-self: flex-end;
-  background-color: #bc3624;
-  color: white;
+  background-color: #e9e9e980;
+  color: rgb(13, 13, 13);
 }
 
 .message.assistant,
@@ -67,6 +68,11 @@ lib-sidebar {
   align-self: flex-start;
   background-color: white;
   color: #1c244e;
+  box-shadow: 0px 4px 4px 0px #0000000a, 0px 0px 1px 0px #0000009e !important;
+}
+
+::ng-deep .mat-mdc-card {
+  background-color: none !important;
 }
 
 .message-content {
@@ -105,9 +111,10 @@ lib-sidebar {
   bottom: 0;
   background-color: #fff;
   z-index: 2;
-  margin-left: 0;
-  margin-right: 0;
+  margin-left: 200px;
+  margin-right: 200px;
   margin-bottom: 25px;
+  box-shadow: 0px 4px 4px 0px #0000000a, 0px 0px 1px 0px #0000009e !important;
 }
 
 /* Chat input */
@@ -244,6 +251,14 @@ markdown {
 
 .export-file {
   width: fit-content;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+.export-file button {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .message.form {
@@ -255,17 +270,25 @@ markdown {
 .user-message .copy-btn {
   position: absolute;
   top: 60px;
-  right: 4px;
+  right: -10px;
   z-index: 1;
   border-radius: 4px;
 }
-.user-message .copy-btn {
+.user-message .copy-btn, .user-message .speak-btn {
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-.user-message:hover .copy-btn {
+.user-message:hover .copy-btn, .user-message:hover .speak-btn {
   opacity: 1;
+}
+
+.user-message .speak-btn {
+  position: absolute;
+  top: 60px;
+  right: 25px;
+  z-index: 1;
+  border-radius: 4px;
 }
 
 .model-message {
@@ -281,6 +304,24 @@ markdown {
   border-radius: 4px;
 }
 
+.model-message .speak-btn {
+  position: absolute;
+  top: -10px;
+  right: 35px;
+  z-index: 1;
+  border-radius: 4px;
+}
+
+.file-icon.open, .file-icon.excel {
+  width: 60px;
+  height: 60px;
+}
+
+.file-icon.csv {
+  width: 50px;
+  height: 60px;
+}
+
 .small-icon {
   font-size: 16px;
   height: 16px;
@@ -291,7 +332,6 @@ markdown {
 .chat-input-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .input-actions {
