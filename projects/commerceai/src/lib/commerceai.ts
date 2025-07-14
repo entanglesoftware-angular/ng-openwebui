@@ -19,7 +19,9 @@ import { COMMERCE_AI_CONFIG } from './config/commerceai-config.token';
 import { CommerceAIConfigValidator } from './services/commerceai-config-validator.service';
 import * as XLSX from 'xlsx';
 import { A11yModule } from '@angular/cdk/a11y';
-import { gsap } from 'gsap';
+import gsap from 'gsap';
+import { CommerceAiThemeService } from './theme/theme.service';
+import {ThemeSwitcherComponent} from './theme-switcher/theme-switcher';
 
 @Component({
   selector: 'lib-commerceai',
@@ -32,6 +34,7 @@ import { gsap } from 'gsap';
     MarkdownModule,
     NgIf,
     Sidebar,
+    ThemeSwitcherComponent,
     HttpClientModule,
     MatTooltipModule,
     A11yModule
@@ -65,8 +68,10 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private configValidator: CommerceAIConfigValidator,
+    private themeService: CommerceAiThemeService,
     @Inject(COMMERCE_AI_CONFIG) private config: CommerceAIConfig
   ) {
+    this.themeService.loadSavedTheme();
     this.routeSubscription = this.route.params.subscribe(params => {
       const userId = params['user_id'];
       if (userId) {

@@ -2,13 +2,15 @@
   "name": "commerceai",
   "version": "0.0.1",
   "peerDependencies": {
+    "@angular/animations": "^20.0.0",
+    "@angular/cdk": "^20.0.0",
     "@angular/common": "^20.0.0",
     "@angular/core": "^20.0.0",
-    "@angular/cdk": "^20.0.0",
-    "@angular/animations": "^20.0.0",
     "@angular/material": "20.0.1",
+    "ngx-csv-parser": "10.8.2",
     "ngx-markdown": "19.1.1",
-    "ngx-csv-parser": "10.8.2"
+    "gsap": "3.13.0",
+    "ngx-papaparse": "8.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
