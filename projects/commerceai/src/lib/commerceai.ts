@@ -2,17 +2,33 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetec
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpClientModule,
+  HttpHeaders,
+} from '@angular/common/http';
 import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
-import { ChatReq, ChatReqMessage, Events, event, EventMessage } from './models/chat-message.model';
+// import { ChatPersistenceService } from './services/chat-persistence.service';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { Header } from "./header/header";
+import {
+  ChatReq,
+  ChatReqMessage,
+  Events,
+  event,
+  EventMessage,
+} from './models/chat-message.model';
 import { ChatSession } from './models/chat-session.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component';
 import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dialog.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltip } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { CommerceAIConfig } from './config/commerceai-config';
 import { COMMERCE_AI_CONFIG } from './config/commerceai-config.token';
@@ -22,6 +38,24 @@ import { A11yModule } from '@angular/cdk/a11y';
 import gsap from 'gsap';
 import { CommerceAiThemeService } from './theme/theme.service';
 import {ThemeSwitcherComponent} from './theme-switcher/theme-switcher';
+
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string | null;
+}
+
+interface LoginResponse {
+  account: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    userType: string;
+  };
+  JWT_Token: string;
+  Refresh_Token: string;
+}
 
 @Component({
   selector: 'lib-commerceai',
@@ -37,7 +71,13 @@ import {ThemeSwitcherComponent} from './theme-switcher/theme-switcher';
     ThemeSwitcherComponent,
     HttpClientModule,
     MatTooltipModule,
-    A11yModule
+    A11yModule,
+    MatInputModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    HttpClientModule,
+    MatTooltip,
+    Header
   ],
   providers: [],
   templateUrl: './commerceai.html',
@@ -46,6 +86,20 @@ import {ThemeSwitcherComponent} from './theme-switcher/theme-switcher';
 export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   message: string = '';
   aiName: string = 'CommerceAI';
+  // chatMessages: ChatMessage[] = [];
+  modelMap: { model: string; domain: string }[] = [];
+  selectedModel: string = '';
+  selectedDomain: string = '';
+  dropdownOpen: boolean = false;
+  domain: string = '';
+  selectedIndex: number = 0;
+  domains: string[] = [
+    'http://localhost:8000',
+    'http://localhost:8001',
+    'http://localhost:8002',
+    'http://localhost:8003',
+    'http://localhost:8004',
+  ];
   chatMessages: Events = { events: [] };
   currentSessionId: string | null = null;
   selectedFiles: File[] = [];
@@ -55,10 +109,14 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   isListening: boolean = false;
   speechRecognition: any;
 
-  excel_mime_types = ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.ms-excel.sheet.macroEnabled.12"]
+  excel_mime_types = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-excel',
+    'application/vnd.ms-excel.sheet.macroEnabled.12',
+  ];
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
-  private routeSubscription: Subscription;
+  private routeSubscription!: Subscription;
 
   constructor(
     private router: Router,
@@ -72,26 +130,13 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     @Inject(COMMERCE_AI_CONFIG) private config: CommerceAIConfig
   ) {
     this.themeService.loadSavedTheme();
-    this.routeSubscription = this.route.params.subscribe(params => {
-      const userId = params['user_id'];
-      if (userId) {
-        this.config.userId = userId
-      }
-      const sessionId = params['session_id'];
-      if (sessionId) {
-        this.currentSessionId = sessionId;
-        this.loadSessionMessages(sessionId);
-      } else {
-        this.currentSessionId = null;
-        this.chatMessages.events = [];
-        requestAnimationFrame(() => {
-          this.cdr.detectChanges();
-        });
-      }
-    });
     this.config = this.configValidator.getConfig();
   }
+  isSidebarOpen = false;
 
+toggleSidebar() {
+  this.isSidebarOpen = !this.isSidebarOpen;
+}
   async ngOnInit(): Promise<void> {
     console.log('Initializing...');
     this.http
@@ -104,11 +149,29 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         },
         error: () => {
           this.aiName = 'Select Model';
-          this.snackBar.open('Failed to fetch model name.', 'Close', { duration: 3000 });
+          this.snackBar.open('Failed to fetch model name.', 'Close', {
+            duration: 3000,
+          });
         },
       });
+    if (
+      sessionStorage.getItem('jwt') == null ||
+      sessionStorage.getItem('jwt') == undefined ||
+      sessionStorage.getItem('jwt') == ''
+    ) {
+      this.routeSubscription = this.route.params.subscribe((params) => {
+        const sessionId = params['session_id'];
+        if (sessionId) {
+          this.currentSessionId = sessionId;
+          this.loadSessionMessages(sessionId);
+        } else {
+          this.currentSessionId = null;
+          this.chatMessages.events = [];
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
-
   async loadSessionMessages(sessionId: string) {
     this.chatMessages.events = [];
     try {
@@ -120,17 +183,15 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         ...msg,
         sessionId,
       }));
-      requestAnimationFrame(() => {
-        this.cdr.detectChanges();
-      });
+      this.cdr.detectChanges();
     } catch (err) {
       console.error('Error loading messages for session:', err);
       this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000 });
       this.router.navigate(['..'], { relativeTo: this.route });
     }
   }
-
   ngAfterViewChecked(): void {
+    this.scrollToBottomAfterViewChecked();
     // Removed automatic scroll to bottom here to handle it with GSAP
   }
 
@@ -165,6 +226,46 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         this.scrollThrottleTimer = null;
       }, 100);
     }
+  }
+
+  scrollToBottomAfterViewChecked() {
+    try {
+      this.chatContainer.nativeElement.scrollTop =
+        this.chatContainer.nativeElement.scrollHeight;
+    } catch (err) {}
+  }
+  scrollToBottom() {
+    if (!this.scrollThrottleTimer) {
+      this.scrollThrottleTimer = setTimeout(() => {
+        try {
+          this.chatContainer.nativeElement.scrollTop =
+            this.chatContainer.nativeElement.scrollHeight;
+        } catch {}
+        this.scrollThrottleTimer = null;
+      }, 100); // Throttle every 100ms
+    }
+  }
+
+  clearChat(): void {
+    this.chatMessages.events = [];
+    if (this.currentSessionId) {
+      const headers = new HttpHeaders({
+        user_id: this.config.userId,
+        authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+      });
+      this.http
+        .delete(`${this.domain}/session/${this.currentSessionId}/messages`, {
+          headers,
+        })
+        .toPromise()
+        .catch((err) => {
+          console.error('Error clearing messages:', err);
+          this.snackBar.open('Failed to clear messages.', 'Close', {
+            duration: 3000,
+          });
+        });
+    }
+    this.cdr.detectChanges();
   }
 
   checkForFormTrigger(content: string) {
@@ -228,7 +329,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         }
       } catch (err) {
         console.error('Failed to create new session:', err);
-        this.snackBar.open('Failed to create new session.', 'Close', { duration: 3000 });
+        this.snackBar.open('Failed to create new session.', 'Close', {
+          duration: 3000,
+        });
         return;
       }
     }
@@ -306,7 +409,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
           });
         } catch (error) {
           console.error(`Failed to convert file ${file.name}:`, error);
-          this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', { duration: 3000 });
+          this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', {
+            duration: 3000,
+          });
         }
       }
     }
@@ -319,9 +424,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
       };
       ReqBody.messages.push(userMessage);
     }
-    this.clearAllFiles();
+    
     const controller = new AbortController();
-    const signal = controller.signal;
 
     try {
       const headersObj = {
@@ -340,7 +444,12 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         headers: headersPlainObject,
         body: JSON.stringify(ReqBody),
       });
-
+      if (response.status !== 200) {
+        this.snackBar.open(`Error : ${response.status} ${response}`, 'Close', {
+          duration: 3000,
+        });
+        return;
+      }
       const reader = response.body?.getReader();
       const decoder = new TextDecoder('utf-8');
       let modelContent = '';
@@ -361,6 +470,8 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
         }
       });
       this.isStreaming = false;
+      let n = this.chatMessages.events.length - 1;
+      let m = this.chatMessages.events[n].messages.length - 1;
 
       let lastGeneralIndex = this.chatMessages.events.length - 1;
       let lastFormEvent: event | null = null;
@@ -507,9 +618,13 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files) {
       this.selectedFiles = Array.from(input.files);
-      this.snackBar.open(`${this.selectedFiles.length} file(s) selected`, 'Close', {
-        duration: 2000,
-      });
+      this.snackBar.open(
+        `${this.selectedFiles.length} file(s) selected`,
+        'Close',
+        {
+          duration: 2000,
+        }
+      );
     }
   }
 

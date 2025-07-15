@@ -1,0 +1,9 @@
+.full-width {
+  width: 100%;
+}
+
+::ng-deep .mat-dialog-container {
+  border-radius: 16px;
+  padding: 24px;
+}
+

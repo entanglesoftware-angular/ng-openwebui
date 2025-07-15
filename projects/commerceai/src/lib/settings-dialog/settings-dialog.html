@@ -1,0 +1,132 @@
+<h2 mat-dialog-title>Settings</h2>
+<mat-dialog-content class="settings-dialog-content">
+  <div class="container">
+    <aside class="settings-sidebar">
+      <div class="sidebar-item" (click)="selectedSection = 'connections'">
+        <mat-icon>cloud</mat-icon>
+        <span>Connections</span>
+      </div>
+      <div class="sidebar-item" (click)="selectedSection = 'about'">
+        <mat-icon>info</mat-icon>
+        <span>About</span>
+      </div>
+      <div class="sidebar-item" (click)="selectedSection='account'">
+        <mat-icon>account_circle</mat-icon>
+        <span>Account</span>
+      </div>
+    </aside>
+
+    <div class="content-area">
+      <ng-container *ngIf="selectedSection === 'default'"> </ng-container>
+      <ng-container *ngIf="selectedSection === 'connections'">
+        <div class="connections">
+          <div class="content-header">
+            <h3>Manage Direct Connections</h3>
+            <mat-icon class="add-icon" (click)="onClick()">add</mat-icon>
+          </div>
+          <p>Total connections: {{ savedConnections.length }}</p>
+
+          <div
+            *ngFor="let conn of savedConnections"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 8px 0;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1">
+              <span>{{ conn.url }}</span>
+              <span>{{ conn.visible ? conn.key : '•••' }}</span>
+            </div>
+
+            <div style="text-align: center">
+              <button
+                style="border: none; background-color: black"
+                mat-icon-button
+                matSuffix
+                (click)="conn.visible = !conn.visible"
+                type="button"
+              >
+                <mat-icon style="color: white"
+                  >{{ conn.visible ? 'visibility_off' : 'visibility'
+                  }}</mat-icon
+                >
+              </button>
+              <button
+                style="border: none; background-color: black"
+                mat-icon-button
+                (click)="onEdit(conn)"
+              >
+                <mat-icon style="color: white">settings</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <small style="color: gray">
+            Connect to your own OpenAI compatible API endpoints. <br />
+            CORS must be properly configured by the provider to allow requests
+            from Open WebUI.
+          </small>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="selectedSection === 'about'">
+        <div class="scroll">
+          <div class="about">
+            <h3 style="margin: 0px">WineGPT (Open WebUI) Version</h3>
+            <p><strong>v0.6.1</strong> (v0.6.15 available!)</p>
+            <a href="#">See what's new</a>
+
+            <div style="margin: 10px 0">
+              <button mat-flat-button color="primary">Discord</button>
+              <button mat-flat-button color="accent">Open WebUI</button>
+              <button mat-flat-button>Follow OpenWebUI</button>
+              <button mat-stroked-button>⭐ Star us on GitHub</button>
+            </div>
+
+            <small style="color: gray; display: block; margin-top: 1rem">
+              Copyright (c) 2025
+              <a href="#" target="_blank">Open WebUI (Timothy Jaeryang Baek)</a
+              ><br />
+              Redistribution and use in source and binary forms, with or without
+              modification, are permitted provided that the following conditions
+              are met:<br /><br />
+              1.Redistributions of source code must retain the above copyright
+              notice, this list of conditions and the following disclaimer.<br />
+              2. Redistributions in binary form must reproduce the above
+              copyright notice, this list of conditions and the following
+              disclaimer in the documentation and/or other materials provided
+              with the distribution.<br />
+              3. Neither the name of the copyright holder nor the names of its
+              contributors may be used to endorse or promote products derived
+              from this software without specific prior written permission..<br /><br />
+              <em>
+                THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+                CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+                INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+                MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+                DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+                CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+                SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+                LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+                USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+                AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+                LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+                IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+                THE POSSIBILITY OF SUCH DAMAGE. Created by Timothy J. Baek</em
+              >
+            </small>
+          </div>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="selectedSection === 'account'">
+        <!-- <div class="avatar">{{ user.initial || 'U' }}</div> -->
+         <div class="initial">
+    <span class="profile-initial">{{ user.initial }}</span>
+  </div>
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+      </ng-container>
+    </div>
+  </div>
+</mat-dialog-content>

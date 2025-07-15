@@ -1,0 +1,76 @@
+mat-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.icon{
+  display:flex;
+}
+.model-selector {
+  position: relative;
+  user-select: none;
+  margin-left: 10px;
+}
+
+.model-button {
+  color:white;
+  background-color: rgb(15, 14, 14);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+  font-size: 18px;
+  height: 56px;
+  border: 0px;
+  margin-top: 7px;
+}
+
+.model-button:hover {
+  background-color: #525050;
+}
+
+.arrow {
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.dropdown-card {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 206px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 8px 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 13px;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+.profile-initial {
+  width: 36px;
+  height: 34px;
+  background-color: orange;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 16px;
+}
+

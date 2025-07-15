@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>Edit Connection</h2>
+<mat-dialog-content [formGroup]="form">
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>URL</mat-label>
+    <input matInput formControlName="url" required />
+    <mat-slide-toggle 
+  color="primary" 
+  [(ngModel)]="enabled" 
+  [ngModelOptions]="{standalone: true}">
+</mat-slide-toggle>
+  </mat-form-field>
+
+  <div fxLayout="row" fxLayoutGap="8px">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>API Key</mat-label>
+      <input matInput [type]="hideKey ? 'password' : 'text'" formControlName="key" />
+      <button mat-icon-button matSuffix (click)="hideKey = !hideKey" type="button">
+        <mat-icon>{{ hideKey ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Prefix ID</mat-label>
+      <input matInput formControlName="prefixId" />
+    </mat-form-field>
+  </div>
+
+  <button mat-stroked-button color="primary" type="button">
+    <mat-icon>add</mat-icon> Add Tags
+  </button>
+
+  <p class="hint">Leave empty to include all models from "{{ form.value.url }}/models" endpoint</p>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Add a model ID</mat-label>
+    <input matInput formControlName="modelId" />
+    <button mat-icon-button matSuffix type="button">
+      <mat-icon>add</mat-icon>
+    </button>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button color="warn" (click)="onDelete()">Delete</button>
+  <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSave()">Save</button>
+</mat-dialog-actions>

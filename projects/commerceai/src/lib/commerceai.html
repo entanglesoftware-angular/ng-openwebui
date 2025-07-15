@@ -1,14 +1,8 @@
 <div class="main-container">
-  <lib-sidebar></lib-sidebar>
-  <div class="chat-box-container">
-    <div class="header-row">
-      <div class="left-section">
-        <mat-card class="ai-name">{{ aiName }}</mat-card>
-      </div>
-      <div class="right-section">
-        <lib-theme-switcher></lib-theme-switcher>
-      </div>
-    </div>
+  <lib-sidebar *ngIf="isSidebarOpen"></lib-sidebar>
+    <div class="chat-box-container">
+      <lib-header (menuClicked)="toggleSidebar()"></lib-header>
+      <!-- <mat-card class="ai-name" style="margin-bottom: 0px">{{ aiName }}</mat-card> -->
 
     <div class="chat-messages" #chatContainer>
       <ng-container *ngFor="let event of chatMessages.events">
