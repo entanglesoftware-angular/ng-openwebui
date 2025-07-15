@@ -16,11 +16,11 @@
     </button>
   </div>
 </mat-toolbar>
-<mat-nav-list>
+<mat-nav-list class="chat-list-container">
   <div class="toolbar-title-upper">
     <span class="toolbar-title">Chats</span>
   </div>
-  <mat-list-item *ngFor="let session of chatNames" [ngClass]="{'selected': session.id === selectedSessionId}"
+  <mat-list-item class="chat-list-upper" *ngFor="let session of chatNames" [ngClass]="{'selected': session.id === selectedSessionId}"
     (click)="onSelectSession(session)">
     <div matLine>{{ session.title || session.id }}</div>
     <button mat-icon-button type="button" aria-label="Open conversation options" class="options-button" (click)="openMenu($event, session)">
