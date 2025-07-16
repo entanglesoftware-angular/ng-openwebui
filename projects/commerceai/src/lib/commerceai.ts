@@ -37,7 +37,6 @@ import * as XLSX from 'xlsx';
 import { A11yModule } from '@angular/cdk/a11y';
 import gsap from 'gsap';
 import { CommerceAiThemeService } from './theme/theme.service';
-import {ThemeSwitcherComponent} from './theme-switcher/theme-switcher';
 
 
 interface ChatMessage {
@@ -68,7 +67,6 @@ interface LoginResponse {
     MarkdownModule,
     NgIf,
     Sidebar,
-    ThemeSwitcherComponent,
     HttpClientModule,
     MatTooltipModule,
     A11yModule,

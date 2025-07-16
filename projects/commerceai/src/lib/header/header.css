@@ -2,9 +2,11 @@ mat-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: transparent !important;
 }
 .icon{
   display:flex;
+  color: var(--chat-list-text-color);
 }
 .model-selector {
   position: relative;
@@ -13,23 +15,14 @@ mat-toolbar {
 }
 
 .model-button {
-  color:white;
-  background-color: rgb(15, 14, 14);
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 8px 12px;
+  color: var(--chat-list-text-color);
+  background: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   transition: background-color 0.2s;
   font-size: 18px;
-  height: 56px;
   border: 0px;
-  margin-top: 7px;
-}
-
-.model-button:hover {
-  background-color: #525050;
 }
 
 .arrow {
@@ -39,10 +32,10 @@ mat-toolbar {
 
 .dropdown-card {
   position: absolute;
-  top: 50px;
+  top: 30px;
   left: 0;
   width: 206px;
-  background: white;
+  background: var(--model-card-bg);
   border: 1px solid #ccc;
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
@@ -56,9 +49,6 @@ mat-toolbar {
   font-size: 13px;
 }
 
-.dropdown-item:hover {
-  background-color: #f5f5f5;
-}
 .profile-initial {
   width: 36px;
   height: 34px;

@@ -1,5 +1,5 @@
 <div class="main-container">
-  <lib-sidebar *ngIf="isSidebarOpen"></lib-sidebar>
+  <lib-sidebar [class.sidebar-open]="isSidebarOpen" [class.sidebar-closed]="!isSidebarOpen"></lib-sidebar>
     <div class="chat-box-container">
       <lib-header (menuClicked)="toggleSidebar()"></lib-header>
       <!-- <mat-card class="ai-name" style="margin-bottom: 0px">{{ aiName }}</mat-card> -->

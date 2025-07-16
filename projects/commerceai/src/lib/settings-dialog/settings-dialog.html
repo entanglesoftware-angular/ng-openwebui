@@ -2,6 +2,10 @@
 <mat-dialog-content class="settings-dialog-content">
   <div class="container">
     <aside class="settings-sidebar">
+      <div class="sidebar-item" (click)="selectedSection = 'general'">
+        <mat-icon>settings</mat-icon>
+        <span>General</span>
+      </div>
       <div class="sidebar-item" (click)="selectedSection = 'connections'">
         <mat-icon>cloud</mat-icon>
         <span>Connections</span>
@@ -17,7 +21,20 @@
     </aside>
 
     <div class="content-area">
-      <ng-container *ngIf="selectedSection === 'default'"> </ng-container>
+      <ng-container *ngIf="selectedSection === 'general'">
+        <div class="settings-panel">
+          <!-- Title -->
+          <h2 class="settings-title">Settings</h2>
+          <!-- Theme -->
+          <div class="setting-item">
+            <div class="label">Theme</div>
+            <select #themeSelector [(ngModel)]="currentTheme" (change)="changeTheme(themeSelector.value)">
+              <option value="light-theme">Light Theme</option>
+              <option value="dark-theme">Dark Theme</option>
+            </select>
+          </div>
+        </div>
+      </ng-container>
       <ng-container *ngIf="selectedSection === 'connections'">
         <div class="connections">
           <div class="content-header">
@@ -26,38 +43,24 @@
           </div>
           <p>Total connections: {{ savedConnections.length }}</p>
 
-          <div
-            *ngFor="let conn of savedConnections"
-            style="
+          <div *ngFor="let conn of savedConnections" style="
               display: flex;
               align-items: center;
               justify-content: space-between;
               padding: 8px 0;
-            "
-          >
+            ">
             <div style="display: flex; align-items: center; gap: 10px; flex: 1">
               <span>{{ conn.url }}</span>
               <span>{{ conn.visible ? conn.key : '•••' }}</span>
             </div>
 
             <div style="text-align: center">
-              <button
-                style="border: none; background-color: black"
-                mat-icon-button
-                matSuffix
-                (click)="conn.visible = !conn.visible"
-                type="button"
-              >
-                <mat-icon style="color: white"
-                  >{{ conn.visible ? 'visibility_off' : 'visibility'
-                  }}</mat-icon
-                >
+              <button style="border: none; background-color: black" mat-icon-button matSuffix
+                (click)="conn.visible = !conn.visible" type="button">
+                <mat-icon style="color: white">{{ conn.visible ? 'visibility_off' : 'visibility'
+                  }}</mat-icon>
               </button>
-              <button
-                style="border: none; background-color: black"
-                mat-icon-button
-                (click)="onEdit(conn)"
-              >
+              <button style="border: none; background-color: black" mat-icon-button (click)="onEdit(conn)">
                 <mat-icon style="color: white">settings</mat-icon>
               </button>
             </div>
@@ -86,8 +89,7 @@
 
             <small style="color: gray; display: block; margin-top: 1rem">
               Copyright (c) 2025
-              <a href="#" target="_blank">Open WebUI (Timothy Jaeryang Baek)</a
-              ><br />
+              <a href="#" target="_blank">Open WebUI (Timothy Jaeryang Baek)</a><br />
               Redistribution and use in source and binary forms, with or without
               modification, are permitted provided that the following conditions
               are met:<br /><br />
@@ -113,17 +115,16 @@
                 AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
                 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
                 IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
-                THE POSSIBILITY OF SUCH DAMAGE. Created by Timothy J. Baek</em
-              >
+                THE POSSIBILITY OF SUCH DAMAGE. Created by Timothy J. Baek</em>
             </small>
           </div>
         </div>
       </ng-container>
       <ng-container *ngIf="selectedSection === 'account'">
         <!-- <div class="avatar">{{ user.initial || 'U' }}</div> -->
-         <div class="initial">
-    <span class="profile-initial">{{ user.initial }}</span>
-  </div>
+        <div class="initial">
+          <span class="profile-initial">{{ user.initial }}</span>
+        </div>
         <p><strong>Name:</strong> {{ user.name }}</p>
         <p><strong>Email:</strong> {{ user.email }}</p>
       </ng-container>

@@ -13,4 +13,3 @@ export * from './lib/config/commerceai-config';
 export * from './lib/config/commerceai-config.token';
 export * from './lib/config/commerceai-config.provider'
 export * from './lib/theme/theme.service';
-export * from './lib/theme-switcher/theme-switcher';

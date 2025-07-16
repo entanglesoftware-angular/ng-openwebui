@@ -23,6 +23,7 @@ export class CommerceAiThemeService {
             --typing-indicator-color: gray;
             --chat-input-color: #8F8F8F;
             --scrollbar-color: rgb(185, 185, 185);
+            --model-card-bg:rgb(233, 233, 233);
 
             --chat-list-text-color: #201a1b;
             --chats-label-color :rgb(143, 143, 143);
@@ -57,6 +58,7 @@ export class CommerceAiThemeService {
             --typing-indicator-color: gray;
             --chat-input-color: #AFAFAF;
             --scrollbar-color: rgb(130, 130, 130);
+            --model-card-bg: #323232;
 
             --chat-list-text-color: #ffffff;
             --chats-label-color:rgb(175, 175, 175);
@@ -91,5 +93,16 @@ export class CommerceAiThemeService {
     loadSavedTheme() {
         const saved = localStorage.getItem('ca-theme') as 'light-theme' | 'dark-theme';
         if (saved) this.setTheme(saved);
+    }
+
+    getCurrentTheme(): 'light-theme' | 'dark-theme' | null {
+        const body = document.body;
+        if (body.classList.contains('light-theme')) {
+            return 'light-theme';
+        } else if (body.classList.contains('dark-theme')) {
+            return 'dark-theme';
+        } else {
+            return 'light-theme';
+        }
     }
 }

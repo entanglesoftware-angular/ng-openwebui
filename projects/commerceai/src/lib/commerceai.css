@@ -11,6 +11,14 @@ lib-sidebar {
   background-color: var(--bg-sidebar);
 }
 
+lib-sidebar.sidebar-open {
+  display: block;
+}
+
+lib-sidebar.sidebar-closed {
+  display: none;
+}
+
 .chat-box-container {
   flex: 1;
   display: flex;

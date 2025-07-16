@@ -7,27 +7,37 @@ import { ChangeDetectorRef } from '@angular/core';
 import { EditDialog } from '../edit-dialog/edit-dialog';
 import { MatCard } from '@angular/material/card';
 import { UserService } from '../user.service';
+import { CommerceAiThemeService } from '../theme/theme.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'lib-settings-dialog',
-  imports: [MatIcon, NgIf, NgFor, MatCard, MatDialogModule],
+  imports: [MatIcon, NgIf, NgFor, MatCard, MatDialogModule,FormsModule],
   templateUrl: './settings-dialog.html',
   styleUrl: './settings-dialog.css',
 })
 export class SettingsDialog {
-   user: { name?: string; email?: string; initial?: string } = {};
+  user: { name?: string; email?: string; initial?: string } = {};
+  currentTheme: string = 'light-theme';
   ngOnInit(): void {
     const data = localStorage.getItem('savedConnections');
     if (data) {
       this.savedConnections = JSON.parse(data);
     }
     this.user = this.userService.getUser();
+    const theme = this.themeService.getCurrentTheme();
+    this.currentTheme = theme ? theme : 'light-theme';
   }
-  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef, private userService: UserService) {}
+  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef, private userService: UserService, public themeService: CommerceAiThemeService) { }
 
-  selectedSection = 'default';
+  selectedSection = 'general';
 
   savedConnections: any[] = [];
+
+  changeTheme(theme: string) {
+    this.currentTheme = theme ? theme : 'light-theme';
+    this.themeService.setTheme(theme as 'light-theme' | 'dark-theme');
+  }
 
   onClick() {
     this.dialog

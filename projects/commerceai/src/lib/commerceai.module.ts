@@ -10,7 +10,6 @@ import { CommerceaiRoutingModule } from './commerceai-routing.module';
 import { MaterialModule } from './modules/material.module';
 import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component';
 import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dialog.component';
-import { ThemeSwitcherComponent } from './theme-switcher/theme-switcher';
 
 @NgModule({
   imports: [
@@ -25,8 +24,7 @@ import { ThemeSwitcherComponent } from './theme-switcher/theme-switcher';
     Sidebar,
     DynamicFormDialogComponent,
     CsvPreviewDialogComponent,
-    ThemeSwitcherComponent
   ],
-  exports: [Commerceai, Sidebar, CommerceaiRoutingModule, ThemeSwitcherComponent],
+  exports: [Commerceai, Sidebar, CommerceaiRoutingModule],
 })
 export class CommerceaiModule {}
