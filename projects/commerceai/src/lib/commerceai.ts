@@ -130,7 +130,7 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     this.themeService.loadSavedTheme();
     this.config = this.configValidator.getConfig();
   }
-  isSidebarOpen = false;
+  isSidebarOpen = true;
 
 toggleSidebar() {
   this.isSidebarOpen = !this.isSidebarOpen;
