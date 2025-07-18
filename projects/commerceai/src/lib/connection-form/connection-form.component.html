@@ -1,0 +1,50 @@
+<form [formGroup]="form" (ngSubmit)="onSave()">
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>API Base URL</mat-label>
+    <input matInput formControlName="url" />
+  </mat-form-field>
+
+  <div class="row">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>API Key</mat-label>
+      <input matInput [type]="showKey ? 'text' : 'password'" formControlName="key" />
+      <button mat-icon-button type="button" matSuffix (click)="toggleKeyVisibility()">
+        <mat-icon>{{ showKey ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Prefix ID</mat-label>
+      <input matInput [type]="showPrefix ? 'text' : 'password'" formControlName="prefixId" />
+      <button mat-icon-button type="button" matSuffix (click)="togglePrefixVisibility()">
+        <mat-icon>{{ showPrefix ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Model ID</mat-label>
+    <input matInput formControlName="modelId" />
+  </mat-form-field>
+  <div class="model-ids-hint">
+    <small>Leave empty to include all models from "/models" endpoint</small>
+  </div>
+  <mat-dialog-actions align="end">
+    <div class="button-group">
+      <ng-container *ngIf="showDelete; else closeBtn">
+        <button mat-raised-button color="warn" type="button" (click)="onDelete()">
+          Delete
+        </button>
+      </ng-container>
+      <ng-template #closeBtn>
+        <button mat-raised-button color="basic" type="button" (click)="onClose()">
+          Close
+        </button>
+      </ng-template>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        Save
+      </button>
+    </div>
+  </mat-dialog-actions>
+</form>

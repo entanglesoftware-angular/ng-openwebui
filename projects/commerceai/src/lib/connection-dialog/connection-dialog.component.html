@@ -1,0 +1,13 @@
+<h2 mat-dialog-title>
+  {{ data?.mode === 'edit' ? 'Edit Connection' : 'Add Connection' }}
+</h2>
+
+<mat-dialog-content>
+  <app-connection-form
+    [initialData]="data?.connection"
+    [showDelete]="data?.mode === 'edit'"
+    (save)="onSave($event)"
+    (delete)="onDelete()"
+    (close)="onClose()">
+  </app-connection-form>
+</mat-dialog-content>

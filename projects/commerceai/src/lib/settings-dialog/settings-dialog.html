@@ -1,7 +1,7 @@
-<h2 mat-dialog-title>Settings</h2>
 <mat-dialog-content class="settings-dialog-content">
   <div class="container">
     <aside class="settings-sidebar">
+      <h2 mat-dialog-title>Settings</h2>
       <div class="sidebar-item" (click)="selectedSection = 'general'">
         <mat-icon>settings</mat-icon>
         <span>General</span>
@@ -39,29 +39,25 @@
         <div class="connections">
           <div class="content-header">
             <h3>Manage Direct Connections</h3>
-            <mat-icon class="add-icon" (click)="onClick()">add</mat-icon>
+            <mat-icon class="add-icon" (click)="openAddDialog()">add</mat-icon>
           </div>
           <p>Total connections: {{ savedConnections.length }}</p>
 
-          <div *ngFor="let conn of savedConnections" style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              padding: 8px 0;
-            ">
-            <div style="display: flex; align-items: center; gap: 10px; flex: 1">
-              <span>{{ conn.url }}</span>
+          <div *ngIf="savedConnections.length === 0">
+            <p>No connections saved.</p>
+          </div>
+
+          <div *ngFor="let conn of savedConnections" class="connection-item">
+            <div class="details">
+              <span class="url">{{ conn.url }}</span>
               <span>{{ conn.visible ? conn.key : '•••' }}</span>
             </div>
-
-            <div style="text-align: center">
-              <button style="border: none; background-color: black" mat-icon-button matSuffix
-                (click)="conn.visible = !conn.visible" type="button">
-                <mat-icon style="color: white">{{ conn.visible ? 'visibility_off' : 'visibility'
-                  }}</mat-icon>
+            <div class="connection-item-btn">
+              <button mat-icon-button matSuffix (click)="conn.visible = !conn.visible" type="button">
+                <mat-icon>{{ conn.visible ? 'visibility_off' : 'visibility' }}</mat-icon>
               </button>
-              <button style="border: none; background-color: black" mat-icon-button (click)="onEdit(conn)">
-                <mat-icon style="color: white">settings</mat-icon>
+              <button mat-icon-button (click)="openEditDialog(conn)">
+                <mat-icon>edit</mat-icon>
               </button>
             </div>
           </div>
@@ -78,7 +74,7 @@
           <div class="about">
             <h3 style="margin: 0px">WineGPT (Open WebUI) Version</h3>
             <p><strong>v0.6.1</strong> (v0.6.15 available!)</p>
-            <a href="#">See what's new</a>
+            <a class="link" href="#">See what's new</a>
 
             <div style="margin: 10px 0">
               <button mat-flat-button color="primary">Discord</button>
@@ -89,7 +85,7 @@
 
             <small style="color: gray; display: block; margin-top: 1rem">
               Copyright (c) 2025
-              <a href="#" target="_blank">Open WebUI (Timothy Jaeryang Baek)</a><br />
+              <a href="#" class="link" target="_blank">Open WebUI (Timothy Jaeryang Baek)</a><br />
               Redistribution and use in source and binary forms, with or without
               modification, are permitted provided that the following conditions
               are met:<br /><br />

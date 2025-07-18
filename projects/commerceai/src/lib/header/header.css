@@ -42,6 +42,19 @@ mat-toolbar {
   z-index: 1000;
 }
 
+.custom-profile-menu { 
+  background: var(--setting-menu-bg) !important;
+}
+
+.menu-btn, .menu-icon {
+  color: var(--chat-list-text-color) !important;
+}
+
+.setting-dialog-model .mdc-dialog__surface {
+  background: var(--setting-menu-bg) !important;
+}
+
+
 .dropdown-item {
   padding: 8px 5px;
   cursor: pointer;
@@ -49,18 +62,27 @@ mat-toolbar {
   font-size: 13px;
 }
 
-.profile-initial {
-  width: 36px;
-  height: 34px;
-  background-color: orange;
+.profile-button {
+  padding: 0;
   border-radius: 50%;
-  color: white;
-  font-weight: bold;
-  font-size: 16px;
+  min-width: unset;
+}
+
+.profile-button .mdc-button__ripple, .profile-button .mat-mdc-button-ripple {
+  display: none !important;
+}
+
+.profile-circle {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background-color: orange;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  margin-right: 16px;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  user-select: none;
 }
 

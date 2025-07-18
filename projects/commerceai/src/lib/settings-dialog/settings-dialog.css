@@ -1,5 +1,5 @@
-.card{
-     display: flex;
+.card {
+  display: flex;
   flex-direction: column;
   width: 100%;
   /* height: 100%; */
@@ -7,18 +7,32 @@
   font-family: 'Segoe UI', sans-serif;
   background-color: #fff;
 }
-.container{
+
+.container {
   display: flex;
   flex: 1;
-  height: calc(100% - 64px); 
+  height: calc(100%);
 }
+
 .settings-sidebar {
   width: 220px;
-  /* background-color: #fff; */
   padding: 4px;
   display: flex;
   flex-direction: column;
-  /* gap: 12px; */
+  background: var(--setting-bg);
+}
+
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-title,
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-content {
+  color: var(--chat-list-text-color) !important;
+}
+
+::ng-deep .settings-dialog-content {
+  padding: 0px !important;
+}
+
+.about .link {
+  color: var(--chat-list-text-color) !important;
 }
 
 .sidebar-item {
@@ -29,24 +43,36 @@
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s;
-  color:grey;
+  color: var(--chat-list-text-color) !important;
 
   &:hover {
-    background-color:#525050;
+    background-color: var(--sidebar-item-hover);
     color: #fff;
   }
 }
 
 .content-area {
   flex-grow: 1;
-  padding: 10px;
+  padding: 30px;
 }
-.connections{
-    h3{
-        margin:0px;
-        font-weight: 400;
-    }
-     .content-header {
+
+.connections .connections-btn {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.connections .connections-btn .icon {
+  color: var(--chat-list-text-color) !important;
+}
+
+.connections {
+  h3 {
+    margin: 0px;
+    font-weight: 400;
+  }
+
+  .content-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -54,7 +80,24 @@
     .add-icon {
       cursor: pointer;
     }
+  }
 }
+
+.connection-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.connection-item .url {
+  margin-right: 10px;
+}
+
+.connection-item .connection-item-btn button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-color);
 }
 .scroll {
   max-height: 70vh;
@@ -74,12 +117,13 @@
 .about-scroll::-webkit-scrollbar-thumb:hover {
   background-color: #555;
 }
-.inital{
+
+.inital {
   width: 36px;
-    height: 34px;
-    background-color: orange;
-    border-radius: 50%;
-    color: #fff;
+  height: 34px;
+  background-color: orange;
+  border-radius: 50%;
+  color: #fff;
 }
 
 .setting-item {
@@ -87,13 +131,14 @@
   display: flex;
   justify-content: space-between;
   padding-top: 15px;
-  border-block-start: 1px black solid;
+  border-block-start: 1px var(--chat-list-text-color) solid;
 }
 
-.setting-item select{
+.setting-item select {
   background: none;
   border: none;
   outline: none;
+  color: var(--chat-list-text-color) !important;
 }
 
 .label {
@@ -120,7 +165,7 @@
   height: 20px;
 }
 
-.switch input { 
+.switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -149,11 +194,11 @@
   transition: .4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #4CAF50;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(20px);
 }
 

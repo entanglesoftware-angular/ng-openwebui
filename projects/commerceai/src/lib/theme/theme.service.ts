@@ -24,6 +24,9 @@ export class CommerceAiThemeService {
             --chat-input-color: #8F8F8F;
             --scrollbar-color: rgb(185, 185, 185);
             --model-card-bg:rgb(233, 233, 233);
+            --text-color: rgb(13, 13, 13);
+            --setting-bg: #d6d6d6;
+            --sidebar-item-hover: #bebebe;
 
             --chat-list-text-color: #201a1b;
             --chats-label-color :rgb(143, 143, 143);
@@ -34,6 +37,7 @@ export class CommerceAiThemeService {
             --new-chat-color: rgb(0, 0, 0);
             --new-chat-hover-bg: #eeeeee;
             --dropdown-menu-bg: #ffffff;
+            --setting-menu-bg: #ffffff;
             --menu-item-color: red;
             --menu-item-hover-bg: transparent;
         }`;
@@ -59,6 +63,9 @@ export class CommerceAiThemeService {
             --chat-input-color: #AFAFAF;
             --scrollbar-color: rgb(130, 130, 130);
             --model-card-bg: #323232;
+            --text-color: rgb(255, 255, 255);
+            --setting-bg: #292929;
+            --sidebar-item-hover: #525050;
 
             --chat-list-text-color: #ffffff;
             --chats-label-color:rgb(175, 175, 175);
@@ -69,6 +76,7 @@ export class CommerceAiThemeService {
             --new-chat-color: rgb(255, 255, 255);
             --new-chat-hover-bg: #ffffff1a;
             --dropdown-menu-bg: #303030;
+            --setting-menu-bg: rgb(65, 65, 65);
             --menu-item-color: red;
             --menu-item-hover-bg: transparent;
         }`;

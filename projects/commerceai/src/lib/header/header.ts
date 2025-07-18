@@ -143,7 +143,8 @@ goToSettings() {
   this.dialog.open(SettingsDialog, {
     width: '950px',
     height:'600px',
-  maxWidth: 'none',
+    maxWidth: 'none',
+    panelClass: 'setting-dialog-model'
   });
 }
 

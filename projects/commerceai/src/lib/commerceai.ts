@@ -189,7 +189,7 @@ toggleSidebar() {
     }
   }
   ngAfterViewChecked(): void {
-    this.scrollToBottomAfterViewChecked();
+    // this.scrollToBottomAfterViewChecked();
     // Removed automatic scroll to bottom here to handle it with GSAP
   }
 

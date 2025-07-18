@@ -1,0 +1,69 @@
+/* // @use '../_theme' as theme; */
+
+.full-width {
+  width: 100%;
+}
+
+.half-width {
+  width: 48%;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 4%;
+}
+
+.actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+
+::ng-deep .mat-mdc-dialog-container-with-actions .mat-mdc-dialog-content {
+  padding: 20px 24px !important;
+}
+
+::ng-deep .mdc-dialog--open .mat-mdc-dialog-surface {
+  background: var(--setting-menu-bg);
+}
+
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  background-color: transparent;
+}
+
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::before,
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple::after,
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple:active {
+  border-bottom-color: var(--text-color) !important;
+}
+
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple--active::before,
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-line-ripple--active::before {
+  border-bottom-color: var(--text-color) !important;
+}
+
+::ng-deep .mat-mdc-form-field:not(.mat-form-field-disabled) .mat-mdc-floating-label.mdc-floating-label,
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-floating-label,
+::ng-deep .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-text-field__input {
+  color: var(--text-color) !important;
+  caret-color: var(--text-color) !important;
+}
+
+
+::ng-deep .mat-mdc-raised-button:not(:disabled) {
+  color: white;
+  background-color: #5a5558;
+}
+
+::ng-deep .mat-mdc-raised-button:hover:not(:disabled) {
+  color: white;
+  background-color: #969696;
+}
+
+::ng-deep .mat-mdc-raised-button .mdc-button__ripple,
+::ng-deep .mat-mdc-raised-button .mat-mdc-button-ripple {
+  display: none !important;
+}
