@@ -75,23 +75,19 @@ export class Header {
     private dialog: MatDialog,
     private userService: UserService
   ) {}
-
-  ngOnInit(): void {
-    this.getToken();
-    this.fetchModels();
-    document.addEventListener(
-      'click',
-      this.closeModelDropdown.bind(this)
-    );
-    if (
-    !sessionStorage.getItem('jwt')
-  ) {
-    this.getToken();
+ngOnInit(): void {
+  this.userService.user$.subscribe(user => {
+    this.userInitial = user?.initial || '';
+  });
+  if (!sessionStorage.getItem('jwt')) {
+    this.getToken(); 
   } else {
-    this.fetchAccountDetails();
+    this.fetchAccountDetails(); 
   }
+  this.fetchModels();
+  document.addEventListener('click', this.closeModelDropdown.bind(this));
+}
 
-  }
 
   fetchModels() {
     this.domain = this.domains[this.selectedIndex];
@@ -147,23 +143,25 @@ goToSettings() {
     panelClass: 'setting-dialog-model'
   });
 }
+getToken() {
+  const loginData = {
+    email: 'alice.smith123@example.com',
+    password: 'newsecurepass123',
+  };
 
- getToken() {
-    const loginData = {
-      email: 'alice.smith123@example.com',
-      password: 'newsecurepass123',
-    };
-    this.http
-      .post<LoginResponse>(`https://micro-scale.software/api/login`, loginData)
-      .subscribe({
-        next: (response) => {
-          sessionStorage.setItem('jwt', response.JWT_Token);
-        },
-        error: (err) => {
-          console.error('Login error:', err);
-        },
-      });
-  }
+  this.http
+    .post<LoginResponse>(`https://micro-scale.software/api/login`, loginData)
+    .subscribe({
+      next: (response) => {
+        sessionStorage.setItem('jwt', response.JWT_Token);
+        this.fetchAccountDetails(); 
+      },
+      error: (err) => {
+        console.error('Login error:', err);
+      },
+    });
+}
+
 
   fetchAccountDetails() {
   const token = sessionStorage.getItem('jwt');
