@@ -132,9 +132,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
   }
   isSidebarOpen = true;
 
-toggleSidebar() {
-  this.isSidebarOpen = !this.isSidebarOpen;
-}
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
   async ngOnInit(): Promise<void> {
     console.log('Initializing...');
     this.http
@@ -152,11 +152,7 @@ toggleSidebar() {
           });
         },
       });
-    if (
-      sessionStorage.getItem('jwt') == null ||
-      sessionStorage.getItem('jwt') == undefined ||
-      sessionStorage.getItem('jwt') == ''
-    ) {
+    if (sessionStorage.getItem('jwt')) {
       this.routeSubscription = this.route.params.subscribe((params) => {
         const sessionId = params['session_id'];
         if (sessionId) {
@@ -230,7 +226,7 @@ toggleSidebar() {
     try {
       this.chatContainer.nativeElement.scrollTop =
         this.chatContainer.nativeElement.scrollHeight;
-    } catch (err) {}
+    } catch (err) { }
   }
   scrollToBottom() {
     if (!this.scrollThrottleTimer) {
@@ -238,7 +234,7 @@ toggleSidebar() {
         try {
           this.chatContainer.nativeElement.scrollTop =
             this.chatContainer.nativeElement.scrollHeight;
-        } catch {}
+        } catch { }
         this.scrollThrottleTimer = null;
       }, 100); // Throttle every 100ms
     }
@@ -423,7 +419,7 @@ toggleSidebar() {
       };
       ReqBody.messages.push(userMessage);
     }
-    
+
     const controller = new AbortController();
 
     try {
