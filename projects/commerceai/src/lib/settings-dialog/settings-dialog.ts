@@ -28,7 +28,8 @@ export class SettingsDialog {
   ngOnInit(): void {
     const data = localStorage.getItem('savedConnections');
     this.savedConnections = data ? JSON.parse(data) : [];
-    this.user = this.userService.getUser();
+    this.user = this.userService.getUser() ?? {}; 
+    console.log('User:', this.userService.getUser());
     const theme = this.themeService.getCurrentTheme();
     this.currentTheme = theme ? theme : 'light-theme';
   }
