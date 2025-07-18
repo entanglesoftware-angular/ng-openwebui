@@ -405,6 +405,7 @@ toggleSidebar() {
               this.animateNewMessage(lastMessage);
             }
           });
+          this.clearAllFiles();
         } catch (error) {
           console.error(`Failed to convert file ${file.name}:`, error);
           this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', {

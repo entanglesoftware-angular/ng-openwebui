@@ -6,7 +6,7 @@
 
     <div class="chat-messages" #chatContainer>
       <ng-container *ngFor="let event of chatMessages.events">
-        <mat-card class="message"
+        <mat-card class="message" *ngIf="(event.messages && event.messages.length > 0)"
           [ngClass]="{ 'user': event.role === 'user', 'model': event.role === 'model', 'form': event.role === 'form', }">
           <!-- Render all messages within this event -->
           <div *ngFor="let message of event.messages">
