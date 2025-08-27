@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { NgOpenwebui } from '../../../ng-openwebui/src/lib/ng-openwebui'; // Import the library component
+import { NgOpenwebUI } from '../../../ng-openwebui/src/lib/ng-openwebui'; // Import the library component
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, NgOpenwebui],
+  imports: [RouterOutlet, NgOpenwebUI],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

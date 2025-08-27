@@ -6,8 +6,8 @@ import { MaterialModule } from '../modules/material.module';
 import { ChatSession } from '../models/chat-session.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { NgOpenwebuiConfig } from '../config/ng-openwebui-config';
-import { NgOpenwebuiConfigValidator } from '../services/ng-openwebui-config-validator.service';
+import { NgOpenwebUIConfig } from '../config/ng-openwebui-config';
+import { NgOpenwebUIConfigValidator } from '../services/ng-openwebui-config-validator.service';
 import { catchError, throwError } from 'rxjs';
 
 @Component({
@@ -21,7 +21,7 @@ export class Sidebar implements OnInit, OnDestroy {
   @ViewChild('dropdownMenu') dropdownMenu!: ElementRef;
   chatNames: ChatSession[] = [];
   selectedSessionId: string | null = null;
-  private config: NgOpenwebuiConfig;
+  private config: NgOpenwebUIConfig;
   menuOpen = false;
   menuPosition = { x: 0, y: 0 };
   selectedSession: any = null;
@@ -32,7 +32,7 @@ export class Sidebar implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
-    private configValidator: NgOpenwebuiConfigValidator
+    private configValidator: NgOpenwebUIConfigValidator
   ) {
     this.config = this.configValidator.getConfig();
   }

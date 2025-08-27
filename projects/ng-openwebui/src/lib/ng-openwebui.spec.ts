@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { NgOpenwebui } from './ng-openwebui';
+import { NgOpenwebUI } from './ng-openwebui';
 
-describe('NgOpenwebui', () => {
-  let component: NgOpenwebui;
-  let fixture: ComponentFixture<NgOpenwebui>;
+describe('NgOpenwebUI', () => {
+  let component: NgOpenwebUI;
+  let fixture: ComponentFixture<NgOpenwebUI>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NgOpenwebui]
+      imports: [NgOpenwebUI]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(NgOpenwebui);
+    fixture = TestBed.createComponent(NgOpenwebUI);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

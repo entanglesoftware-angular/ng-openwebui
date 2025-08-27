@@ -30,9 +30,9 @@ import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dial
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
-import { NgOpenwebuiConfig } from './config/ng-openwebui-config';
+import { NgOpenwebUIConfig } from './config/ng-openwebui-config';
 import { COMMERCE_AI_CONFIG } from './config/ng-openwebui-config.token';
-import { NgOpenwebuiConfigValidator } from './services/ng-openwebui-config-validator.service';
+import { NgOpenwebUIConfigValidator } from './services/ng-openwebui-config-validator.service';
 import * as XLSX from 'xlsx';
 import { A11yModule } from '@angular/cdk/a11y';
 import gsap from 'gsap';
@@ -81,9 +81,9 @@ interface LoginResponse {
   templateUrl: './ng-openwebui.html',
   styleUrl: './ng-openwebui.css',
 })
-export class NgOpenwebui implements OnInit, AfterViewChecked, OnDestroy {
+export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   message: string = '';
-  aiName: string = 'NgOpenwebui';
+  aiName: string = 'NgOpenwebUI';
   // chatMessages: ChatMessage[] = [];
   modelMap: { model: string; domain: string }[] = [];
   selectedModel: string = '';
@@ -123,9 +123,9 @@ export class NgOpenwebui implements OnInit, AfterViewChecked, OnDestroy {
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    private configValidator: NgOpenwebuiConfigValidator,
+    private configValidator: NgOpenwebUIConfigValidator,
     private themeService: CommerceAiThemeService,
-    @Inject(COMMERCE_AI_CONFIG) private config: NgOpenwebuiConfig
+    @Inject(COMMERCE_AI_CONFIG) private config: NgOpenwebUIConfig
   ) {
     this.themeService.loadSavedTheme();
     this.config = this.configValidator.getConfig();

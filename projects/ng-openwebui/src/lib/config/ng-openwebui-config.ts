@@ -1,4 +1,4 @@
-export interface NgOpenwebuiConfig {
+export interface NgOpenwebUIConfig {
   userId: string;
   domain: string;
 }
