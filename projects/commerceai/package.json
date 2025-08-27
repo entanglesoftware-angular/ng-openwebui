@@ -1,6 +1,21 @@
 {
-  "name": "commerceai",
+  "name": "ng-openwebui",
   "version": "0.0.1",
+  "description": "Angular library for AI-driven commerce features and OpenWebUI integration",
+  "author": "Entangle Software",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/entanglesoftware-angular/ng-openwebui.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "library",
+    "ng-openwebui",
+    "openwebui",
+    "entanglesoftware",
+    "ai"
+  ],
   "peerDependencies": {
     "@angular/animations": "^20.0.0",
     "@angular/cdk": "^20.0.0",
