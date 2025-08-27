@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Commerceai } from '../../../commerceai/src/lib/commerceai'; // Import the library component
+import { NgOpenwebui } from '../../../ng-openwebui/src/lib/ng-openwebui'; // Import the library component
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Commerceai],
+  imports: [RouterOutlet, NgOpenwebui],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

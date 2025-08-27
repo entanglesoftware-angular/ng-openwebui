@@ -2,9 +2,9 @@
   "name": "ai",
   "version": "0.0.0",
   "scripts": {
-    "buildf": "ng build commerceai && cd dist/commerceai && npm pack",
-    "build:stats": "ng build commerceai --stats-json",
-    "analyze": "webpack-bundle-analyzer dist/commerceai/stats.json",
+    "buildf": "ng build ng-openwebui && cd dist/ng-openwebui && npm pack",
+    "build:stats": "ng build ng-openwebui --stats-json",
+    "analyze": "webpack-bundle-analyzer dist/ng-openwebui/stats.json",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",

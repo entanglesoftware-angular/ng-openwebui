@@ -7,7 +7,7 @@
     "types": [],
     "baseUrl": "./",
     "paths": {
-      "commerceai": ["dist/commerceai"]
+      "ng-openwebui": ["dist/ng-openwebui"]
     }
   },
   "include": [

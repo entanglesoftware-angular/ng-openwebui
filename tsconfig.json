@@ -4,8 +4,8 @@
   "compileOnSave": false,
   "compilerOptions": {
     "paths": {
-      "commerceai": [
-        "./dist/commerceai"
+      "ng-openwebui": [
+        "./dist/ng-openwebui"
       ]
     },
     "strict": true,
@@ -30,10 +30,10 @@
   "files": [],
   "references": [
     {
-      "path": "./projects/commerceai/tsconfig.lib.json"
+      "path": "./projects/ng-openwebui/tsconfig.lib.json"
     },
     {
-      "path": "./projects/commerceai/tsconfig.spec.json"
+      "path": "./projects/ng-openwebui/tsconfig.spec.json"
     },
     {
       "path": "./projects/test-app/tsconfig.app.json"

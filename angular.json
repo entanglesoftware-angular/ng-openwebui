@@ -3,20 +3,20 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "commerceai": {
+    "ng-openwebui": {
       "projectType": "library",
-      "root": "projects/commerceai",
-      "sourceRoot": "projects/commerceai/src",
+      "root": "projects/ng-openwebui",
+      "sourceRoot": "projects/ng-openwebui/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/commerceai/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ng-openwebui/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/commerceai/tsconfig.lib.json"
+              "tsConfig": "projects/ng-openwebui/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -24,7 +24,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "tsConfig": "projects/commerceai/tsconfig.spec.json",
+            "tsConfig": "projects/ng-openwebui/tsconfig.spec.json",
             "polyfills": [
               "zone.js",
               "zone.js/testing"

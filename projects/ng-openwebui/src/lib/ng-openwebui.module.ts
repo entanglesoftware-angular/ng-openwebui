@@ -4,9 +4,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { MarkdownModule } from 'ngx-markdown';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { Commerceai } from './commerceai';
+import { NgOpenwebui } from './ng-openwebui';
 import { Sidebar } from './sidebar/sidebar';
-import { CommerceaiRoutingModule } from './commerceai-routing.module';
+import { CommerceaiRoutingModule } from './ng-openwebui-routing.module';
 import { MaterialModule } from './modules/material.module';
 import { DynamicFormDialogComponent } from './form/dynamic-form-dialog.component';
 import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dialog.component';
@@ -20,11 +20,11 @@ import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dial
     BrowserAnimationsModule,
     MaterialModule,
     CommerceaiRoutingModule,
-    Commerceai,
+    NgOpenwebui,
     Sidebar,
     DynamicFormDialogComponent,
     CsvPreviewDialogComponent,
   ],
-  exports: [Commerceai, Sidebar, CommerceaiRoutingModule],
+  exports: [NgOpenwebui, Sidebar, CommerceaiRoutingModule],
 })
 export class CommerceaiModule {}

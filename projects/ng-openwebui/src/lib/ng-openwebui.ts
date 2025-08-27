@@ -30,9 +30,9 @@ import { CsvPreviewDialogComponent } from './csv-preview-dialog/csv-preview-dial
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
-import { CommerceAIConfig } from './config/commerceai-config';
-import { COMMERCE_AI_CONFIG } from './config/commerceai-config.token';
-import { CommerceAIConfigValidator } from './services/commerceai-config-validator.service';
+import { NgOpenwebuiConfig } from './config/ng-openwebui-config';
+import { COMMERCE_AI_CONFIG } from './config/ng-openwebui-config.token';
+import { NgOpenwebuiConfigValidator } from './services/ng-openwebui-config-validator.service';
 import * as XLSX from 'xlsx';
 import { A11yModule } from '@angular/cdk/a11y';
 import gsap from 'gsap';
@@ -57,7 +57,7 @@ interface LoginResponse {
 }
 
 @Component({
-  selector: 'lib-commerceai',
+  selector: 'lib-ng-openwebui',
   standalone: true,
   imports: [
     MaterialModule,
@@ -78,12 +78,12 @@ interface LoginResponse {
     Header
   ],
   providers: [],
-  templateUrl: './commerceai.html',
-  styleUrl: './commerceai.css',
+  templateUrl: './ng-openwebui.html',
+  styleUrl: './ng-openwebui.css',
 })
-export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
+export class NgOpenwebui implements OnInit, AfterViewChecked, OnDestroy {
   message: string = '';
-  aiName: string = 'CommerceAI';
+  aiName: string = 'NgOpenwebui';
   // chatMessages: ChatMessage[] = [];
   modelMap: { model: string; domain: string }[] = [];
   selectedModel: string = '';
@@ -123,9 +123,9 @@ export class Commerceai implements OnInit, AfterViewChecked, OnDestroy {
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
-    private configValidator: CommerceAIConfigValidator,
+    private configValidator: NgOpenwebuiConfigValidator,
     private themeService: CommerceAiThemeService,
-    @Inject(COMMERCE_AI_CONFIG) private config: CommerceAIConfig
+    @Inject(COMMERCE_AI_CONFIG) private config: NgOpenwebuiConfig
   ) {
     this.themeService.loadSavedTheme();
     this.config = this.configValidator.getConfig();
