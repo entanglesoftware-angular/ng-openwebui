@@ -62,7 +62,7 @@ Hurray You are good to go !! 😋 😋
 
 `ng-openwebui` uses following tech to work properly:
 
-- [Angular 13] - HTML enhanced for web apps!
+- [Angular 20] - HTML enhanced for web apps!
 - [scss] - an extension to css
 
 ng-openwebui is an open source project with a [public repository][dill]
