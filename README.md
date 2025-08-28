@@ -2,7 +2,7 @@
 
 ## A lightweight, reusable Angular UI component library that brings accessible, responsive web UI controls to your Angular apps. ng-openwebui provides a set of well-documented components and utilities (modals, tooltips, form controls, buttons, layout helpers, etc.) built with Angular 20 and designed to be easy to drop into your project — with theming and accessibility in mind.
 
-![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fentanglesoftware-angular%2Fsvg-donught&labelColor=%231a214d&countColor=%23bb3624&style=flat)
+![Visitors](https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fentanglesoftware-angular%2Fng-openwebui&labelColor=%231a214d&countColor=%23bb3624&style=flat)
 
 NgOpenwebUI is an angular based lightweight, reusable Angular UI component library that brings accessible, responsive web UI controls to your Angular apps. ng-openwebui provides a set of well-documented components and utilities (modals, tooltips, form controls, buttons, layout helpers, etc.) built with Angular 20 and designed to be easy to drop into your project — with theming and accessibility in mind.
 
@@ -52,28 +52,18 @@ Hurray You are good to go !! 😋 😋
 > `import { NgOpenwebUI } from 'ng-openwebui';`
 
 
-### Interfaces
-
-- IDonughtConfig - interface for donught configuration
-- IDonughtSegmentArrayConfig - interface for donught segment array configuration
-- IDonughtTextArrayConfig - interface for donught text array
 
 ## Technologies Used
 
 `ng-openwebui` uses following tech to work properly:
 
-- [Angular 20] - HTML enhanced for web apps!
+- [Angular 13] - HTML enhanced for web apps!
 - [scss] - an extension to css
-
-ng-openwebui is an open source project with a [public repository][dill]
-on GitHub.
 
 
 ## Development
 
 Want to contribute? Great! You are welcome here !! Let's build together 🙂
-
-Fork or clone the repo from [our repository][dill]
 
 ```sh
 git clone https://github.com/entanglesoftware-angular/ng-openwebui
@@ -126,8 +116,6 @@ Want to stay tuned for latest updates or share feedbacks. Follow us at following
 💬 If you have any question/feedback, please do not hesitate to reach out to us at tech@entanglesoftware.com
 
 ## 📈 GitHub Stats
-
-[![Yu's github stats](https://github-readme-stats.vercel.app/api?username=entanglesoftware)](https://github.com/entanglesoftware-angular)
 
 [//]: # "These are reference links used in the body of this note and get stripped out when the markdown processor does its job. There is no need to format nicely because it shouldn't be seen. Thanks SO - http://stackoverflow.com/questions/4823468/store-comments-in-markdown-syntax"
 [dill]: https://github.com/entanglesoftware-angular/svg-donught
