@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@angular/core';
-import { COMMERCE_AI_CONFIG  } from '../config/ng-openwebui-config.token';
+import { NG_OPEN_WEB_UI_CONFIG  } from '../config/ng-openwebui-config.token';
 import { NgOpenwebUIConfig } from '../config/ng-openwebui-config';
 
 @Injectable()
 export class NgOpenwebUIConfigValidator {
   constructor(
-    @Inject(COMMERCE_AI_CONFIG) private config: NgOpenwebUIConfig
+    @Inject(NG_OPEN_WEB_UI_CONFIG) private config: NgOpenwebUIConfig
   ) {
     this.validateConfig();
   }

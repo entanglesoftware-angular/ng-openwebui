@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
-export class CommerceAiThemeService {
+export class NgOpenwebUIThemeService {
 
      private lightTheme = `
         :root {

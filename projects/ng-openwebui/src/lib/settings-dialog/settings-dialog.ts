@@ -6,7 +6,7 @@ import { ConnectionDialogComponent } from '../connection-dialog/connection-dialo
 import { ChangeDetectorRef } from '@angular/core';
 import { MatCard } from '@angular/material/card';
 import { UserService } from '../user.service';
-import { CommerceAiThemeService } from '../theme/theme.service';
+import { NgOpenwebUIThemeService } from '../theme/theme.service';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -23,7 +23,7 @@ export class SettingsDialog {
   showKey: boolean = false;
   showPrefix: boolean = false;
 
-  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef, private userService: UserService, public themeService: CommerceAiThemeService) { }
+  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef, private userService: UserService, public themeService: NgOpenwebUIThemeService) { }
 
   ngOnInit(): void {
     const data = localStorage.getItem('savedConnections');

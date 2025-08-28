@@ -31,12 +31,12 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTooltip } from '@angular/material/tooltip';
 import { Subscription } from 'rxjs';
 import { NgOpenwebUIConfig } from './config/ng-openwebui-config';
-import { COMMERCE_AI_CONFIG } from './config/ng-openwebui-config.token';
+import { NG_OPEN_WEB_UI_CONFIG } from './config/ng-openwebui-config.token';
 import { NgOpenwebUIConfigValidator } from './services/ng-openwebui-config-validator.service';
 import * as XLSX from 'xlsx';
 import { A11yModule } from '@angular/cdk/a11y';
 import gsap from 'gsap';
-import { CommerceAiThemeService } from './theme/theme.service';
+import { NgOpenwebUIThemeService } from './theme/theme.service';
 
 
 interface ChatMessage {
@@ -124,8 +124,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private configValidator: NgOpenwebUIConfigValidator,
-    private themeService: CommerceAiThemeService,
-    @Inject(COMMERCE_AI_CONFIG) private config: NgOpenwebUIConfig
+    private themeService: NgOpenwebUIThemeService,
+    @Inject(NG_OPEN_WEB_UI_CONFIG) private config: NgOpenwebUIConfig
   ) {
     this.themeService.loadSavedTheme();
     this.config = this.configValidator.getConfig();
