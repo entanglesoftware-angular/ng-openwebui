@@ -46,6 +46,8 @@
     "webpack-bundle-analyzer": "4.10.2"
   },
   "overrides": {
-    "mermaid": "11.10.0"
+    "mermaid": "11.10.0",
+    "find-cache-directory": "3.3.1"
+
   }
 }
