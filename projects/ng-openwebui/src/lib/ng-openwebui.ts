@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy, Input, Optional, Inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy, Input, Optional, Inject, PLATFORM_ID } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -7,7 +7,7 @@ import {
   HttpClientModule,
   HttpHeaders,
 } from '@angular/common/http';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { NgClass, NgForOf, NgIf, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { MarkdownModule } from 'ngx-markdown';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
@@ -106,6 +106,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   formData = '';
   isListening: boolean = false;
   speechRecognition: any;
+  private isBrowser: boolean;
 
   excel_mime_types = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -125,10 +126,13 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     private dialog: MatDialog,
     private configValidator: NgOpenwebUIConfigValidator,
     private themeService: NgOpenwebUIThemeService,
-    @Inject(NG_OPEN_WEB_UI_CONFIG) private config: NgOpenwebUIConfig
+    @Inject(NG_OPEN_WEB_UI_CONFIG) private config: NgOpenwebUIConfig,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.themeService.loadSavedTheme();
     this.config = this.configValidator.getConfig();
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
   isSidebarOpen = true;
 
@@ -658,13 +662,17 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
 
     const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
+    if (!this.isBrowser){
+      window.URL.revokeObjectURL(url); 
+      return;
+    } 
     const link = document.createElement('a');
     link.href = url;
     link.download = `csvfile.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
+    
   }
 
   downloadExcel(csvString: string): void {
@@ -682,6 +690,10 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       const url = window.URL.createObjectURL(blob);
+      if (!this.isBrowser){
+        window.URL.revokeObjectURL(url); 
+        return;
+      }
       const link = document.createElement('a');
       link.href = url;
       link.download = `excelFile.xlsx`;

@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, HostListener, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, HostListener, Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { NgForOf, NgIf } from '@angular/common';
 import { MaterialModule } from '../modules/material.module';
 import { ChatSession } from '../models/chat-session.model';
@@ -25,6 +25,7 @@ export class Sidebar implements OnInit, OnDestroy {
   menuOpen = false;
   menuPosition = { x: 0, y: 0 };
   selectedSession: any = null;
+  private isBrowser: boolean;
 
   constructor(
     private http: HttpClient,
@@ -32,9 +33,12 @@ export class Sidebar implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
-    private configValidator: NgOpenwebUIConfigValidator
+    private configValidator: NgOpenwebUIConfigValidator,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(DOCUMENT) private document: Document
   ) {
     this.config = this.configValidator.getConfig();
+    this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   ngOnInit() {
@@ -147,6 +151,7 @@ export class Sidebar implements OnInit, OnDestroy {
   }
 
   clearActiveListItems() {
+    if (!this.isBrowser) return;
     const activeItems = document.querySelectorAll('mat-list-item.active');
 
     activeItems.forEach((item) => {

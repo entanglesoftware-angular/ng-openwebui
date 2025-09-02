@@ -1,9 +1,9 @@
-import { Component,ViewEncapsulation,Output,EventEmitter } from '@angular/core';
+import { Component,ViewEncapsulation,Output,EventEmitter, Inject, PLATFORM_ID } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { HostListener } from '@angular/core';
-import { NgClass, NgFor, NgIf} from '@angular/common';
+import { NgClass, DOCUMENT, isPlatformBrowser, NgFor, NgIf} from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -69,12 +69,17 @@ export class Header {
     'http://localhost:8004',
   ];
   selectedIndex: number = 0;
+  private isBrowser: boolean;
    constructor(
     private http: HttpClient,
     private router: Router,
     private dialog: MatDialog,
-    private userService: UserService
-  ) {}
+    private userService: UserService,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(DOCUMENT) private document: Document
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 ngOnInit(): void {
   this.userService.user$.subscribe(user => {
     this.userInitial = user?.initial || '';
@@ -85,7 +90,9 @@ ngOnInit(): void {
     this.fetchAccountDetails(); 
   }
   this.fetchModels();
-  document.addEventListener('click', this.closeModelDropdown.bind(this));
+  if (!this.isBrowser){
+    document.addEventListener('click', this.closeModelDropdown.bind(this));
+  };
 }
 
 

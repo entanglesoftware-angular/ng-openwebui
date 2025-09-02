@@ -1,7 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 
 @Injectable({ providedIn: 'root' })
 export class NgOpenwebUIThemeService {
+    private isBrowser: boolean;
 
      private lightTheme = `
         :root {
@@ -81,17 +83,27 @@ export class NgOpenwebUIThemeService {
             --menu-item-hover-bg: transparent;
         }`;
 
-    constructor() {
-        this.injectStyle(this.lightTheme + this.darkTheme);
+    constructor(
+        @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(DOCUMENT) private document: Document
+    ) {
+        this.isBrowser = isPlatformBrowser(this.platformId);
+
+        if (this.isBrowser) {
+            this.injectStyle(this.lightTheme + this.darkTheme);
+            this.loadSavedTheme();
+        }
     }
 
     private injectStyle(css: string) {
+        if (!this.isBrowser) return;
         const style = document.createElement('style');
         style.textContent = css;
         document.head.appendChild(style);
     }
 
     setTheme(theme: 'light-theme' | 'dark-theme') {
+        if (!this.isBrowser) return;
         const body = document.body;
         body.classList.remove('light-theme', 'dark-theme');
         body.classList.add(theme);
@@ -104,6 +116,7 @@ export class NgOpenwebUIThemeService {
     }
 
     getCurrentTheme(): 'light-theme' | 'dark-theme' | null {
+        if (!this.isBrowser) return null;
         const body = document.body;
         if (body.classList.contains('light-theme')) {
             return 'light-theme';
