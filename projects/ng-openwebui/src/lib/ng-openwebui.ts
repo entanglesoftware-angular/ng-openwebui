@@ -666,12 +666,12 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
       window.URL.revokeObjectURL(url); 
       return;
     } 
-    const link = document.createElement('a');
+    const link = this.document.createElement('a');
     link.href = url;
     link.download = `csvfile.csv`;
-    document.body.appendChild(link);
+    this.document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    this.document.body.removeChild(link);
     
   }
 
@@ -694,12 +694,12 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         window.URL.revokeObjectURL(url); 
         return;
       }
-      const link = document.createElement('a');
+      const link = this.document.createElement('a');
       link.href = url;
       link.download = `excelFile.xlsx`;
-      document.body.appendChild(link);
+      this.document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      this.document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error generating Excel file:', error);

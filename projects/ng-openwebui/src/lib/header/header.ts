@@ -91,7 +91,7 @@ ngOnInit(): void {
   }
   this.fetchModels();
   if (!this.isBrowser){
-    document.addEventListener('click', this.closeModelDropdown.bind(this));
+    this.document.addEventListener('click', this.closeModelDropdown.bind(this));
   };
 }
 

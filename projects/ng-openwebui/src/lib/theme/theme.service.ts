@@ -97,14 +97,14 @@ export class NgOpenwebUIThemeService {
 
     private injectStyle(css: string) {
         if (!this.isBrowser) return;
-        const style = document.createElement('style');
+        const style = this.document.createElement('style');
         style.textContent = css;
-        document.head.appendChild(style);
+        this.document.head.appendChild(style);
     }
 
     setTheme(theme: 'light-theme' | 'dark-theme') {
         if (!this.isBrowser) return;
-        const body = document.body;
+        const body = this.document.body;
         body.classList.remove('light-theme', 'dark-theme');
         body.classList.add(theme);
         localStorage.setItem('ca-theme', theme);
@@ -117,7 +117,7 @@ export class NgOpenwebUIThemeService {
 
     getCurrentTheme(): 'light-theme' | 'dark-theme' | null {
         if (!this.isBrowser) return null;
-        const body = document.body;
+        const body = this.document.body;
         if (body.classList.contains('light-theme')) {
             return 'light-theme';
         } else if (body.classList.contains('dark-theme')) {

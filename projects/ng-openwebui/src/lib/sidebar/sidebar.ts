@@ -152,7 +152,7 @@ export class Sidebar implements OnInit, OnDestroy {
 
   clearActiveListItems() {
     if (!this.isBrowser) return;
-    const activeItems = document.querySelectorAll('mat-list-item.active');
+    const activeItems = this.document.querySelectorAll('mat-list-item.active');
 
     activeItems.forEach((item) => {
       const buttons = item.querySelectorAll('button');
