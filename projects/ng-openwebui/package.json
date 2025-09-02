@@ -8,9 +8,10 @@
     "@angular/core": "^20.0.0",
     "@angular/material": "20.0.1",
     "ngx-csv-parser": "10.8.2",
-    "ngx-markdown": "19.1.1",
+    "ngx-markdown": "^20.1.0",
     "gsap": "3.13.0",
-    "ngx-papaparse": "8.0.0"
+    "ngx-papaparse": "^8.0.0",
+     "xlsx": "^0.18.5"
   },
   "dependencies": {
     "tslib": "^2.3.0"
