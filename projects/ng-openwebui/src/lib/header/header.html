@@ -16,11 +16,19 @@
       </div>
     </div>
   </div>
-  <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-button">
-    <div class="profile-circle">
-      {{ userInitial }}
+  <div class="header-left-content">
+    <div class="setting-item">
+      <select id="themeSelector" name="themeSelector" #themeSelector [(ngModel)]="currentTheme" (change)="changeTheme(themeSelector.value)">
+        <option value="light-theme">Light Theme</option>
+        <option value="dark-theme">Dark Theme</option>
+      </select>
     </div>
-  </button>
+    <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-button">
+      <div class="profile-circle">
+        {{ userInitial }}
+      </div>
+    </button>
+  </div>
 
   <mat-menu #profileMenu="matMenu" [overlapTrigger]="false" class="custom-profile-menu">
     <button class="menu-btn" mat-menu-item (click)="goToSettings()">

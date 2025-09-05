@@ -27,6 +27,14 @@
   color: var(--chat-list-text-color) !important;
 }
 
+::ng-deep .mat-mdc-dialog-container .mat-mdc-dialog-content {
+  display: contents;
+}
+
+::ng-deep .scroll {
+  max-height: -webkit-fill-available !important;
+}
+
 ::ng-deep .settings-dialog-content {
   padding: 0px !important;
 }

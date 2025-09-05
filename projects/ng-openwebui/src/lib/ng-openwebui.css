@@ -424,3 +424,21 @@ markdown {
 .send-button {
   cursor: pointer;
 }
+
+::ng-deep .mat-mdc-snack-bar-container .mat-mdc-snackbar-surface {
+  background-color: var(--snackbar-bg) !important;
+  color: var(--snackbar-text) !important;
+
+  .mat-mdc-snack-bar-action {
+    color: var(--snackbar-action) !important;
+  }
+}
+
+::ng-deep .mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
+  --mat-button-text-state-layer-color: none !important;
+  --mat-button-text-ripple-color: none !important;
+}
+
+::ng-deep .custom-tooltip {
+  color: var(--snackbar-text) !important;
+}

@@ -101,13 +101,13 @@
         <div class="left-actions">
           <input type="file" accept=".csv, .xls, .xlsx, image/*" multiple (change)="onFilesSelected($event)" hidden
             #fileInput />
-          <button mat-icon-button color="warn" matTooltip="Attach file" (click)="fileInput.click()">
+          <button mat-icon-button color="warn" matTooltip="Attach file" matTooltipClass="custom-tooltip" (click)="fileInput.click()">
             <mat-icon>attach_file</mat-icon>
           </button>
         </div>
         <div class="right-actions">
           <button mat-icon-button color="accent" aria-label="Voice Input" (click)="startVoiceInput()"
-            matTooltip="{{ isListening ? 'Stop voice input' : 'Start voice input' }}">
+            matTooltip="{{ isListening ? 'Stop voice input' : 'Start voice input' }}" matTooltipClass="custom-tooltip">
             <ng-container *ngIf="!isListening; else listening">
               <mat-icon>mic</mat-icon>
             </ng-container>

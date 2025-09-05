@@ -22,6 +22,8 @@ import { SettingsDialog } from '../settings-dialog/settings-dialog';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatCard } from '@angular/material/card';
 import { UserService } from '../user.service';
+import { NgOpenwebUIThemeService } from '../theme/theme.service';
+import { FormsModule } from '@angular/forms';
 import { MatSidenav } from '@angular/material/sidenav';
 
 interface LoginResponse {
@@ -50,6 +52,7 @@ interface LoginResponse {
     MatButtonModule,
     MatToolbar,
     MatCard,
+    FormsModule
   ],
   templateUrl: './header.html',
   styleUrl: './header.css',
@@ -78,12 +81,14 @@ export class Header {
   ];
   selectedIndex: number = 0;
   private isBrowser: boolean;
+  currentTheme: string = 'light-theme';
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private dialog: MatDialog,
     private userService: UserService,
+    public themeService: NgOpenwebUIThemeService,
     @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(DOCUMENT) private document: Document
   ) {
@@ -110,6 +115,10 @@ export class Header {
     if (this.isBrowser) {
       this.document.addEventListener('click', this.closeModelDropdown.bind(this));
     }
+
+    // Load current theme
+    const theme = this.themeService.getCurrentTheme();
+    this.currentTheme = theme ? theme : 'light-theme';
   }
 
   fetchModels() {
@@ -131,6 +140,15 @@ export class Header {
           console.error(`Error fetching from ${domain}:`, err);
         },
       });
+    }
+  }
+
+  changeTheme(theme: string) {
+    this.currentTheme = theme || 'light-theme';
+    this.themeService.setTheme(theme as 'light-theme' | 'dark-theme');
+
+    if (this.isBrowser) {
+      this.document.cookie = `ca-theme=${theme}; path=/; max-age=31536000`; // 1 year
     }
   }
 

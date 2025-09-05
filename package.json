@@ -1,6 +1,6 @@
 {
   "name": "ng-openwebui",
-  "version": "0.0.2",
+  "version": "0.0.7",
   "scripts": {
     "buildf": "ng build ng-openwebui && cd dist/ng-openwebui && npm pack",
     "build:stats": "ng build ng-openwebui --stats-json",

@@ -67,7 +67,7 @@ export class Sidebar implements OnInit, OnDestroy {
         .pipe(
           catchError((err) => {
             console.error('Failed to load sessions:', err);
-            this.snackBar.open('Failed to load chat sessions.', 'Close', { duration: 3000 });
+            this.snackBar.open('Failed to load chat sessions.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
             return throwError(() => err);
           })
         )
@@ -77,7 +77,7 @@ export class Sidebar implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     } catch (err) {
       console.error('Error fetching sessions:', err);
-      this.snackBar.open('Error fetching sessions.', 'Close', { duration: 3000 });
+      this.snackBar.open('Error fetching sessions.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
     }
   }
 
@@ -127,14 +127,14 @@ export class Sidebar implements OnInit, OnDestroy {
         .pipe(
           catchError((err) => {
             console.error('HTTP error while deleting session:', err);
-            this.snackBar.open('Failed to delete chat session.', 'Close', { duration: 3000 });
+            this.snackBar.open('Failed to delete chat session.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
             return throwError(() => err);
           })
         )
         .toPromise();
 
       if (response?.status !== 'error') {
-        this.snackBar.open('Chat session deleted successfully.', 'Close', { duration: 3000 });
+        this.snackBar.open('Chat session deleted successfully.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
         const userId = this.route.snapshot.paramMap.get('user_id');
         if (userId) {
           this.router.navigate([userId], { relativeTo: this.route.parent });
@@ -144,11 +144,11 @@ export class Sidebar implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       } else {
         console.error('Server responded with error:', response?.message);
-        this.snackBar.open(`Error: ${response?.message || 'Unknown error'}`, 'Close', { duration: 3000 });
+        this.snackBar.open(`Error: ${response?.message || 'Unknown error'}`, 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
       }
     } catch (err) {
       console.error('Unexpected error while deleting session:', err);
-      this.snackBar.open('Unexpected error occurred.', 'Close', { duration: 3000 });
+      this.snackBar.open('Unexpected error occurred.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
     }
     this.menuOpen = false;
     this.clearActiveListItems();

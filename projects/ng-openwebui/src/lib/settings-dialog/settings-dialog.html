@@ -28,7 +28,7 @@
           <!-- Theme -->
           <div class="setting-item">
             <div class="label">Theme</div>
-            <select #themeSelector [(ngModel)]="currentTheme" (change)="changeTheme(themeSelector.value)">
+            <select id="themeSelector" name="themeSelector" #themeSelector [(ngModel)]="currentTheme" (change)="changeTheme(themeSelector.value)">
               <option value="light-theme">Light Theme</option>
               <option value="dark-theme">Dark Theme</option>
             </select>
@@ -83,7 +83,7 @@
               <button mat-stroked-button>⭐ Star us on GitHub</button>
             </div>
 
-            <small style="color: gray; display: block; margin-top: 1rem">
+            <small style="color: gray; display: block; margin-top: 1rem; max-width: 638px;">
               Copyright (c) 2025
               <a href="#" class="link" target="_blank">Open WebUI (Timothy Jaeryang Baek)</a><br />
               Redistribution and use in source and binary forms, with or without

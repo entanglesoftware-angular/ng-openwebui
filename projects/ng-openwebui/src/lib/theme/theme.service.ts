@@ -43,6 +43,10 @@ export class NgOpenwebUIThemeService {
             --setting-menu-bg: #ffffff;
             --menu-item-color: red;
             --menu-item-hover-bg: transparent;
+
+            --snackbar-bg: #ffffff;
+            --snackbar-text: #333333;
+            --snackbar-action: #1976d2;
         }`;
 
     private darkTheme = `
@@ -82,6 +86,10 @@ export class NgOpenwebUIThemeService {
             --setting-menu-bg: rgb(65, 65, 65);
             --menu-item-color: red;
             --menu-item-hover-bg: transparent;
+
+            --snackbar-bg: #323232;
+            --snackbar-text: #ffffff;
+            --snackbar-action: #90caf9;
         }`;
 
     constructor(

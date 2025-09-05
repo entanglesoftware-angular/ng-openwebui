@@ -86,3 +86,17 @@ mat-toolbar {
   user-select: none;
 }
 
+.setting-item select {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--chat-list-text-color) !important;
+}
+
+.header-left-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+

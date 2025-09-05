@@ -152,7 +152,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         error: () => {
           this.aiName = 'Select Model';
           this.snackBar.open('Failed to fetch model name.', 'Close', {
-            duration: 3000,
+            duration: 3000, panelClass: ['lib-snackbar']
           });
         },
       });
@@ -184,7 +184,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
       this.cdr.detectChanges();
     } catch (err) {
       console.error('Error loading messages for session:', err);
-      this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000 });
+      this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
       this.router.navigate(['..'], { relativeTo: this.route });
     }
   }
@@ -259,7 +259,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         .catch((err) => {
           console.error('Error clearing messages:', err);
           this.snackBar.open('Failed to clear messages.', 'Close', {
-            duration: 3000,
+            duration: 3000, panelClass: ['lib-snackbar']
           });
         });
     }
@@ -328,7 +328,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
       } catch (err) {
         console.error('Failed to create new session:', err);
         this.snackBar.open('Failed to create new session.', 'Close', {
-          duration: 3000,
+          duration: 3000, panelClass: ['lib-snackbar']
         });
         return;
       }
@@ -409,7 +409,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         } catch (error) {
           console.error(`Failed to convert file ${file.name}:`, error);
           this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', {
-            duration: 3000,
+            duration: 3000, panelClass: ['lib-snackbar']
           });
         }
       }
@@ -445,7 +445,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
       });
       if (response.status !== 200) {
         this.snackBar.open(`Error : ${response.status} ${response}`, 'Close', {
-          duration: 3000,
+          duration: 3000, panelClass: ['lib-snackbar']
         });
         return;
       }
@@ -481,7 +481,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         clearTimeout(timeoutHandle);
         timeoutHandle = setTimeout(() => {
           controller.abort();
-          this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000 });
+          this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
           this.cdr.detectChanges();
         }, TIMEOUT_MS);
       };
@@ -566,7 +566,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
                 this.cdr.detectChanges();
               });
             } catch (err) {
-              this.snackBar.open(`Error parsing stream chunk: ${err}`, 'Close', { duration: 3000 });
+              this.snackBar.open(`Error parsing stream chunk: ${err}`, 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
               console.error('Error parsing stream chunk:', err);
               return;
             }
@@ -574,7 +574,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         }
       } catch (error) {
         console.error('Stream aborted or failed:', error);
-        this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000 });
+        this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
         this.cdr.detectChanges();
         return;
       } finally {
@@ -586,7 +586,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
       }
     } catch (err) {
       console.error('Error sending message:', err);
-      this.snackBar.open('Failed to send message.', 'Close', { duration: 3000 });
+      this.snackBar.open('Failed to send message.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
       return;
     }
   }
@@ -621,7 +621,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         `${this.selectedFiles.length} file(s) selected`,
         'Close',
         {
-          duration: 2000,
+          duration: 2000, panelClass: ['lib-snackbar']
         }
       );
     }
@@ -756,13 +756,13 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     if (!this.isBrowser || !navigator?.clipboard) {
-      this.snackBar.open('Clipboard API not supported.', 'Close', { duration: 3000 });
+      this.snackBar.open('Clipboard API not supported.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
       return;
     }
     navigator.clipboard.writeText(text).then(() => {
-      this.snackBar.open('Copied!', 'Close', { duration: 3000 });
+      this.snackBar.open('Copied!', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
     }).catch(err => {
-      this.snackBar.open('Failed to copy message.', 'Close', { duration: 3000 });
+      this.snackBar.open('Failed to copy message.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
     });
   }
 
