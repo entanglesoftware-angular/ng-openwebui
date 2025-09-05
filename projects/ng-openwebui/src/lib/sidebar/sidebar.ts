@@ -1,4 +1,14 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef, HostListener, Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+  HostListener,
+  Inject,
+  PLATFORM_ID
+} from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { NgForOf, NgIf } from '@angular/common';
@@ -84,15 +94,15 @@ export class Sidebar implements OnInit, OnDestroy {
 
   onSelectSession(session: ChatSession) {
     const userId = this.route.snapshot.paramMap.get('user_id');
-    let nav = []
-    if(userId){
-      nav.push(userId)
+    let nav: string[] = [];
+    if (userId) {
+      nav.push(userId);
     }
     if (session.id) {
-      nav.push(session.id)
+      nav.push(session.id);
     }
-    console.log(nav)
-    if(nav.length > 0){
+    console.log(nav);
+    if (nav.length > 0) {
       this.router.navigate(nav, { relativeTo: this.route.parent });
     }
   }
@@ -122,13 +132,13 @@ export class Sidebar implements OnInit, OnDestroy {
           })
         )
         .toPromise();
+
       if (response?.status !== 'error') {
         this.snackBar.open('Chat session deleted successfully.', 'Close', { duration: 3000 });
         const userId = this.route.snapshot.paramMap.get('user_id');
-        if(userId){
+        if (userId) {
           this.router.navigate([userId], { relativeTo: this.route.parent });
-        }
-        else {
+        } else {
           this.router.navigate(['..'], { relativeTo: this.route });
         }
         this.cdr.detectChanges();
@@ -156,19 +166,19 @@ export class Sidebar implements OnInit, OnDestroy {
 
     activeItems.forEach((item) => {
       const buttons = item.querySelectorAll('button');
-
       buttons.forEach((button) => {
         button.classList.remove('hover-btn');
       });
-
       item.classList.remove('active');
     });
   }
 
+  /** ✅ Updated to be SSR Safe */
   private buildHeaders(additionalHeaders: { [key: string]: string } = {}): HttpHeaders {
+    const jwt = this.isBrowser ? sessionStorage.getItem('jwt') || '' : '';
     const headers: { [key: string]: string } = {
       user_id: this.config.userId,
-      authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+      authorization: `Bearer ${jwt}`,
       ...additionalHeaders
     };
     return new HttpHeaders(headers);

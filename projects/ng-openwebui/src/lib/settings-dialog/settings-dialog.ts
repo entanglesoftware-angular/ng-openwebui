@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf, DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { ConnectionDialogComponent } from '../connection-dialog/connection-dialog.component';
 import { ChangeDetectorRef } from '@angular/core';
 import { MatCard } from '@angular/material/card';
@@ -23,20 +23,40 @@ export class SettingsDialog {
   showKey: boolean = false;
   showPrefix: boolean = false;
 
-  constructor(private dialog: MatDialog, private cdr: ChangeDetectorRef, private userService: UserService, public themeService: NgOpenwebUIThemeService) { }
+  private readonly cookieKey = 'savedConnections';
+  private isBrowser: boolean;
+
+  constructor(
+    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef,
+    private userService: UserService,
+    public themeService: NgOpenwebUIThemeService,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    @Inject(DOCUMENT) private document: Document
+  ) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
 
   ngOnInit(): void {
-    const data = localStorage.getItem('savedConnections');
-    this.savedConnections = data ? JSON.parse(data) : [];
-    this.user = this.userService.getUser() ?? {}; 
+    // Load saved connections safely from cookies
+    this.savedConnections = this.getConnectionsFromCookie();
+
+    // Load user data
+    this.user = this.userService.getUser() ?? {};
     console.log('User:', this.userService.getUser());
+
+    // Load current theme
     const theme = this.themeService.getCurrentTheme();
     this.currentTheme = theme ? theme : 'light-theme';
   }
 
   changeTheme(theme: string) {
-    this.currentTheme = theme ? theme : 'light-theme';
+    this.currentTheme = theme || 'light-theme';
     this.themeService.setTheme(theme as 'light-theme' | 'dark-theme');
+
+    if (this.isBrowser) {
+      this.document.cookie = `ca-theme=${theme}; path=/; max-age=31536000`; // 1 year
+    }
   }
 
   toggleKeyVisibility() {
@@ -72,7 +92,25 @@ export class SettingsDialog {
     });
   }
 
-  updateStorage() {
-    localStorage.setItem('savedConnections', JSON.stringify(this.savedConnections));
+  private updateStorage() {
+    if (!this.isBrowser) return;
+    const encodedData = encodeURIComponent(JSON.stringify(this.savedConnections));
+    this.document.cookie = `${this.cookieKey}=${encodedData}; path=/; max-age=31536000`; // 1 year
+  }
+
+  private getConnectionsFromCookie(): any[] {
+    if (!this.isBrowser) return [];
+
+    const cookies = this.document.cookie.split(';').map(c => c.trim());
+    const savedCookie = cookies.find(c => c.startsWith(`${this.cookieKey}=`));
+
+    if (!savedCookie) return [];
+
+    try {
+      const value = decodeURIComponent(savedCookie.split('=')[1]);
+      return JSON.parse(value);
+    } catch {
+      return [];
+    }
   }
 }

@@ -4,6 +4,7 @@ import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 @Injectable({ providedIn: 'root' })
 export class NgOpenwebUIThemeService {
     private isBrowser: boolean;
+    private themeCookieKey = 'ca-theme';
 
      private lightTheme = `
         :root {
@@ -107,23 +108,31 @@ export class NgOpenwebUIThemeService {
         const body = this.document.body;
         body.classList.remove('light-theme', 'dark-theme');
         body.classList.add(theme);
-        localStorage.setItem('ca-theme', theme);
+        if (this.isBrowser) {
+            this.document.cookie = `${this.themeCookieKey}=${theme}; path=/; max-age=31536000`;
+        }
+    }
+
+    private getCookie(name: string): string | null {
+        if (!this.isBrowser) return null;
+        const match = this.document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
     }
 
     loadSavedTheme() {
-        const saved = localStorage.getItem('ca-theme') as 'light-theme' | 'dark-theme';
-        if (saved) this.setTheme(saved);
+        const saved = this.getCookie(this.themeCookieKey) as 'light-theme' | 'dark-theme';
+        if (saved) {
+            this.setTheme(saved);
+        } else {
+            this.setTheme('light-theme'); // default
+        }
     }
 
     getCurrentTheme(): 'light-theme' | 'dark-theme' | null {
         if (!this.isBrowser) return null;
         const body = this.document.body;
-        if (body.classList.contains('light-theme')) {
-            return 'light-theme';
-        } else if (body.classList.contains('dark-theme')) {
-            return 'dark-theme';
-        } else {
-            return 'light-theme';
-        }
+        if (body.classList.contains('light-theme')) return 'light-theme';
+        if (body.classList.contains('dark-theme')) return 'dark-theme';
+        return 'light-theme';
     }
 }

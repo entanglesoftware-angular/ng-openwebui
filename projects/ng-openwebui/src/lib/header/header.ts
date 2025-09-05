@@ -1,9 +1,17 @@
-import { Component,ViewEncapsulation,Output,EventEmitter, Inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  ViewEncapsulation,
+  Output,
+  EventEmitter,
+  Inject,
+  PLATFORM_ID,
+  HostListener,
+  ViewChild,
+} from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { HostListener } from '@angular/core';
-import { NgClass, DOCUMENT, isPlatformBrowser, NgFor, NgIf} from '@angular/common';
+import { NgClass, DOCUMENT, isPlatformBrowser, NgFor, NgIf } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -14,9 +22,7 @@ import { SettingsDialog } from '../settings-dialog/settings-dialog';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatCard } from '@angular/material/card';
 import { UserService } from '../user.service';
-import { ViewChild } from '@angular/core';
 import { MatSidenav } from '@angular/material/sidenav';
-
 
 interface LoginResponse {
   account: {
@@ -29,31 +35,33 @@ interface LoginResponse {
   JWT_Token: string;
   Refresh_Token: string;
 }
+
 @Component({
   selector: 'lib-header',
   imports: [
     MatFormFieldModule,
     MatSelectModule,
-    MatSelectModule,
-    NgClass,NgIf,NgFor,
+    NgClass,
+    NgIf,
+    NgFor,
     MatInputModule,
     MatIcon,
     MatMenuModule,
     MatButtonModule,
     MatToolbar,
-    MatCard
+    MatCard,
   ],
   templateUrl: './header.html',
   styleUrl: './header.css',
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
-
-
 export class Header {
   @Output() menuClicked = new EventEmitter<void>();
+
   onMenuClick() {
-  this.menuClicked.emit();
-}
+    this.menuClicked.emit();
+  }
+
   modelMap: { model: string; domain: string }[] = [];
   selectedModel: string = '';
   selectedDomain: string = '';
@@ -70,7 +78,8 @@ export class Header {
   ];
   selectedIndex: number = 0;
   private isBrowser: boolean;
-   constructor(
+
+  constructor(
     private http: HttpClient,
     private router: Router,
     private dialog: MatDialog,
@@ -80,21 +89,28 @@ export class Header {
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
-ngOnInit(): void {
-  this.userService.user$.subscribe(user => {
-    this.userInitial = user?.initial || '';
-  });
-  if (!sessionStorage.getItem('jwt')) {
-    this.getToken(); 
-  } else {
-    this.fetchAccountDetails(); 
-  }
-  this.fetchModels();
-  if (!this.isBrowser){
-    this.document.addEventListener('click', this.closeModelDropdown.bind(this));
-  };
-}
 
+  ngOnInit(): void {
+    this.userService.user$.subscribe((user) => {
+      this.userInitial = user?.initial || '';
+    });
+
+    // ✅ Ensure sessionStorage only accessed in browser
+    if (this.isBrowser) {
+      if (!sessionStorage.getItem('jwt')) {
+        this.getToken();
+      } else {
+        this.fetchAccountDetails();
+      }
+    }
+
+    this.fetchModels();
+
+    // ✅ Only add event listener in browser
+    if (this.isBrowser) {
+      this.document.addEventListener('click', this.closeModelDropdown.bind(this));
+    }
+  }
 
   fetchModels() {
     this.domain = this.domains[this.selectedIndex];
@@ -106,7 +122,7 @@ ngOnInit(): void {
             this.modelMap.push({ model, domain });
           });
 
-          if (!this.selectedModel) {
+          if (!this.selectedModel && models.length > 0) {
             this.selectedModel = models[0];
             this.selectedDomain = domain;
           }
@@ -130,74 +146,79 @@ ngOnInit(): void {
   }
 
   @HostListener('document:click', ['$event'])
-closeModelDropdown(event: Event) {
-  const target = event.target as HTMLElement;
+  closeModelDropdown(event: Event) {
+    if (!this.isBrowser) return; // ✅ Prevent SSR errors
 
-  const clickedOnModel = target.closest('.model-selector');
-  const clickedOnProfile = target.closest('[mat-menu-trigger-for]');
+    const target = event.target as HTMLElement;
+    const clickedOnModel = target.closest('.model-selector');
+    const clickedOnProfile = target.closest('[mat-menu-trigger-for]');
 
-  // Don't close if clicked on model selector or profile trigger
-  if (!clickedOnModel && !clickedOnProfile) {
-    this.dropdownOpen = false;
+    // Don't close if clicked on model selector or profile trigger
+    if (!clickedOnModel && !clickedOnProfile) {
+      this.dropdownOpen = false;
+    }
   }
-}
 
-goToSettings() {
-  this.dialog.open(SettingsDialog, {
-    width: '950px',
-    height:'600px',
-    maxWidth: 'none',
-    panelClass: 'setting-dialog-model'
-  });
-}
-getToken() {
-  const loginData = {
-    email: 'alice.smith123@example.com',
-    password: 'newsecurepass123',
-  };
+  goToSettings() {
+    this.dialog.open(SettingsDialog, {
+      width: '950px',
+      height: '600px',
+      maxWidth: 'none',
+      panelClass: 'setting-dialog-model',
+    });
+  }
 
-  this.http
-    .post<LoginResponse>(`https://micro-scale.software/api/login`, loginData)
-    .subscribe({
+  getToken() {
+    if (!this.isBrowser) return; // ✅ SSR safety
+
+    const loginData = {
+      email: 'alice.smith123@example.com',
+      password: 'newsecurepass123',
+    };
+
+    this.http.post<LoginResponse>(`https://micro-scale.software/api/login`, loginData).subscribe({
       next: (response) => {
         sessionStorage.setItem('jwt', response.JWT_Token);
-        this.fetchAccountDetails(); 
+        this.fetchAccountDetails();
       },
       error: (err) => {
         console.error('Login error:', err);
       },
     });
-}
-
+  }
 
   fetchAccountDetails() {
-  const token = sessionStorage.getItem('jwt');
-  if (!token) return;
+    if (!this.isBrowser) return; // ✅ SSR safety
 
-  this.http.get<any>('https://micro-scale.software/api/account', {
-    headers: {
-      Authorization: token,
-    },
-  }).subscribe({
-    next: (res) => {
-      const name = res?.account?.name || '';
-      this.userInitial = this.getInitials(name);
-      this.userService.setUser({
-        name: name,
-        email: res.account.email,
-        initial: this.userInitial
+    const token = sessionStorage.getItem('jwt');
+    if (!token) return;
+
+    this.http
+      .get<any>('https://micro-scale.software/api/account', {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .subscribe({
+        next: (res) => {
+          const name = res?.account?.name || '';
+          this.userInitial = this.getInitials(name);
+          this.userService.setUser({
+            name: name,
+            email: res.account.email,
+            initial: this.userInitial,
+          });
+        },
+        error: (err) => {
+          console.error('Error fetching account info:', err);
+        },
       });
-    },
-    error: (err) => {
-      console.error('Error fetching account info:', err);
-    },
-  });
-}
-getInitials(name: string): string {
-  const names = name.trim().split(' ');
-  const first = names[0]?.charAt(0).toUpperCase() || '';
-  const second = names[1]?.charAt(0).toUpperCase() || '';
-  return first + second;
-}
+  }
 
+  getInitials(name: string): string {
+    const names = name.trim().split(' ');
+    const first = names[0]?.charAt(0).toUpperCase() || '';
+    const second = names[1]?.charAt(0).toUpperCase() || '';
+    return first + second;
+  }
 }

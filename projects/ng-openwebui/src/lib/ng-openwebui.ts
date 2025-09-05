@@ -156,7 +156,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
           });
         },
       });
-    if (sessionStorage.getItem('jwt')) {
+    if (this.isBrowser && sessionStorage.getItem('jwt')) {
       this.routeSubscription = this.route.params.subscribe((params) => {
         const sessionId = params['session_id'];
         if (sessionId) {
@@ -249,7 +249,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     if (this.currentSessionId) {
       const headers = new HttpHeaders({
         user_id: this.config.userId,
-        authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+        authorization: this.isBrowser ? `Bearer ${sessionStorage.getItem('jwt') || ''}` : '',
       });
       this.http
         .delete(`${this.domain}/session/${this.currentSessionId}/messages`, {
@@ -641,7 +641,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.routeSubscription.unsubscribe();
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();
+    }
   }
 
   getShortenedFileName(fileName: string): string {
@@ -655,31 +657,24 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   downloadCsv(csvString: string): void {
-    if (!csvString) {
-      console.error('CSV string is empty');
-      return;
-    }
+    if (!csvString || !this.isBrowser) return;
 
     const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-    const url = window.URL.createObjectURL(blob);
-    if (!this.isBrowser){
-      window.URL.revokeObjectURL(url); 
-      return;
-    } 
-    const link = this.document.createElement('a');
-    link.href = url;
-    link.download = `csvfile.csv`;
-    this.document.body.appendChild(link);
-    link.click();
-    this.document.body.removeChild(link);
+    if (this.isBrowser) {
+      const url = window.URL.createObjectURL(blob);
+      const link = this.document.createElement('a');
+      link.href = url;
+      link.download = `csvfile.csv`;
+      this.document.body.appendChild(link);
+      link.click();
+      this.document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
     
   }
 
   downloadExcel(csvString: string): void {
-    if (!csvString) {
-      console.error('CSV string is empty');
-      return;
-    }
+    if (!csvString || !this.isBrowser) return;
 
     try {
       const rows = csvString.split('\n').filter(row => row.trim() !== '');
@@ -689,18 +684,17 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
-      if (!this.isBrowser){
-        window.URL.revokeObjectURL(url); 
-        return;
+
+      if (this.isBrowser) {
+        const url = window.URL.createObjectURL(blob);
+        const link = this.document.createElement('a');
+        link.href = url;
+        link.download = `excelFile.xlsx`;
+        this.document.body.appendChild(link);
+        link.click();
+        this.document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
       }
-      const link = this.document.createElement('a');
-      link.href = url;
-      link.download = `excelFile.xlsx`;
-      this.document.body.appendChild(link);
-      link.click();
-      this.document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error generating Excel file:', error);
     }
@@ -709,13 +703,16 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   private buildHeaders(additionalHeaders: { [key: string]: string } = {}): HttpHeaders {
     const headers: { [key: string]: string } = {
       user_id: this.config.userId,
-      authorization: `Bearer ${sessionStorage.getItem('jwt') || ''}`,
+      authorization: this.isBrowser ? `Bearer ${sessionStorage.getItem('jwt') || ''}` : '',
       ...additionalHeaders
     };
     return new HttpHeaders(headers);
   }
 
   startVoiceInput(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return; // Prevent execution on server
+    }
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     if (!SpeechRecognition) {
       alert('Your browser does not support speech recognition.');
@@ -739,7 +736,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
 
     this.speechRecognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
-      this.message = this.message + ' ' + transcript;
+      this.message = `${this.message} ${transcript}`;
     };
 
     this.speechRecognition.onend = () => {
@@ -754,6 +751,14 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   copyToClipboard(text: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return; // Prevent server-side execution
+    }
+
+    if (!this.isBrowser || !navigator?.clipboard) {
+      this.snackBar.open('Clipboard API not supported.', 'Close', { duration: 3000 });
+      return;
+    }
     navigator.clipboard.writeText(text).then(() => {
       this.snackBar.open('Copied!', 'Close', { duration: 3000 });
     }).catch(err => {
@@ -762,7 +767,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   speak(text: string): void {
-    if (!text) return;
+    if (!isPlatformBrowser(this.platformId) || !text) {
+      return; // Prevent execution on server
+    }
 
     const synth = window.speechSynthesis;
 
