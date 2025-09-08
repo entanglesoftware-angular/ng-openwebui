@@ -91,13 +91,6 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   dropdownOpen: boolean = false;
   domain: string = '';
   selectedIndex: number = 0;
-  domains: string[] = [
-    'http://localhost:8000',
-    'http://localhost:8001',
-    'http://localhost:8002',
-    'http://localhost:8003',
-    'http://localhost:8004',
-  ];
   chatMessages: Events = { events: [] };
   currentSessionId: string | null = null;
   selectedFiles: File[] = [];

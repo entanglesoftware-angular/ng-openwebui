@@ -24,6 +24,9 @@ import { MatCard } from '@angular/material/card';
 import { UserService } from '../user.service';
 import { NgOpenwebUIThemeService } from '../theme/theme.service';
 import { FormsModule } from '@angular/forms';
+import { NgOpenwebUIConfigValidator } from '../services/ng-openwebui-config-validator.service';
+import { NG_OPEN_WEB_UI_CONFIG } from '../config/ng-openwebui-config.token';
+import { NgOpenwebUIConfig } from '../config/ng-openwebui-config';
 import { MatSidenav } from '@angular/material/sidenav';
 
 interface LoginResponse {
@@ -70,15 +73,7 @@ export class Header {
   selectedDomain: string = '';
   dropdownOpen: boolean = false;
   rofileDropdownOpen: boolean = false;
-  domain: string = '';
   userInitial: string = '';
-  domains: string[] = [
-    'http://localhost:8000',
-    'http://localhost:8001',
-    'http://localhost:8002',
-    'http://localhost:8003',
-    'http://localhost:8004',
-  ];
   selectedIndex: number = 0;
   private isBrowser: boolean;
   currentTheme: string = 'light-theme';
@@ -89,10 +84,13 @@ export class Header {
     private dialog: MatDialog,
     private userService: UserService,
     public themeService: NgOpenwebUIThemeService,
+    private configValidator: NgOpenwebUIConfigValidator,
+    @Inject(NG_OPEN_WEB_UI_CONFIG) private config: NgOpenwebUIConfig,
     @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(DOCUMENT) private document: Document
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
+    this.config = this.configValidator.getConfig();
   }
 
   ngOnInit(): void {
@@ -122,25 +120,23 @@ export class Header {
   }
 
   fetchModels() {
-    this.domain = this.domains[this.selectedIndex];
-    for (const domain of this.domains) {
-      this.http.get<any>(`${domain}/v1/models`).subscribe({
-        next: (res) => {
-          const models = res?.data?.map((m: any) => m.id) || [];
-          models.forEach((model: string) => {
-            this.modelMap.push({ model, domain });
-          });
+    const domain = this.config.domain;
+    this.http.get<any>(`${domain}/v1/models`).subscribe({
+      next: (res) => {
+        const models = res?.data?.map((m: any) => m.id) || [];
+        models.forEach((model: string) => {
+          this.modelMap.push({ model, domain });
+        });
 
-          if (!this.selectedModel && models.length > 0) {
-            this.selectedModel = models[0];
-            this.selectedDomain = domain;
-          }
-        },
-        error: (err) => {
-          console.error(`Error fetching from ${domain}:`, err);
-        },
-      });
-    }
+        if (!this.selectedModel && models.length > 0) {
+          this.selectedModel = models[0];
+          this.selectedDomain = domain;
+        }
+      },
+      error: (err) => {
+        console.error(`Error fetching from ${domain}:`, err);
+      },
+    });
   }
 
   changeTheme(theme: string) {
