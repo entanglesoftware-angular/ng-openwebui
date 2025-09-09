@@ -115,8 +115,9 @@ export class Header {
     }
 
     // Load current theme
-    const theme = this.themeService.getCurrentTheme();
-    this.currentTheme = theme ? theme : 'light-theme';
+    this.themeService.theme$.subscribe(theme => {
+        this.currentTheme = theme;
+    });
   }
 
   fetchModels() {

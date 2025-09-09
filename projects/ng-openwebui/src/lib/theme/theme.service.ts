@@ -1,12 +1,16 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class NgOpenwebUIThemeService {
     private isBrowser: boolean;
     private themeCookieKey = 'ca-theme';
 
-     private lightTheme = `
+    private themeSubject = new BehaviorSubject<'light-theme' | 'dark-theme'>('light-theme');
+    theme$ = this.themeSubject.asObservable();
+
+    private lightTheme = `
         :root {
             --bg-primary: #ffffff;
             --bg-sidebar: #F9F9F9;
@@ -94,7 +98,7 @@ export class NgOpenwebUIThemeService {
 
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
-    @Inject(DOCUMENT) private document: Document
+        @Inject(DOCUMENT) private document: Document
     ) {
         this.isBrowser = isPlatformBrowser(this.platformId);
 
@@ -116,9 +120,11 @@ export class NgOpenwebUIThemeService {
         const body = this.document.body;
         body.classList.remove('light-theme', 'dark-theme');
         body.classList.add(theme);
-        if (this.isBrowser) {
-            this.document.cookie = `${this.themeCookieKey}=${theme}; path=/; max-age=31536000`;
-        }
+
+        this.document.cookie = `${this.themeCookieKey}=${theme}; path=/; max-age=31536000`;
+
+        // ✅ Emit new theme to subscribers
+        this.themeSubject.next(theme);
     }
 
     private getCookie(name: string): string | null {
@@ -132,15 +138,11 @@ export class NgOpenwebUIThemeService {
         if (saved) {
             this.setTheme(saved);
         } else {
-            this.setTheme('light-theme'); // default
+            this.setTheme('light-theme');
         }
     }
 
     getCurrentTheme(): 'light-theme' | 'dark-theme' | null {
-        if (!this.isBrowser) return null;
-        const body = this.document.body;
-        if (body.classList.contains('light-theme')) return 'light-theme';
-        if (body.classList.contains('dark-theme')) return 'dark-theme';
-        return 'light-theme';
+        return this.themeSubject.value;
     }
 }

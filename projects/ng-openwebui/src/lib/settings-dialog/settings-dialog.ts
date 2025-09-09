@@ -46,12 +46,12 @@ export class SettingsDialog {
     console.log('User:', this.userService.getUser());
 
     // Load current theme
-    const theme = this.themeService.getCurrentTheme();
-    this.currentTheme = theme ? theme : 'light-theme';
+    this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
+    });
   }
 
   changeTheme(theme: string) {
-    this.currentTheme = theme || 'light-theme';
     this.themeService.setTheme(theme as 'light-theme' | 'dark-theme');
 
     if (this.isBrowser) {

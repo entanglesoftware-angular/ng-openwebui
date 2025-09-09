@@ -149,7 +149,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
           });
         },
       });
-    if (this.isBrowser && sessionStorage.getItem('jwt')) {
+    if (this.isBrowser) {
       this.routeSubscription = this.route.params.subscribe((params) => {
         const sessionId = params['session_id'];
         if (sessionId) {
