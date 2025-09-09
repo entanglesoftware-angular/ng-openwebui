@@ -4,8 +4,8 @@ import { NgOpenwebUI } from './ng-openwebui';
 
 const routes: Routes = [
   { path: '', component: NgOpenwebUI }, // New chat
-  { path: ':user_id', component: NgOpenwebUI },          // User chat without session
   { path: ':user_id/:session_id', component: NgOpenwebUI }, // Existing session
+  { path: ':user_id', component: NgOpenwebUI },          // User chat without session
 ];
 
 @NgModule({
