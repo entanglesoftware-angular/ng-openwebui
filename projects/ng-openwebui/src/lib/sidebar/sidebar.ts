@@ -134,14 +134,14 @@ export class Sidebar implements OnInit, OnDestroy {
         .toPromise();
 
       if (response?.status !== 'error') {
-        this.snackBar.open('Chat session deleted successfully.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
         const userId = this.route.snapshot.paramMap.get('user_id');
         if (userId) {
           this.router.navigate([userId], { relativeTo: this.route.parent });
         } else {
           this.router.navigate(['..'], { relativeTo: this.route });
         }
-        this.cdr.detectChanges();
+        this.loadSessions();
+        this.snackBar.open('Chat session deleted successfully.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
       } else {
         console.error('Server responded with error:', response?.message);
         this.snackBar.open(`Error: ${response?.message || 'Unknown error'}`, 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
