@@ -1,91 +1,101 @@
 <div class="main-container">
-  <lib-sidebar [class.sidebar-open]="isSidebarOpen" [class.sidebar-closed]="!isSidebarOpen"></lib-sidebar>
-    <div class="chat-box-container">
-      <lib-header (menuClicked)="toggleSidebar()"></lib-header>
-      <!-- <mat-card class="ai-name" style="margin-bottom: 0px">{{ aiName }}</mat-card> -->
+  <lib-sidebar
+    [class.sidebar-open]="isSidebarOpen"
+    [class.sidebar-closed]="!isSidebarOpen"
+  ></lib-sidebar>
+  <div class="chat-box-container">
+    <lib-header (menuClicked)="toggleSidebar()"></lib-header>
+    <!-- <mat-card class="ai-name" style="margin-bottom: 0px">{{ aiName }}</mat-card> -->
 
     <div class="chat-messages" #chatContainer>
-      <ng-container *ngFor="let event of chatMessages.events">
-        <mat-card class="message" *ngIf="(event.messages && event.messages.length > 0)"
-          [ngClass]="{ 'user': event.role === 'user', 'model': event.role === 'model', 'form': event.role === 'form', }">
-          <!-- Render all messages within this event -->
-          <div *ngFor="let message of event.messages">
-            <!-- Text messages -->
-            <div *ngIf="message.type === 'text' && event.role === 'user'" class="message-content user-message">
-              {{ message.content }}
-              <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" matTooltip="Copy">
-                <mat-icon class="small-icon">content_copy</mat-icon>
-              </button>
-              <button mat-icon-button class="speak-btn" (click)="speak(message.content)" matTooltip="Speak">
-                <mat-icon class="small-icon">volume_up</mat-icon>
-              </button>
-            </div>
-            <div *ngIf="message.type === 'text' && event.role === 'model'"
-              class="message-content with-copy model-message">
-              <markdown [data]="message.content"></markdown>
-              <button mat-icon-button class="copy-btn" (click)="copyToClipboard(message.content)" matTooltip="Copy">
-                <mat-icon class="small-icon">content_copy</mat-icon>
-              </button>
-              <button mat-icon-button class="speak-btn" (click)="speak(message.content)" matTooltip="Speak">
-                <mat-icon class="small-icon">volume_up</mat-icon>
-              </button>
-            </div>
-            <!-- Form Button -->
-            <ng-container *ngIf="event.role === 'form' || message.type === 'form'">
-              <button mat-raised-button color="accent" (click)="checkForFormTrigger(message.content)">
-                Click To Open Form
-              </button>
-            </ng-container>
-            <!-- Image messages -->
-            <div *ngIf="message.type.startsWith('image/') && message.content" class="message-content">
-              <div class="file-display">
-                <mat-icon>image</mat-icon>
-                <span>Image: {{ message.type }}</span>
-              </div>
-              <img [src]="'data:' + message.type + ';base64,' + message.content" alt="Image" class="inline-image" />
-            </div>
-            <!-- CSV messages -->
-            <mat-card *ngIf="message.type === 'text/csv' && message.content" class="message-content export-file">
-              <div class="file-display">
-                <button color="secondary" (click)="openCsvDialog(message.content)">
-                  <img src="/assets/images/open.png" alt="Wine Icon" class="file-icon open">
+      <ng-container *ngFor="let event of chatMessages?.events">
+        <ng-container *ngIf="event?.messages as messages">
+          <mat-card
+            class="message"
+            *ngIf="messages.length > 0"
+            [ngClass]="{ 'user': event?.role === 'user', 'model': event?.role === 'model', 'form': event?.role === 'form' }"
+          >
+            <div *ngFor="let message of event?.messages">
+              <!-- USER MESSAGE -->
+              <div
+                *ngIf="message?.type === 'text' && event?.role === 'user'"
+                class="message-content user-message"
+              >
+                {{ message?.content }}
+                <button
+                  *ngIf="isBrowser" 
+                  mat-icon-button
+                  class="copy-btn"
+                  matTooltipClass="custom-tooltip"
+                  (click)="copyToClipboard(message?.content)"
+                  matTooltip="Copy"
+                >
+                  <mat-icon class="small-icon">content_copy</mat-icon>
                 </button>
-                <button (click)="downloadCsv(message.content)"
-                  style="display:flex; align-items: center; flex-direction: column;">
-                  <img src="/assets/images/csv.png" alt="Wine Icon" class="file-icon csv">
-                </button>
-                <button (click)="downloadExcel(message.content)"
-                  style="display:flex; align-items: center; flex-direction: column;">
-                  <img src="/assets/images/excel.png" alt="Wine Icon" class="file-icon excel">
+                <button
+                  mat-icon-button
+                  matTooltipClass="custom-tooltip"
+                  class="speak-btn"
+                  (click)="speak(message?.content)"
+                  matTooltip="Speak"
+                >
+                  <mat-icon class="small-icon">volume_up</mat-icon>
                 </button>
               </div>
-            </mat-card>
-            <!-- Other non-text messages -->
-            <div
-              *ngIf="message.type !== 'text' && !message.type.startsWith('image/') && message.type !== 'text/csv' && message.type !== 'form' && message.content"
-              class="message-content">
-              <div class="file-display">
-                <mat-icon>insert_drive_file</mat-icon>
-                <span>File: {{ message.type }}</span>
+  
+              <!-- MODEL MESSAGE -->
+              <div
+                *ngIf="message?.type === 'text' && event?.role === 'model'"
+                class="message-content with-copy model-message"
+              >
+              {{ message?.content }}
+                <button
+                  *ngIf="isBrowser" 
+                  mat-icon-button
+                  matTooltipClass="custom-tooltip"
+                  class="copy-btn"
+                  (click)="copyToClipboard(message?.content)"
+                  matTooltip="Copy"
+                >
+                  <mat-icon class="small-icon">content_copy</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  class="speak-btn"
+                  matTooltipClass="custom-tooltip"
+                  (click)="speak(message?.content)"
+                  matTooltip="Speak"
+                >
+                  <mat-icon class="small-icon">volume_up</mat-icon>
+                </button>
               </div>
             </div>
-          </div>
-        </mat-card>
+          </mat-card>
+        </ng-container>
       </ng-container>
+
       <mat-card *ngIf="isStreaming" class="typing-indicator model">
-        <span>Thinking</span><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+        <span>Thinking</span><span class="dot">.</span><span class="dot">.</span
+        ><span class="dot">.</span>
       </mat-card>
     </div>
 
-    <mat-card class="chat-input-container" style="margin-top: 0px;">
+    <mat-card class="chat-input-container" style="margin-top: 0px">
       <!-- File Preview ABOVE the input -->
       <div *ngIf="selectedFiles.length > 0" class="file-chip-container">
-        <div *ngFor="let file of selectedFiles; let i = index" class="file-chip">
+        <div
+          *ngFor="let file of selectedFiles; let i = index"
+          class="file-chip"
+        >
           <div class="file-icon">
             <mat-icon>insert_drive_file</mat-icon>
           </div>
           <div class="file-name">{{ getShortenedFileName(file.name) }}</div>
-          <button mat-icon-button class="file-remove-btn" (click)="removeFile(i)">
+          <button
+            mat-icon-button
+            class="file-remove-btn"
+            (click)="removeFile(i)"
+          >
             <mat-icon>close</mat-icon>
           </button>
         </div>
@@ -93,31 +103,64 @@
 
       <!-- Input Box -->
       <mat-form-field class="chat-input" appearance="outline">
-        <input matInput placeholder="Type a message..." [(ngModel)]="message" (keyup.enter)="onSend()" class="custom-placeholder"/>
+        <input
+          matInput
+          placeholder="Type a message..."
+          [(ngModel)]="message"
+          (keyup.enter)="onSend()"
+          class="custom-placeholder"
+        />
       </mat-form-field>
 
       <!-- Buttons BELOW the input -->
       <div class="input-actions">
         <div class="left-actions">
-          <input type="file" accept=".csv, .xls, .xlsx, image/*" multiple (change)="onFilesSelected($event)" hidden
-            #fileInput />
-          <button mat-icon-button color="warn" matTooltip="Attach file" matTooltipClass="custom-tooltip" (click)="fileInput.click()">
+          <input
+            type="file"
+            accept=".csv, .xls, .xlsx, image/*"
+            multiple
+            (change)="onFilesSelected($event)"
+            hidden
+            #fileInput
+          />
+          <button
+            mat-icon-button
+            color="warn"
+            matTooltip="Attach file"
+            matTooltipClass="custom-tooltip"
+            (click)="fileInput.click()"
+          >
             <mat-icon>attach_file</mat-icon>
           </button>
         </div>
         <div class="right-actions">
-          <button mat-icon-button color="accent" aria-label="Voice Input" (click)="startVoiceInput()"
-            matTooltip="{{ isListening ? 'Stop voice input' : 'Start voice input' }}" matTooltipClass="custom-tooltip">
+          <button
+            mat-icon-button
+            color="accent"
+            aria-label="Voice Input"
+            (click)="startVoiceInput()"
+            matTooltip="{{ isListening ? 'Stop voice input' : 'Start voice input' }}"
+            matTooltipClass="custom-tooltip"
+          >
             <ng-container *ngIf="!isListening; else listening">
               <mat-icon>mic</mat-icon>
             </ng-container>
             <ng-template #listening>
-              <mat-progress-spinner diameter="24" mode="indeterminate" strokeWidth="3" color="accent">
+              <mat-progress-spinner
+                diameter="24"
+                mode="indeterminate"
+                strokeWidth="3"
+                color="accent"
+              >
               </mat-progress-spinner>
             </ng-template>
           </button>
-          <button mat-icon-button color="primary" (click)="onSend()"
-            [disabled]="!message.trim() && selectedFiles.length === 0">
+          <button
+            mat-icon-button
+            color="primary"
+            (click)="onSend()"
+            [disabled]="!message.trim() && selectedFiles.length === 0"
+          >
             <mat-icon>send</mat-icon>
           </button>
         </div>

@@ -356,16 +356,16 @@ markdown {
 
 .model-message .copy-btn {
   position: absolute;
-  top: -10px;
-  right: -6px;
+  top: -20px;
+  right: -12px;
   z-index: 1;
   border-radius: 4px;
 }
 
 .model-message .speak-btn {
   position: absolute;
-  top: -10px;
-  right: 35px;
+  top: -20px;
+  right: 15px;
   z-index: 1;
   border-radius: 4px;
 }

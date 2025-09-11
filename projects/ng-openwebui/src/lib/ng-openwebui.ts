@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy, Input, Optional, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy, Input, Optional, Inject, PLATFORM_ID, ErrorHandler } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -8,7 +8,7 @@ import {
   HttpHeaders,
 } from '@angular/common/http';
 import { NgClass, NgForOf, NgIf, DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { MarkdownModule } from 'ngx-markdown';
+import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
 // import { ChatPersistenceService } from './services/chat-persistence.service';
@@ -37,6 +37,7 @@ import * as XLSX from 'xlsx';
 import { A11yModule } from '@angular/cdk/a11y';
 import gsap from 'gsap';
 import { NgOpenwebUIThemeService } from './theme/theme.service';
+import { GlobalErrorHandler } from './global-error-handler.service';
 
 
 interface ChatMessage {
@@ -77,7 +78,10 @@ interface LoginResponse {
     MatTooltip,
     Header
   ],
-  providers: [],
+  providers: [
+    { provide: ErrorHandler, useClass: GlobalErrorHandler }, 
+    MarkdownService,
+  ],
   templateUrl: './ng-openwebui.html',
   styleUrl: './ng-openwebui.css',
 })
@@ -99,7 +103,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   formData = '';
   isListening: boolean = false;
   speechRecognition: any;
-  private isBrowser: boolean;
+  public isBrowser: boolean;
 
   excel_mime_types = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -174,7 +178,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         ...msg,
         sessionId,
       }));
-      this.cdr.detectChanges();
+      if (this.isBrowser) {
+        this.cdr.detectChanges();
+      }
     } catch (err) {
       console.error('Error loading messages for session:', err);
       this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
@@ -259,7 +265,10 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  checkForFormTrigger(content: string) {
+  checkForFormTrigger(content: string | undefined) {
+    if (!isPlatformBrowser(this.platformId) || !content) {
+      return; // Prevent server-side execution
+    }
     let formData = JSON.parse(content);
     this.openDynamicForm(formData);
   }
@@ -280,7 +289,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     });
   }
 
-  openCsvDialog(csvString: string): void {
+  openCsvDialog(csvString: string | undefined): void {
     this.dialog.open(CsvPreviewDialogComponent, {
       width: '70vw',
       maxHeight: '80vh',
@@ -639,7 +648,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
 
-  getShortenedFileName(fileName: string): string {
+  getShortenedFileName(fileName: string | undefined): string {
+    if (!fileName) return '';
     const maxChars = 10;
     const dotIndex = fileName.lastIndexOf('.');
     const namePart = dotIndex !== -1 ? fileName.substring(0, dotIndex) : fileName;
@@ -649,7 +659,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     return `${trimmedName}${extension}`;
   }
 
-  downloadCsv(csvString: string): void {
+  downloadCsv(csvString: string | undefined): void {
     if (!csvString || !this.isBrowser) return;
 
     const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
@@ -666,7 +676,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     
   }
 
-  downloadExcel(csvString: string): void {
+  downloadExcel(csvString: string | undefined): void {
     if (!csvString || !this.isBrowser) return;
 
     try {
@@ -743,8 +753,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     this.speechRecognition.start();
   }
 
-  copyToClipboard(text: string): void {
-    if (!isPlatformBrowser(this.platformId)) {
+  copyToClipboard(text: string | undefined): void {
+    if (!isPlatformBrowser(this.platformId) || !text) {
       return; // Prevent server-side execution
     }
 
@@ -759,7 +769,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     });
   }
 
-  speak(text: string): void {
+  speak(text: string | undefined): void {
     if (!isPlatformBrowser(this.platformId) || !text) {
       return; // Prevent execution on server
     }

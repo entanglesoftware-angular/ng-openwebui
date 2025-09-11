@@ -7,6 +7,7 @@ import {
   PLATFORM_ID,
   HostListener,
   ViewChild,
+  ChangeDetectorRef
 } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -69,7 +70,7 @@ export class Header {
   }
 
   modelMap: { model: string; domain: string }[] = [];
-  selectedModel: string = '';
+  selectedModel: string = 'Select Model';
   selectedDomain: string = '';
   dropdownOpen: boolean = false;
   rofileDropdownOpen: boolean = false;
@@ -85,6 +86,7 @@ export class Header {
     private userService: UserService,
     public themeService: NgOpenwebUIThemeService,
     private configValidator: NgOpenwebUIConfigValidator,
+    private cdr: ChangeDetectorRef,
     @Inject(NG_OPEN_WEB_UI_CONFIG) private config: NgOpenwebUIConfig,
     @Inject(PLATFORM_ID) private platformId: Object,
     @Inject(DOCUMENT) private document: Document
@@ -132,6 +134,9 @@ export class Header {
         if (!this.selectedModel && models.length > 0) {
           this.selectedModel = models[0];
           this.selectedDomain = domain;
+          if (this.isBrowser) {
+            this.cdr.detectChanges();
+          }
         }
       },
       error: (err) => {
