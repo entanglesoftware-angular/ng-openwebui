@@ -1,6 +1,6 @@
 {
   "name": "ng-openwebui",
-  "version": "0.0.10",
+  "version": "0.0.9",
   "peerDependencies": {
     "@angular/animations": "^20.0.0",
     "@angular/cdk": "^20.0.0",
