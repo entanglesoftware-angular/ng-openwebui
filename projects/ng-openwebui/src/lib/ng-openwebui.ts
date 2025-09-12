@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, OnDestroy, Input, Optional, Inject, PLATFORM_ID, ErrorHandler } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, AfterViewInit, ChangeDetectorRef, OnDestroy, Input, Optional, Inject, PLATFORM_ID, ErrorHandler } from '@angular/core';
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -85,7 +85,7 @@ interface LoginResponse {
   templateUrl: './ng-openwebui.html',
   styleUrl: './ng-openwebui.css',
 })
-export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
+export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit {
   message: string = '';
   aiName: string = 'NgOpenwebUI';
   // chatMessages: ChatMessage[] = [];
@@ -104,6 +104,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   isListening: boolean = false;
   speechRecognition: any;
   public isBrowser: boolean;
+  private lastEventCount = 0;
 
   excel_mime_types = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -136,23 +137,23 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
-  async ngOnInit(): Promise<void> {
+
+  private loadModels() {
     console.log('Initializing...');
-    this.http
-      .get<any>(`${this.config.domain}/v1/models`, {
-        headers: this.buildHeaders()
-      })
+    this.http.get<any>(`${this.config.domain}/v1/models`, { headers: this.buildHeaders() })
       .subscribe({
-        next: (res) => {
-          this.aiName = res?.data?.[0]?.id ?? 'Unknown AI';
-        },
-        error: () => {
-          this.aiName = 'Select Model';
-          this.snackBar.open('Failed to fetch model name.', 'Close', {
-            duration: 3000, panelClass: ['lib-snackbar']
-          });
-        },
+        next: (res) => this.aiName = res?.data?.[0]?.id ?? 'Select Model',
+        error: () => this.aiName = 'Select Model'
       });
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => {
+      this.loadModels();
+    });
+  }
+
+  async ngOnInit(): Promise<void> {
     if (this.isBrowser) {
       this.routeSubscription = this.route.params.subscribe((params) => {
         const sessionId = params['session_id'];
@@ -162,7 +163,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         } else {
           this.currentSessionId = null;
           this.chatMessages.events = [];
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       });
     }
@@ -179,7 +180,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
         sessionId,
       }));
       if (this.isBrowser) {
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     } catch (err) {
       console.error('Error loading messages for session:', err);
@@ -188,8 +189,10 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
     }
   }
   ngAfterViewChecked(): void {
-    // this.scrollToBottomAfterViewChecked();
-    // Removed automatic scroll to bottom here to handle it with GSAP
+    if (this.chatMessages.events.length !== this.lastEventCount) {
+      this.lastEventCount = this.chatMessages.events.length;
+      this.updateUIAndAnimate();
+    }
   }
 
   animateNewMessage(element: HTMLElement) {
@@ -262,7 +265,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
           });
         });
     }
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   checkForFormTrigger(content: string | undefined) {
@@ -310,288 +313,306 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy {
 
   async onSend() {
     const trimmed = this.message.trim();
-    if (!trimmed && this.selectedFiles.length === 0 && !this.formData) return;
+    if (!this.isValidInput(trimmed)) return;
 
-    let sessionId = this.currentSessionId;
-    let isNewSession = false;
-    if (!sessionId) {
-      try {
-        const headers = this.buildHeaders();
-        const newSession = await this.http
-          .post<ChatSession>(`${this.config.domain}/session/create`, {}, { headers })
-          .toPromise();
-        if (newSession && newSession.id) {
-          sessionId = newSession.id;
-          this.currentSessionId = sessionId;
-          isNewSession = true;
-        } else {
-          throw new Error('Invalid session response from server');
-        }
-      } catch (err) {
-        console.error('Failed to create new session:', err);
-        this.snackBar.open('Failed to create new session.', 'Close', {
-          duration: 3000, panelClass: ['lib-snackbar']
-        });
-        return;
+    let sessionId = await this.ensureSession();
+    if (!sessionId) return;
+
+    this.handleUserTextMessage(trimmed);
+
+    const reqBody = await this.buildRequestBody(trimmed);
+    this.isStreaming = true;
+
+    await this.handleFileUploads(reqBody);
+
+    this.appendFormData(reqBody);
+
+    try {
+      await this.streamResponse(sessionId, reqBody);
+    } catch (err) {
+      this.handleError('Failed to send message.', err);
+    }
+  }
+
+  private isValidInput(trimmed: string): boolean {
+    if (!trimmed && this.selectedFiles.length === 0 && !this.formData) {
+      return false;
+    }
+    return true;
+  }
+
+  private async ensureSession(): Promise<string | null> {
+    if (this.currentSessionId) return this.currentSessionId;
+
+    try {
+      const headers = this.buildHeaders();
+      const newSession = await this.http
+        .post<ChatSession>(`${this.config.domain}/session/create`, {}, { headers })
+        .toPromise();
+
+      if (newSession && newSession.id) {
+        this.currentSessionId = newSession.id;
+        return newSession.id;
+      } else {
+        throw new Error('Invalid session response from server');
       }
-    }
-
-    if (trimmed) {
-      const eventMessage: EventMessage = {
-        type: 'text',
-        content: trimmed,
-      };
-      const userMessage: event = {
-        role: 'user',
-        messages: [eventMessage],
-      };
-      this.chatMessages.events.push(userMessage);
-      requestAnimationFrame(() => {
-        this.cdr.detectChanges();
-        const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
-        if (lastMessage) {
-          this.animateNewMessage(lastMessage);
-        }
+    } catch (err) {
+      console.error('Failed to create new session:', err);
+      this.snackBar.open('Failed to create new session.', 'Close', {
+        duration: 3000, panelClass: ['lib-snackbar']
       });
+      return null;
     }
+  }
 
+  private handleUserTextMessage(trimmed: string) {
+    if (!trimmed) return;
+
+    const eventMessage: EventMessage = { type: 'text', content: trimmed };
+    const userMessage: event = { role: 'user', messages: [eventMessage] };
+
+    this.chatMessages.events.push(userMessage);
+    this.updateUIAndAnimate();
     this.message = '';
+  }
 
-    const ReqBody: ChatReq = {
+  private async buildRequestBody(trimmed: string): Promise<ChatReq> {
+    const reqBody: ChatReq = {
       model: this.aiName,
       messages: [],
       stream: true,
     };
 
     if (trimmed) {
-      const userMessage: ChatReqMessage = {
-        role: 'user',
-        type: 'text',
-        content: trimmed,
-      };
-      ReqBody.messages.push(userMessage);
-    }
-    this.isStreaming = true;
-
-    if (this.selectedFiles && this.selectedFiles.length > 0) {
-      for (const file of this.selectedFiles) {
-        try {
-          let mimeType: string = file.type || 'application/octet-stream';
-          let content: string = "";
-          if (mimeType == "text/csv") {
-            content = await file.text();
-          } else if (mimeType.startsWith("image/")) {
-            content = await this.convertFileToBase64(file);
-          } else if (this.excel_mime_types.includes(mimeType)) {
-            content = await this.convertExcelToCsv(file);
-            mimeType = "text/csv";
-          } else {
-            content = await this.convertFileToBase64(file);
-          }
-          const userFile: ChatReqMessage = {
-            role: 'user',
-            type: mimeType,
-            content: content,
-          };
-          ReqBody.messages.push(userFile);
-
-          const fileEventMessage: EventMessage = {
-            type: mimeType,
-            content,
-          };
-          this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
-          requestAnimationFrame(() => {
-            this.cdr.detectChanges();
-            const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
-            if (lastMessage) {
-              this.animateNewMessage(lastMessage);
-            }
-          });
-          this.clearAllFiles();
-        } catch (error) {
-          console.error(`Failed to convert file ${file.name}:`, error);
-          this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', {
-            duration: 3000, panelClass: ['lib-snackbar']
-          });
-        }
-      }
+      reqBody.messages.push({ role: 'user', type: 'text', content: trimmed });
     }
 
-    if (this.formData) {
-      const userMessage: ChatReqMessage = {
-        role: 'user',
-        type: 'application/json',
-        content: this.formData,
-      };
-      ReqBody.messages.push(userMessage);
-    }
+    return reqBody;
+  }
 
-    const controller = new AbortController();
+  private async handleFileUploads(reqBody: ChatReq) {
+    if (!this.selectedFiles || this.selectedFiles.length === 0) return;
 
-    try {
-      const headersObj = {
-        'Content-Type': 'application/json',
-        user_id: this.config.userId,
-        session_id: sessionId,
-      };
+    for (const file of this.selectedFiles) {
+      try {
+        let { mimeType, content } = await this.processFile(file);
 
-      const finalHeaders = this.buildHeaders(headersObj);
-      const headersPlainObject: { [key: string]: string } = {};
-      finalHeaders.keys().forEach((key) => {
-        headersPlainObject[key] = finalHeaders.get(key) as string;
-      });
-      const response = await fetch(`${this.config.domain}/v1/chat/completions`, {
-        method: 'POST',
-        headers: headersPlainObject,
-        body: JSON.stringify(ReqBody),
-      });
-      if (response.status !== 200) {
-        this.snackBar.open(`Error : ${response.status} ${response}`, 'Close', {
+        const userFile: ChatReqMessage = { role: 'user', type: mimeType, content };
+        reqBody.messages.push(userFile);
+
+        const fileEventMessage: EventMessage = { type: mimeType, content };
+        this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
+
+        this.updateUIAndAnimate();
+        this.clearAllFiles();
+      } catch (error) {
+        console.error(`Failed to convert file ${file.name}:`, error);
+        this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', {
           duration: 3000, panelClass: ['lib-snackbar']
         });
-        return;
       }
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let modelContent = '';
-      const eventMessage: EventMessage = {
-        type: 'text',
-        content: modelContent,
-      };
-      const modelMessage: event = {
-        role: 'model',
-        messages: [eventMessage],
-      };
-      this.chatMessages.events.push(modelMessage);
-      requestAnimationFrame(() => {
-        this.cdr.detectChanges();
-        const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
-        if (lastMessage) {
-          this.animateNewMessage(lastMessage);
-        }
-      });
-      this.isStreaming = false;
-      let n = this.chatMessages.events.length - 1;
-      let m = this.chatMessages.events[n].messages.length - 1;
-
-      let lastGeneralIndex = this.chatMessages.events.length - 1;
-      let lastFormEvent: event | null = null;
-      const TIMEOUT_MS = 25000; // 25 seconds timeout for no data
-      let timeoutHandle: any;
-      let hasContent = false;
-      const resetTimeout = () => {
-        clearTimeout(timeoutHandle);
-        timeoutHandle = setTimeout(() => {
-          controller.abort();
-          this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
-          this.cdr.detectChanges();
-        }, TIMEOUT_MS);
-      };
-      try {
-        resetTimeout();
-        while (true) {
-          const { done, value } = await reader!.read();
-          if (done) {
-            break;
-          }
-
-          resetTimeout();
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk
-            .split('\n')
-            .filter((line) => line.trim() !== '' && line.startsWith('data: '));
-
-          for (const line of lines) {
-            const data = line.replace('data: ', '').trim();
-            if (data === '[DONE]') {
-              clearTimeout(timeoutHandle);
-              controller.abort();
-              this.router.navigate([this.config.userId, sessionId], { relativeTo: this.route.parent });
-              requestAnimationFrame(() => {
-                this.cdr.detectChanges();
-              });
-              return;
-            }
-            try {
-              const json = JSON.parse(data);
-              const delta = json?.choices?.[0]?.delta;
-              const content = delta?.content;
-              const role = delta?.role;
-              resetTimeout();
-
-              if (!content) continue;
-              hasContent = true;
-
-              if (role === 'form' && this.isValidJson(content)) {
-                if (!lastFormEvent) {
-                  lastFormEvent = {
-                    role: 'form',
-                    messages: [
-                      {
-                        type: 'text',
-                        content: '',
-                      },
-                    ],
-                  };
-                  this.chatMessages.events.push(lastFormEvent);
-                  requestAnimationFrame(() => {
-                    this.cdr.detectChanges();
-                    const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
-                    if (lastMessage) {
-                      this.animateNewMessage(lastMessage);
-                    }
-                  });
-                }
-                lastFormEvent.messages[0].content += content;
-              } else if (role === "text/csv") {
-                const raw = delta?.content;
-                const onceParsed = JSON.parse(raw);
-                const result = JSON.parse(onceParsed);
-                const fileEventMessage: EventMessage = {
-                  type: delta.role,
-                  content: result.csv,
-                };
-                this.chatMessages.events[lastGeneralIndex].messages.push(fileEventMessage);
-                requestAnimationFrame(() => {
-                  this.cdr.detectChanges();
-                  const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
-                  if (lastMessage) {
-                    this.animateNewMessage(lastMessage);
-                  }
-                });
-              } else {
-                const generalEvent = this.chatMessages.events[lastGeneralIndex];
-                generalEvent.messages[0].content += content;
-              }
-              this.scrollToBottomWithAnimation();
-              requestAnimationFrame(() => {
-                this.cdr.detectChanges();
-              });
-            } catch (err) {
-              this.snackBar.open(`Error parsing stream chunk: ${err}`, 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
-              console.error('Error parsing stream chunk:', err);
-              return;
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Stream aborted or failed:', error);
-        this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
-        this.cdr.detectChanges();
-        return;
-      } finally {
-        clearTimeout(timeoutHandle);
-        if (!hasContent) {
-          this.chatMessages.events.pop();
-        }
-        return;
-      }
-    } catch (err) {
-      console.error('Error sending message:', err);
-      this.snackBar.open('Failed to send message.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
-      return;
     }
   }
+
+  private async processFile(file: File): Promise<{ mimeType: string; content: string }> {
+    let mimeType: string = file.type || 'application/octet-stream';
+    let content: string = "";
+
+    if (mimeType === "text/csv") {
+      content = await file.text();
+    } else if (mimeType.startsWith("image/")) {
+      content = await this.convertFileToBase64(file);
+    } else if (this.excel_mime_types.includes(mimeType)) {
+      content = await this.convertExcelToCsv(file);
+      mimeType = "text/csv";
+    } else {
+      content = await this.convertFileToBase64(file);
+    }
+
+    return { mimeType, content };
+  }
+
+  private appendFormData(reqBody: ChatReq) {
+    if (!this.formData) return;
+
+    const userMessage: ChatReqMessage = {
+      role: 'user',
+      type: 'application/json',
+      content: this.formData,
+    };
+    reqBody.messages.push(userMessage);
+  }
+
+  private async streamResponse(sessionId: string, reqBody: ChatReq) {
+    const controller = new AbortController();
+
+    const headersObj = {
+      'Content-Type': 'application/json',
+      user_id: this.config.userId,
+      session_id: sessionId,
+    };
+
+    const finalHeaders = this.buildHeaders(headersObj);
+
+    const headersPlainObject = finalHeaders.keys().reduce((acc: Record<string, string>, key: string) => {
+      const value = finalHeaders.get(key);
+      if (value !== null) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    const response = await fetch(`${this.config.domain}/v1/chat/completions`, {
+      method: 'POST',
+      headers: headersPlainObject,
+      body: JSON.stringify(reqBody),
+    });
+
+    if (response.status !== 200) {
+      this.snackBar.open(`Error : ${response.status} ${response}`, 'Close', {
+        duration: 3000, panelClass: ['lib-snackbar']
+      });
+      return;
+    }
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    this.prepareModelMessage();
+
+    await this.readStream(reader!, decoder, controller, sessionId);
+  }
+
+  private prepareModelMessage() {
+    const eventMessage: EventMessage = { type: 'text', content: '' };
+    const modelMessage: event = { role: 'model', messages: [eventMessage] };
+
+    this.chatMessages.events.push(modelMessage);
+    this.updateUIAndAnimate();
+  }
+
+  private async readStream(reader: ReadableStreamDefaultReader<Uint8Array>, decoder: TextDecoder, controller: AbortController, sessionId: string) {
+    let lastGeneralIndex = this.chatMessages.events.length - 1;
+    let lastFormEvent: event | null = null;
+    const TIMEOUT_MS = 25000;
+    let timeoutHandle: any;
+    let hasContent = false;
+
+    const resetTimeout = () => {
+      clearTimeout(timeoutHandle);
+      timeoutHandle = setTimeout(() => {
+        controller.abort();
+        this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+        this.cdr.markForCheck();
+      }, TIMEOUT_MS);
+    };
+
+    resetTimeout();
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        resetTimeout();
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter((line) => line.trim() !== '' && line.startsWith('data: '));
+
+        for (const line of lines) {
+          const data = line.replace('data: ', '').trim();
+          if (data === '[DONE]') {
+            clearTimeout(timeoutHandle);
+            controller.abort();
+            this.router.navigate([this.config.userId, sessionId], { relativeTo: this.route.parent });
+            this.cdr.markForCheck();
+            return;
+          }
+
+          this.processStreamChunk(data, lastGeneralIndex, lastFormEvent);
+          hasContent = true;
+        }
+      }
+    } catch (error) {
+      console.error('Stream aborted or failed:', error);
+      this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+      this.cdr.markForCheck();
+    } finally {
+      clearTimeout(timeoutHandle);
+      this.isStreaming = false;
+      if (!hasContent) {
+        this.chatMessages.events.pop();
+      }
+    }
+  }
+
+  private processStreamChunk(data: string, lastGeneralIndex: number, lastFormEvent: event | null) {
+    try {
+      const json = JSON.parse(data);
+      const delta = json?.choices?.[0]?.delta;
+      const content = delta?.content;
+      const role = delta?.role;
+
+      if (!content){
+        return;
+      } 
+
+      if (role === 'form' && this.isValidJson(content)) {
+        if (!lastFormEvent) {
+          lastFormEvent = { role: 'form', messages: [{ type: 'text', content: '' }] };
+          this.chatMessages.events.push(lastFormEvent);
+          this.updateUIAndAnimate();
+        }
+        lastFormEvent.messages[0].content += content;
+      } else if (role === "text/csv") {
+        const raw = delta?.content;
+        const onceParsed = JSON.parse(raw);
+        const result = JSON.parse(onceParsed);
+
+        const fileEventMessage: EventMessage = { type: delta.role, content: result.csv };
+        this.chatMessages.events[lastGeneralIndex].messages.push(fileEventMessage);
+        this.updateUIAndAnimate();
+      } else {
+        const generalEvent = this.chatMessages.events[lastGeneralIndex];
+        generalEvent.messages[0].content += content;
+      }
+
+      this.scrollToBottomWithAnimation();
+      this.cdr.markForCheck();
+    } catch (err) {
+      this.snackBar.open(`Error parsing stream chunk: ${err}`, 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+      console.error('Error parsing stream chunk:', err);
+    }
+  }
+
+  private updateUIAndAnimate() {
+    requestAnimationFrame(() => {
+      this.cdr.markForCheck();
+      const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
+      if (lastMessage) {
+        this.animateNewMessage(lastMessage);
+      }
+    });
+  }
+
+  private handleError(message: string, error: any) {
+    console.error(message, error);
+    this.snackBar.open(message, 'Close', {
+      duration: 3000, panelClass: ['lib-snackbar']
+    });
+  }
+
+  hasValidMessages(messages: any[] | undefined): boolean {
+    if (!messages || messages.length === 0) {
+      return false;
+    }
+
+    const hasValidMessage = messages.some(
+      msg => msg?.type === 'text' && msg?.content?.trim()
+    );
+
+    return hasValidMessage;
+  }
+
+
 
   convertFileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {

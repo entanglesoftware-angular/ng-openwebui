@@ -12,7 +12,7 @@
         <ng-container *ngIf="event?.messages as messages">
           <mat-card
             class="message"
-            *ngIf="messages.length > 0"
+            *ngIf="messages.length > 0  && hasValidMessages(messages)"
             [ngClass]="{ 'user': event?.role === 'user', 'model': event?.role === 'model', 'form': event?.role === 'form' }"
           >
             <div *ngFor="let message of event?.messages">
