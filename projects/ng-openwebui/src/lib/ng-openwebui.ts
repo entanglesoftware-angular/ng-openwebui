@@ -113,6 +113,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
   ];
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
+  @ViewChild('chatInput', { static: true }) chatInput!: ElementRef<HTMLInputElement>;
   private routeSubscription!: Subscription;
 
   constructor(
@@ -761,6 +762,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     this.speechRecognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
       this.message = `${this.message} ${transcript}`;
+      if (this.chatInput?.nativeElement) {
+        this.chatInput.nativeElement.value = this.message;
+      }
     };
 
     this.speechRecognition.onend = () => {
