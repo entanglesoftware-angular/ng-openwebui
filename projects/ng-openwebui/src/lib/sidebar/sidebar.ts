@@ -173,6 +173,10 @@ export class Sidebar implements OnInit, OnDestroy {
     });
   }
 
+  onLogoClick() {
+    this.router.navigate([''], { relativeTo: this.route.root });
+  }
+
   /** ✅ Updated to be SSR Safe */
   private buildHeaders(additionalHeaders: { [key: string]: string } = {}): HttpHeaders {
     const jwt = this.isBrowser ? sessionStorage.getItem('jwt') || '' : '';
