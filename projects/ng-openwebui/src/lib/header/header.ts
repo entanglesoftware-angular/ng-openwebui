@@ -70,7 +70,7 @@ export class Header {
   }
 
   modelMap: { model: string; domain: string }[] = [];
-  selectedModel: string = 'Select Model';
+  selectedModel: string = '';
   selectedDomain: string = '';
   dropdownOpen: boolean = false;
   rofileDropdownOpen: boolean = false;
