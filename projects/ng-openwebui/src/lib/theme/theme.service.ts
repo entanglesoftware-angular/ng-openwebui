@@ -51,6 +51,30 @@ export class NgOpenwebUIThemeService {
             --snackbar-bg: #ffffff;
             --snackbar-text: #333333;
             --snackbar-action: #1976d2;
+
+            --sidebar-bg: #ffffff;
+            --sidebar-section-bg: #f6f7f9;
+            --sidebar-item-bg: transparent;
+            --sidebar-item-hover-bg: #f0f1f3;
+            --sidebar-item-active-bg: #ebecef;
+
+            --vino-accent: #7a1e3a; /* wine */
+            --vino-accent-soft: rgba(122, 30, 58, 0.12);
+
+            --chat-bg: #ffffff;
+            --chat-column-bg: transparent;
+
+            --bubble-user-bg: #f1f1f1;
+            --bubble-user-text: #111;
+
+            --bubble-ai-bg: #ffffff;
+            --bubble-ai-text: #1c244e;
+
+            --bubble-radius: 18px;
+            --bubble-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+
+            --input-bg: #ffffff;
+            --input-border: #dddddd;
         }`;
 
     private darkTheme = `
@@ -94,6 +118,29 @@ export class NgOpenwebUIThemeService {
             --snackbar-bg: #323232;
             --snackbar-text: #ffffff;
             --snackbar-action: #90caf9;
+
+            --sidebar-bg: #181818;
+            --sidebar-section-bg: #202020;
+            --sidebar-item-bg: transparent;
+            --sidebar-item-hover-bg: #2a2a2a;
+            --sidebar-item-active-bg: #303030;
+
+            --vino-accent: #d16b8a;
+            --vino-accent-soft: rgba(209, 107, 138, 0.18);
+
+            --chat-bg: #1e1e1e;
+            --chat-column-bg: transparent;
+
+            --bubble-user-bg: #2a2a2a;
+            --bubble-user-text: #ffffff;
+
+            --bubble-ai-bg: #242424;
+            --bubble-ai-text: #ffffff;
+
+            --bubble-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+
+            --input-bg: #2a2a2a;
+            --input-border: #3a3a3a;
         }`;
 
     constructor(

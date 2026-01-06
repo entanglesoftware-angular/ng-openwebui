@@ -1,227 +1,131 @@
-.toolbar-title {
-  margin-left: 8px;
-  color: var(--chats-label-color);
-}
-
-::ng-deep .mdc-list-item__primary-text {
-  color: var(--chat-list-text-color) !important;
-}
-
-.chat-list-container {
-  width: 95%;
-  max-height: calc(100vh - 120px);
-  overflow: auto;
-}
-:host {
+/* ================= ROOT ================= */
+.sidebar-root {
   width: 260px;
-  height: auto;
-  display: block;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-sidebar);
   border-right: 1px solid var(--sidebar-border-color);
-  background: #e9e9e980;
+}
 
+/* ================= HEADER ================= */
+.sidebar-header {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-bottom: 1px solid var(--sidebar-border-color);
 }
-mat-nav-list {
-  padding: 0;
-}
-mat-list-item {
+
+.sidebar-logo {
+  width: 120px;
   cursor: pointer;
 }
 
-::ng-deep .mat-mdc-list-item-unscoped-content {
+/* ================= NEW CHAT ================= */
+.new-chat-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+
   display: flex;
-  flex-direction: row;
-  gap: 40%;
   align-items: center;
+  gap: 10px;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  background: var(--vino-accent-soft);
+  color: var(--vino-accent);
+  border: none;
+  cursor: pointer;
 }
 
-::ng-deep .chat-list-upper .mat-mdc-icon-button {
-  color: var(--chats-list-button-color);
+.new-chat-btn:hover {
+  background: var(--vino-accent);
+  color: #fff;
 }
 
-::ng-deep .mat-mdc-nav-list .mat-mdc-list-item {
-  border-radius: 10px !important;
-}
-
-::ng-deep mat-list-item:hover {
-  background: var(--chats-label-hover-bg) !important;
-}
-
-::ng-deep mat-nav-list mat-list-item.active {
-  background: var(--chats-label-hover-bg) !important;
-}
-
-::ng-deep mat-list-item.selected {
-  background: var(--chats-label-selected-bg) !important;
-}
-
-::ng-deep .mdc-list-item:hover::before {
-  background: none !important;
-}
-
-.spacer {
-  flex: 1 1 auto;
-}
-
-.chat-list-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.chat-list-container::-webkit-scrollbar-track {
-  background: var(--bg-sidebar);
-  /* Assuming CSS variable is defined globally */
-}
-
-.chat-list-container::-webkit-scrollbar-thumb {
-  background-color: var(--scrollbar-color);
-  /* Example thumb color */
-  border-radius: 4px;
-}
-
-.session-list-container {
-  height: calc(100vh - 64px);
+/* ================= SECTION ================= */
+.sidebar-section {
+  padding: 12px 8px;
+  flex: 1;
   overflow-y: auto;
 }
 
-.file-name {
-  max-width: 120px;
-  white-space: nowrap;
+.section-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--chats-label-color);
+  padding: 4px 12px 8px;
+}
+
+/* ================= CHAT LIST ================= */
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-item {
+  padding: 12px 14px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  cursor: pointer;
+  background: transparent;
+}
+
+.chat-item:hover {
+  background: var(--sidebar-item-hover-bg);
+}
+
+.chat-item.active {
+  background: var(--sidebar-item-active-bg);
+  box-shadow: inset 3px 0 0 var(--vino-accent);
+}
+
+/* ================= CHAT TEXT ================= */
+.chat-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--chat-list-text-color);
   overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.mat-toolbar-single-row {
-  display: flex;
-  gap: 5px;
-  box-sizing: border-box;
-  padding: 16px;
-  width: 100%;
-  flex-direction: column;
-  white-space: nowrap;
-  height: auto;
-  align-items: start;
+/* ================= OPTIONS ================= */
+.chat-options {
   background: none;
-}
-
-.new-chat-button {
-  display: flex;
-  align-items: center;
-  gap: 15px;
   border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 16px;
-  width: 100%;
-  border-radius: var(--mat-list-active-indicator-shape, 10px);
-  color: var(--new-chat-color);
-}
-
-.new-chat-button:hover {
-  background: var(--new-chat-hover-bg);
-}
-
-.new-chat-outer,
-.new-chat-button {
-  width: 100%;
-}
-
-.new-chat-button .icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.options-button {
-  width: 40px;
-  height: 40px;
-  padding: 8px;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: absolute;
-  left: 200px;
-}
-
-.options-button svg {
-  width: 24px;
-  height: 24px;
-}
-
-::ng-deep .options-button .mat-mdc-button-persistent-ripple {
+  color: var(--chats-list-button-color);
+  font-size: 18px;
   opacity: 0;
+  cursor: pointer;
 }
 
-::ng-deep .options-button {
-  opacity: 0;
-}
-
-::ng-deep mat-list-item:hover .options-button,
-::ng-deep mat-list-item.active .hover-btn {
+.chat-item:hover .chat-options {
   opacity: 1;
 }
 
-::ng-deep mat-list-item:hover .options-button .mat-mdc-button-persistent-ripple {
-  opacity: 0;
-}
-
-::ng-deep .mat-line {
-  max-width: 190px;
-  overflow: hidden;
-}
-
+/* ================= DROPDOWN ================= */
 .dropdown-menu {
   position: fixed;
-  z-index: 1000;
   background: var(--dropdown-menu-bg);
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-.menu-content {
-  display: flex;
-  flex-direction: column;
+  border-radius: 10px;
+  padding: 6px;
 }
 
 .menu-item {
-  padding: 8px 16px;
-  cursor: pointer;
-  align-items: center;
-  display: flex;
-  gap: 10px;
-  width: fit-content;
-  background-color: transparent;
+  padding: 10px 14px;
+  background: none;
   border: none;
-}
-
-.menu-item:hover {
-  background-color: var(--menu-item-hover-bg);
-}
-
-.menu-item.delete {
-  color: var(--menu-item-color);
-}
-
-.toolbar-title-upper {
-  margin-bottom: 10px;
-  padding-left: 10px;
-}
-
-.toolbar-title-upper .icon {
-  width: 110px;
   cursor: pointer;
-}
-
-::ng-deep .mat-mdc-snack-bar-container .mat-mdc-snackbar-surface {
-  background-color: var(--snackbar-bg) !important;
-  color: var(--snackbar-text) !important;
-
-  .mat-mdc-snack-bar-action {
-    color: var(--snackbar-action) !important;
-  }
-}
-
-::ng-deep .mat-mdc-snack-bar-container .mat-mdc-button.mat-mdc-snack-bar-action:not(:disabled) {
-  --mat-button-text-state-layer-color: none !important;
-  --mat-button-text-ripple-color: none !important;
+  color: var(--menu-item-color);
 }
