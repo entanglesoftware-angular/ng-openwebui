@@ -706,6 +706,71 @@ lib-sidebar {
   animation-delay: 0.6s;
 }
 
+markdown {
+  display: block;
+  overflow-x: auto;
+  white-space: normal;
+  word-break: break-word;
+}
+
+markdown pre {
+  background: #0f172a;
+  color: #e5e7eb;
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+markdown code {
+  font-family: monospace;
+  font-size: 14px;
+}
+
+markdown p {
+  margin: 0;
+}
+
+markdown pre {
+  margin: 6px 0;
+}
+
+.thinking-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+.thinking-text {
+  font-style: italic;
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+/* Cancel button – subtle & modern */
+.cancel-btn {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.cancel-btn mat-icon {
+  font-size: 18px;
+}
+
+/* Hover effect */
+.cancel-btn:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 50%;
+}
+
+.cancel-btn:hover {
+  background-color: transparent;
+}
+
 @keyframes blink {
   0%,
   100% {

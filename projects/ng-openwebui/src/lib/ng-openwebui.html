@@ -53,7 +53,7 @@
                 *ngIf="message?.type === 'text' && event?.role === 'model'"
                 class="message-content with-copy model-message"
               >
-                {{ message?.content }}
+                <markdown [data]="message?.content"></markdown>
                 <button
                   *ngIf="isBrowser"
                   mat-icon-button
@@ -80,8 +80,21 @@
       </ng-container>
 
       <mat-card *ngIf="isStreaming" class="typing-indicator model">
-        <span>Thinking</span><span class="dot">.</span><span class="dot">.</span
-        ><span class="dot">.</span>
+        <div class="thinking-row">
+          <span class="thinking-text">
+            Thinking<span class="dot">.</span><span class="dot">.</span
+            ><span class="dot">.</span>
+          </span>
+
+          <button
+            mat-icon-button
+            class="cancel-btn"
+            matTooltip="Cancel response"
+            (click)="cancelRequest()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </mat-card>
     </div>
 

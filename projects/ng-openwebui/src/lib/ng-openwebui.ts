@@ -137,6 +137,7 @@ export class NgOpenwebUI
   @ViewChild('chatInput', { static: true })
   chatInput!: ElementRef<HTMLInputElement>;
   private routeSubscription!: Subscription;
+  private activeController: AbortController | null = null;
 
   constructor(
     private router: Router,
@@ -300,6 +301,14 @@ export class NgOpenwebUI
         });
     }
     this.cdr.markForCheck();
+  }
+
+  cancelRequest() {
+    if (this.activeController) {
+      this.activeController.abort();
+      this.activeController = null;
+      this.isStreaming = false;
+    }
   }
 
   checkForFormTrigger(content: string | undefined) {
@@ -493,6 +502,12 @@ export class NgOpenwebUI
 
   private async streamResponse(sessionId: string, reqBody: ChatReq) {
     const controller = new AbortController();
+    this.activeController = controller;
+
+    const REQUEST_TIMEOUT = 30000;
+    const requestTimeoutId = setTimeout(() => {
+      controller.abort();
+    }, REQUEST_TIMEOUT);
 
     const headersObj = {
       'Content-Type': 'application/json',
@@ -506,32 +521,52 @@ export class NgOpenwebUI
       .keys()
       .reduce((acc: Record<string, string>, key: string) => {
         const value = finalHeaders.get(key);
-        if (value !== null) {
-          acc[key] = value;
-        }
+        if (value !== null) acc[key] = value;
         return acc;
       }, {});
 
-    const response = await fetch(`${this.config.domain}/v1/chat/completions`, {
-      method: 'POST',
-      headers: headersPlainObject,
-      body: JSON.stringify(reqBody),
-    });
+    try {
+      const response = await fetch(
+        `${this.config.domain}/v1/chat/completions`,
+        {
+          method: 'POST',
+          headers: headersPlainObject,
+          body: JSON.stringify(reqBody),
+          signal: controller.signal, // ✅ IMPORTANT FIX
+        }
+      );
 
-    if (response.status !== 200) {
-      this.snackBar.open(`Error : ${response.status} ${response}`, 'Close', {
-        duration: 3000,
-        panelClass: ['lib-snackbar'],
-      });
-      return;
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      const decoder = new TextDecoder('utf-8');
+      this.prepareModelMessage();
+
+      await this.readStream(reader, decoder, controller, sessionId);
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        this.snackBar.open('Request timed out. Please try again.', 'Close', {
+          duration: 3000,
+          panelClass: ['lib-snackbar'],
+        });
+      } else {
+        this.snackBar.open('Server error. Please try again later.', 'Close', {
+          duration: 3000,
+          panelClass: ['lib-snackbar'],
+        });
+      }
+    } finally {
+      clearTimeout(requestTimeoutId);
+      this.isStreaming = false;
+      this.activeController = null;
+      this.cdr.markForCheck();
     }
-
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder('utf-8');
-
-    this.prepareModelMessage();
-
-    await this.readStream(reader!, decoder, controller, sessionId);
   }
 
   private prepareModelMessage() {
@@ -607,6 +642,7 @@ export class NgOpenwebUI
       if (!hasContent) {
         this.chatMessages.events.pop();
       }
+      this.cdr.markForCheck();
     }
   }
 
