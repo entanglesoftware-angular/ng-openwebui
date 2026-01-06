@@ -100,3 +100,20 @@ mat-toolbar {
   gap: 10px;
 }
 
+@media (max-width: 767px) {
+  mat-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .header-left-content {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .model-button {
+    font-size: 14px;
+  }
+}
+

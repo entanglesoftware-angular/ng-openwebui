@@ -3,6 +3,11 @@
     [class.sidebar-open]="isSidebarOpen"
     [class.sidebar-closed]="!isSidebarOpen"
   ></lib-sidebar>
+  <div
+    class="sidebar-backdrop"
+    *ngIf="isSidebarOpen"
+    (click)="toggleSidebar()"
+  ></div>
   <div class="chat-box-container">
     <lib-header (menuClicked)="toggleSidebar()"></lib-header>
     <!-- <mat-card class="ai-name" style="margin-bottom: 0px">{{ aiName }}</mat-card> -->
@@ -23,7 +28,7 @@
               >
                 {{ message?.content }}
                 <button
-                  *ngIf="isBrowser" 
+                  *ngIf="isBrowser"
                   mat-icon-button
                   class="copy-btn"
                   matTooltipClass="custom-tooltip"
@@ -42,15 +47,15 @@
                   <mat-icon class="small-icon">volume_up</mat-icon>
                 </button>
               </div>
-  
+
               <!-- MODEL MESSAGE -->
               <div
                 *ngIf="message?.type === 'text' && event?.role === 'model'"
                 class="message-content with-copy model-message"
               >
-              {{ message?.content }}
+                {{ message?.content }}
                 <button
-                  *ngIf="isBrowser" 
+                  *ngIf="isBrowser"
                   mat-icon-button
                   matTooltipClass="custom-tooltip"
                   class="copy-btn"

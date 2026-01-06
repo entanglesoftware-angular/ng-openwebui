@@ -1,4 +1,18 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, AfterViewInit, ChangeDetectorRef, OnDestroy, Input, Optional, Inject, PLATFORM_ID, ErrorHandler } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked,
+  AfterViewInit,
+  ChangeDetectorRef,
+  OnDestroy,
+  Input,
+  Optional,
+  Inject,
+  PLATFORM_ID,
+  ErrorHandler,
+} from '@angular/core';
 import { MaterialModule } from './modules/material.module';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -7,7 +21,13 @@ import {
   HttpClientModule,
   HttpHeaders,
 } from '@angular/common/http';
-import { NgClass, NgForOf, NgIf, DOCUMENT, isPlatformBrowser } from '@angular/common';
+import {
+  NgClass,
+  NgForOf,
+  NgIf,
+  DOCUMENT,
+  isPlatformBrowser,
+} from '@angular/common';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Sidebar } from './sidebar/sidebar';
@@ -15,7 +35,7 @@ import { Sidebar } from './sidebar/sidebar';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { Header } from "./header/header";
+import { Header } from './header/header';
 import {
   ChatReq,
   ChatReqMessage,
@@ -38,7 +58,6 @@ import { A11yModule } from '@angular/cdk/a11y';
 import gsap from 'gsap';
 import { NgOpenwebUIThemeService } from './theme/theme.service';
 import { GlobalErrorHandler } from './global-error-handler.service';
-
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -76,16 +95,18 @@ interface LoginResponse {
     MatFormFieldModule,
     HttpClientModule,
     MatTooltip,
-    Header
+    Header,
   ],
   providers: [
-    { provide: ErrorHandler, useClass: GlobalErrorHandler }, 
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
     MarkdownService,
   ],
   templateUrl: './ng-openwebui.html',
   styleUrl: './ng-openwebui.css',
 })
-export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit {
+export class NgOpenwebUI
+  implements OnInit, AfterViewChecked, OnDestroy, AfterViewInit
+{
   message: string = '';
   aiName: string = 'NgOpenwebUI';
   // chatMessages: ChatMessage[] = [];
@@ -113,7 +134,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
   ];
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
-  @ViewChild('chatInput', { static: true }) chatInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('chatInput', { static: true })
+  chatInput!: ElementRef<HTMLInputElement>;
   private routeSubscription!: Subscription;
 
   constructor(
@@ -136,15 +158,20 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
   isSidebarOpen = true;
 
   toggleSidebar() {
-    this.isSidebarOpen = !this.isSidebarOpen;
+    if (window.innerWidth < 768) {
+      this.isSidebarOpen = !this.isSidebarOpen;
+    }
   }
 
   private loadModels() {
     console.log('Initializing...');
-    this.http.get<any>(`${this.config.domain}/v1/models`, { headers: this.buildHeaders() })
+    this.http
+      .get<any>(`${this.config.domain}/v1/models`, {
+        headers: this.buildHeaders(),
+      })
       .subscribe({
-        next: (res) => this.aiName = res?.data?.[0]?.id ?? 'Select Model',
-        error: () => this.aiName = 'Select Model'
+        next: (res) => (this.aiName = res?.data?.[0]?.id ?? 'Select Model'),
+        error: () => (this.aiName = 'Select Model'),
       });
   }
 
@@ -185,7 +212,10 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
       }
     } catch (err) {
       console.error('Error loading messages for session:', err);
-      this.snackBar.open('Failed to load messages.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+      this.snackBar.open('Failed to load messages.', 'Close', {
+        duration: 3000,
+        panelClass: ['lib-snackbar'],
+      });
       this.router.navigate(['..'], { relativeTo: this.route });
     }
   }
@@ -223,7 +253,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
             duration: 0.5,
             ease: 'power2.out',
           });
-        } catch { }
+        } catch {}
         this.scrollThrottleTimer = null;
       }, 100);
     }
@@ -233,7 +263,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     try {
       this.chatContainer.nativeElement.scrollTop =
         this.chatContainer.nativeElement.scrollHeight;
-    } catch (err) { }
+    } catch (err) {}
   }
   scrollToBottom() {
     if (!this.scrollThrottleTimer) {
@@ -241,7 +271,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
         try {
           this.chatContainer.nativeElement.scrollTop =
             this.chatContainer.nativeElement.scrollHeight;
-        } catch { }
+        } catch {}
         this.scrollThrottleTimer = null;
       }, 100); // Throttle every 100ms
     }
@@ -252,7 +282,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     if (this.currentSessionId) {
       const headers = new HttpHeaders({
         user_id: this.config.userId,
-        authorization: this.isBrowser ? `Bearer ${sessionStorage.getItem('jwt') || ''}` : '',
+        authorization: this.isBrowser
+          ? `Bearer ${sessionStorage.getItem('jwt') || ''}`
+          : '',
       });
       this.http
         .delete(`${this.domain}/session/${this.currentSessionId}/messages`, {
@@ -262,7 +294,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
         .catch((err) => {
           console.error('Error clearing messages:', err);
           this.snackBar.open('Failed to clear messages.', 'Close', {
-            duration: 3000, panelClass: ['lib-snackbar']
+            duration: 3000,
+            panelClass: ['lib-snackbar'],
           });
         });
     }
@@ -282,7 +315,7 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
       width: '600px',
       data: formData,
     });
-    dialogRef.afterClosed().subscribe(formData => {
+    dialogRef.afterClosed().subscribe((formData) => {
       if (formData?.closedByUser) {
         this.clearAllForm();
       } else if (formData) {
@@ -348,7 +381,11 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     try {
       const headers = this.buildHeaders();
       const newSession = await this.http
-        .post<ChatSession>(`${this.config.domain}/session/create`, {}, { headers })
+        .post<ChatSession>(
+          `${this.config.domain}/session/create`,
+          {},
+          { headers }
+        )
         .toPromise();
 
       if (newSession && newSession.id) {
@@ -360,7 +397,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     } catch (err) {
       console.error('Failed to create new session:', err);
       this.snackBar.open('Failed to create new session.', 'Close', {
-        duration: 3000, panelClass: ['lib-snackbar']
+        duration: 3000,
+        panelClass: ['lib-snackbar'],
       });
       return null;
     }
@@ -398,34 +436,43 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
       try {
         let { mimeType, content } = await this.processFile(file);
 
-        const userFile: ChatReqMessage = { role: 'user', type: mimeType, content };
+        const userFile: ChatReqMessage = {
+          role: 'user',
+          type: mimeType,
+          content,
+        };
         reqBody.messages.push(userFile);
 
         const fileEventMessage: EventMessage = { type: mimeType, content };
-        this.chatMessages.events[this.chatMessages.events.length - 1].messages.push(fileEventMessage);
+        this.chatMessages.events[
+          this.chatMessages.events.length - 1
+        ].messages.push(fileEventMessage);
 
         this.updateUIAndAnimate();
         this.clearAllFiles();
       } catch (error) {
         console.error(`Failed to convert file ${file.name}:`, error);
         this.snackBar.open(`Failed to attach file: ${file.name}`, 'Close', {
-          duration: 3000, panelClass: ['lib-snackbar']
+          duration: 3000,
+          panelClass: ['lib-snackbar'],
         });
       }
     }
   }
 
-  private async processFile(file: File): Promise<{ mimeType: string; content: string }> {
+  private async processFile(
+    file: File
+  ): Promise<{ mimeType: string; content: string }> {
     let mimeType: string = file.type || 'application/octet-stream';
-    let content: string = "";
+    let content: string = '';
 
-    if (mimeType === "text/csv") {
+    if (mimeType === 'text/csv') {
       content = await file.text();
-    } else if (mimeType.startsWith("image/")) {
+    } else if (mimeType.startsWith('image/')) {
       content = await this.convertFileToBase64(file);
     } else if (this.excel_mime_types.includes(mimeType)) {
       content = await this.convertExcelToCsv(file);
-      mimeType = "text/csv";
+      mimeType = 'text/csv';
     } else {
       content = await this.convertFileToBase64(file);
     }
@@ -455,13 +502,15 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
 
     const finalHeaders = this.buildHeaders(headersObj);
 
-    const headersPlainObject = finalHeaders.keys().reduce((acc: Record<string, string>, key: string) => {
-      const value = finalHeaders.get(key);
-      if (value !== null) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    const headersPlainObject = finalHeaders
+      .keys()
+      .reduce((acc: Record<string, string>, key: string) => {
+        const value = finalHeaders.get(key);
+        if (value !== null) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
 
     const response = await fetch(`${this.config.domain}/v1/chat/completions`, {
       method: 'POST',
@@ -471,7 +520,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
 
     if (response.status !== 200) {
       this.snackBar.open(`Error : ${response.status} ${response}`, 'Close', {
-        duration: 3000, panelClass: ['lib-snackbar']
+        duration: 3000,
+        panelClass: ['lib-snackbar'],
       });
       return;
     }
@@ -492,7 +542,12 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     this.updateUIAndAnimate();
   }
 
-  private async readStream(reader: ReadableStreamDefaultReader<Uint8Array>, decoder: TextDecoder, controller: AbortController, sessionId: string) {
+  private async readStream(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+    decoder: TextDecoder,
+    controller: AbortController,
+    sessionId: string
+  ) {
     let lastGeneralIndex = this.chatMessages.events.length - 1;
     let lastFormEvent: event | null = null;
     const TIMEOUT_MS = 25000;
@@ -503,7 +558,10 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
       clearTimeout(timeoutHandle);
       timeoutHandle = setTimeout(() => {
         controller.abort();
-        this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+        this.snackBar.open('Something Went Wrong. Please try again.', 'Close', {
+          duration: 3000,
+          panelClass: ['lib-snackbar'],
+        });
         this.cdr.markForCheck();
       }, TIMEOUT_MS);
     };
@@ -516,14 +574,18 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
 
         resetTimeout();
         const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n').filter((line) => line.trim() !== '' && line.startsWith('data: '));
+        const lines = chunk
+          .split('\n')
+          .filter((line) => line.trim() !== '' && line.startsWith('data: '));
 
         for (const line of lines) {
           const data = line.replace('data: ', '').trim();
           if (data === '[DONE]') {
             clearTimeout(timeoutHandle);
             controller.abort();
-            this.router.navigate([this.config.userId, sessionId], { relativeTo: this.route.parent });
+            this.router.navigate([this.config.userId, sessionId], {
+              relativeTo: this.route.parent,
+            });
             this.cdr.markForCheck();
             return;
           }
@@ -534,7 +596,10 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
       }
     } catch (error) {
       console.error('Stream aborted or failed:', error);
-      this.snackBar.open('Something Went Wrong. Please try again.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+      this.snackBar.open('Something Went Wrong. Please try again.', 'Close', {
+        duration: 3000,
+        panelClass: ['lib-snackbar'],
+      });
       this.cdr.markForCheck();
     } finally {
       clearTimeout(timeoutHandle);
@@ -545,31 +610,43 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     }
   }
 
-  private processStreamChunk(data: string, lastGeneralIndex: number, lastFormEvent: event | null) {
+  private processStreamChunk(
+    data: string,
+    lastGeneralIndex: number,
+    lastFormEvent: event | null
+  ) {
     try {
       const json = JSON.parse(data);
       const delta = json?.choices?.[0]?.delta;
       const content = delta?.content;
       const role = delta?.role;
 
-      if (!content){
+      if (!content) {
         return;
-      } 
+      }
 
       if (role === 'form' && this.isValidJson(content)) {
         if (!lastFormEvent) {
-          lastFormEvent = { role: 'form', messages: [{ type: 'text', content: '' }] };
+          lastFormEvent = {
+            role: 'form',
+            messages: [{ type: 'text', content: '' }],
+          };
           this.chatMessages.events.push(lastFormEvent);
           this.updateUIAndAnimate();
         }
         lastFormEvent.messages[0].content += content;
-      } else if (role === "text/csv") {
+      } else if (role === 'text/csv') {
         const raw = delta?.content;
         const onceParsed = JSON.parse(raw);
         const result = JSON.parse(onceParsed);
 
-        const fileEventMessage: EventMessage = { type: delta.role, content: result.csv };
-        this.chatMessages.events[lastGeneralIndex].messages.push(fileEventMessage);
+        const fileEventMessage: EventMessage = {
+          type: delta.role,
+          content: result.csv,
+        };
+        this.chatMessages.events[lastGeneralIndex].messages.push(
+          fileEventMessage
+        );
         this.updateUIAndAnimate();
       } else {
         const generalEvent = this.chatMessages.events[lastGeneralIndex];
@@ -579,7 +656,10 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
       this.scrollToBottomWithAnimation();
       this.cdr.markForCheck();
     } catch (err) {
-      this.snackBar.open(`Error parsing stream chunk: ${err}`, 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+      this.snackBar.open(`Error parsing stream chunk: ${err}`, 'Close', {
+        duration: 3000,
+        panelClass: ['lib-snackbar'],
+      });
       console.error('Error parsing stream chunk:', err);
     }
   }
@@ -587,7 +667,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
   private updateUIAndAnimate() {
     requestAnimationFrame(() => {
       this.cdr.markForCheck();
-      const lastMessage = this.chatContainer.nativeElement.querySelector('.message:last-child');
+      const lastMessage = this.chatContainer.nativeElement.querySelector(
+        '.message:last-child'
+      );
       if (lastMessage) {
         this.animateNewMessage(lastMessage);
       }
@@ -597,7 +679,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
   private handleError(message: string, error: any) {
     console.error(message, error);
     this.snackBar.open(message, 'Close', {
-      duration: 3000, panelClass: ['lib-snackbar']
+      duration: 3000,
+      panelClass: ['lib-snackbar'],
     });
   }
 
@@ -607,13 +690,11 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     }
 
     const hasValidMessage = messages.some(
-      msg => msg?.type === 'text' && msg?.content?.trim()
+      (msg) => msg?.type === 'text' && msg?.content?.trim()
     );
 
     return hasValidMessage;
   }
-
-
 
   convertFileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -645,7 +726,8 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
         `${this.selectedFiles.length} file(s) selected`,
         'Close',
         {
-          duration: 2000, panelClass: ['lib-snackbar']
+          duration: 2000,
+          panelClass: ['lib-snackbar'],
         }
       );
     }
@@ -660,7 +742,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
   }
 
   clearAllForm(): void {
-    this.chatMessages.events = this.chatMessages.events.filter(e => e.role !== 'form');
+    this.chatMessages.events = this.chatMessages.events.filter(
+      (e) => e.role !== 'form'
+    );
     this.formData = '';
   }
 
@@ -674,9 +758,13 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     if (!fileName) return '';
     const maxChars = 10;
     const dotIndex = fileName.lastIndexOf('.');
-    const namePart = dotIndex !== -1 ? fileName.substring(0, dotIndex) : fileName;
+    const namePart =
+      dotIndex !== -1 ? fileName.substring(0, dotIndex) : fileName;
     const extension = dotIndex !== -1 ? fileName.substring(dotIndex) : '';
-    const trimmedName = namePart.length > maxChars ? namePart.substring(0, maxChars) + '...' : namePart;
+    const trimmedName =
+      namePart.length > maxChars
+        ? namePart.substring(0, maxChars) + '...'
+        : namePart;
 
     return `${trimmedName}${extension}`;
   }
@@ -695,20 +783,26 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
       this.document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     }
-    
   }
 
   downloadExcel(csvString: string | undefined): void {
     if (!csvString || !this.isBrowser) return;
 
     try {
-      const rows = csvString.split('\n').filter(row => row.trim() !== '');
-      const aoa: string[][] = rows.map(row => row.split(',').map(cell => cell.trim()));
+      const rows = csvString.split('\n').filter((row) => row.trim() !== '');
+      const aoa: string[][] = rows.map((row) =>
+        row.split(',').map((cell) => cell.trim())
+      );
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.aoa_to_sheet(aoa);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: 'xlsx',
+        type: 'array',
+      });
+      const blob = new Blob([excelBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
 
       if (this.isBrowser) {
         const url = window.URL.createObjectURL(blob);
@@ -725,11 +819,15 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     }
   }
 
-  private buildHeaders(additionalHeaders: { [key: string]: string } = {}): HttpHeaders {
+  private buildHeaders(
+    additionalHeaders: { [key: string]: string } = {}
+  ): HttpHeaders {
     const headers: { [key: string]: string } = {
       user_id: this.config.userId,
-      authorization: this.isBrowser ? `Bearer ${sessionStorage.getItem('jwt') || ''}` : '',
-      ...additionalHeaders
+      authorization: this.isBrowser
+        ? `Bearer ${sessionStorage.getItem('jwt') || ''}`
+        : '',
+      ...additionalHeaders,
     };
     return new HttpHeaders(headers);
   }
@@ -738,7 +836,9 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     if (!isPlatformBrowser(this.platformId)) {
       return; // Prevent execution on server
     }
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const SpeechRecognition =
+      (window as any).webkitSpeechRecognition ||
+      (window as any).SpeechRecognition;
     if (!SpeechRecognition) {
       alert('Your browser does not support speech recognition.');
       return;
@@ -784,14 +884,26 @@ export class NgOpenwebUI implements OnInit, AfterViewChecked, OnDestroy, AfterVi
     }
 
     if (!this.isBrowser || !navigator?.clipboard) {
-      this.snackBar.open('Clipboard API not supported.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
+      this.snackBar.open('Clipboard API not supported.', 'Close', {
+        duration: 3000,
+        panelClass: ['lib-snackbar'],
+      });
       return;
     }
-    navigator.clipboard.writeText(text).then(() => {
-      this.snackBar.open('Copied!', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
-    }).catch(err => {
-      this.snackBar.open('Failed to copy message.', 'Close', { duration: 3000, panelClass: ['lib-snackbar'] });
-    });
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        this.snackBar.open('Copied!', 'Close', {
+          duration: 3000,
+          panelClass: ['lib-snackbar'],
+        });
+      })
+      .catch((err) => {
+        this.snackBar.open('Failed to copy message.', 'Close', {
+          duration: 3000,
+          panelClass: ['lib-snackbar'],
+        });
+      });
   }
 
   speak(text: string | undefined): void {
